@@ -1,0 +1,16 @@
+{
+  "maxSize": 500,
+  "apiUrl": "http://localhost:3000",
+  "cache":  [ "/posts", "/posts/:slug" ], // Only GET requests allowed for now
+  "bust": {
+    "POST": {
+      "/posts": [ "/posts", "/posts/count" ]
+    },
+    "PUT": {
+      "/posts/:slug": [ "/posts", "/posts/:slug" ]
+    },
+    "DELETE": {
+      "/posts/:slug": [ "/posts", "/posts/:slug" ]
+    },
+  }
+}
