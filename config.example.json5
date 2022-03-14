@@ -1,6 +1,7 @@
 {
   "maxSize": 500,
-  "apiUrl": "http://localhost:3000",
+  // "apiUrl": "http://localhost:3000",
+  "apiUrl": "https://jsonplaceholder.typicode.com",
   "cache":  [ "/posts", "/posts/:slug" ], // Only GET requests allowed for now
   "bust": {
     "POST": {
