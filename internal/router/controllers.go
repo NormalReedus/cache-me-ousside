@@ -1,6 +1,9 @@
 package router
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/NormalReedus/lru-cache-microservice/internal/cache"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
@@ -38,34 +41,56 @@ func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 
 //* remember to use cache hit headers etc
 func readCacheMiddleware(ctx *fiber.Ctx) error {
-	cache := ctx.UserContext().Value("cache").(*cache.LRUCache)
-	key := ctx.OriginalURL()
+	cache := ctx.UserContext().Value(key("cache")).(*cache.LRUCache)
+	cacheKey := ctx.OriginalURL()
 
-	val, present := cache.Get(key)
+	// Read cached json data (headers + body)
+	// responseVal is a json with { "headers": { HEADERS JSON }, "body": stringified []byte }
+	cachedResponseJson, ok := cache.Get(cacheKey)
 
 	// If there is no cached data, continue middlewares to proxy the request
-	if !present {
+	if !ok {
+		ctx.Set("X-LRU-Cache", "MISS") //! not coming through
+
 		ctx.Next()
 		return nil
 	}
 
-	// If there is a key for 'endpoint' in cache.data, send the json from the cache
-	//! Client has no idea how to read the []byte val
-	//! set headers or save whole request in cache and copy them here?
-	ctx.Send(val)
+	// If there is a key for the endpoint in cache, send the json from the cache
+	// Init struct with headers and body of cached response
+	cachedResponse := NewCacheResponseFromJSON(cachedResponseJson)
+
+	// Set all of the cached headers on the current response
+	cachedResponse.SetHeaders(ctx)
+
+	// Let people know they've been served
+	ctx.Set("X-LRU-Cache", "HIT")
+
+	ctx.Send(cachedResponse.Body)
 
 	return nil // don't continue middlewares in this case
 }
 
 //* remember to use cache hit headers etc
 func writeCacheMiddleware(ctx *fiber.Ctx) error {
-	cache := ctx.UserContext().Value("cache").(*cache.LRUCache)
+	cache := ctx.UserContext().Value(key("cache")).(*cache.LRUCache)
+	cacheKey := ctx.OriginalURL()
 
-	// Save the response body with cache.Set() and return the result
-	key := ctx.OriginalURL()
-	body := ctx.Response().Body()
+	// Init the current response as a struct we stringify
+	apiResponse := CacheResponse{
+		Headers: ctx.GetRespHeaders(),
+		Body:    ctx.Response().Body(),
+	}
 
-	cache.Set(key, &body)
+	// Stringify the headers + body of the api response
+	jsonResponse, err := json.Marshal(apiResponse)
+	if err != nil {
+		fmt.Println(fmt.Errorf("there was an issue caching the response from %v", cacheKey))
+		return nil
+	}
+
+	// Save the stringified api response in cache
+	cache.Set(cacheKey, &jsonResponse)
 
 	return nil // this is always last step, so no Next()
 }

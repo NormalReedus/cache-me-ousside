@@ -35,8 +35,8 @@ func (cache *LRUCache) Get(key string) ([]byte, bool) { // return a string inste
 		if listElement == nil {
 			fmt.Println(fmt.Errorf("the key %v exists in data map but not in queue", key))
 
-			delete(cache.data, key) // easiest way to handle this issue is to remove value from cache
-			return []byte{}, false  // return zero value of map val and as if the key does not exist
+			delete(cache.data, key)  // easiest way to handle this issue is to remove value from cache
+			return []byte(""), false // return zero value of map val and as if the key does not exist
 		}
 
 		cache.queue.MoveToFront(listElement)

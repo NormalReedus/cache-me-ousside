@@ -31,3 +31,10 @@ A simple LRU cache that can be used as a reverse proxy, meaning that any request
     * and that the POST request endpoint is the same as the GET endpoint, which it often is not (e.g., with variable route params)
 
 
+## Details
+* You should trust proxies from your REST API, but it is not strictly necessary
+* The cache will only bust cached routes with requests done through the caching microservice. That means, that changing data through any other method will make the cache fall out of sync with the API
+* Your API should always return the exact same data when requesting the same url - the cache uses the url to cache the data.
+* You can only cache responses from GET requests (so far)
+
+

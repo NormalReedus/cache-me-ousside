@@ -3,6 +3,7 @@ module github.com/NormalReedus/lru-cache-microservice
 go 1.17
 
 require (
+	github.com/fatih/color v1.13.0
 	github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
 	github.com/gofiber/fiber/v2 v2.29.0
 	github.com/spf13/pflag v1.0.5
@@ -12,6 +13,8 @@ require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
+	github.com/mattn/go-colorable v0.1.9 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.34.0 // indirect
