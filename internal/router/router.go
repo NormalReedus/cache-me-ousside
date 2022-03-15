@@ -13,14 +13,8 @@ import (
 func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	app := fiber.New()
 
-	cacheCtx := context.WithValue(context.Background(), "cache", cache)
-
-	app.Use(func(ctx *fiber.Ctx) error {
-		ctx.SetUserContext(cacheCtx)
-
-		ctx.Next()
-		return nil
-	})
+	// Make cache available in all handlers on ctx.UserContext().Value("cache")
+	app.Use(createCtxCacheMiddleware(cache))
 
 	// Will loop through cachable endpoints in config and set route handlers + middleware to handle caching on those routes
 	setCachingEndpoints(app, conf)
@@ -56,4 +50,14 @@ func setDefaultProxies(app *fiber.App, apiUrl string) {
 	app.Put("/*", createProxyHandler(apiUrl))
 	app.Patch("/*", createProxyHandler(apiUrl))
 	app.Delete("/*", createProxyHandler(apiUrl))
+}
+
+func createCtxCacheMiddleware(cache *cache.LRUCache) func(ctx *fiber.Ctx) error {
+	cacheCtx := context.WithValue(context.Background(), "cache", cache)
+
+	return func(ctx *fiber.Ctx) error {
+		ctx.SetUserContext(cacheCtx)
+		ctx.Next()
+		return nil
+	}
 }

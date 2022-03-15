@@ -1,12 +1,12 @@
 package router
 
 import (
-	"fmt"
-
+	"github.com/NormalReedus/lru-cache-microservice/internal/cache"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 )
 
+// This is used for everything that is not cached
 func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		url := apiUrl + ctx.OriginalURL()
@@ -24,6 +24,7 @@ func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 
 // Decorates createProxyHandler to work as a middleware by also calling Next() after running.
 // createProxyHandler must not call Next by itself, since the default handler should always be last.
+// this is used for everything that is cached
 func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 	proxyHandler := createProxyHandler(apiUrl)
 
@@ -37,18 +38,34 @@ func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 
 //* remember to use cache hit headers etc
 func readCacheMiddleware(ctx *fiber.Ctx) error {
-	//* cache := ctx.UserContext().Value("cache") // how to reference the cache
+	cache := ctx.UserContext().Value("cache").(*cache.LRUCache)
+	key := ctx.OriginalURL()
 
-	fmt.Printf("HIT the cache and return response from cached key %v here, or...\n", ctx.OriginalURL())
-	fmt.Println("MISS the cache and Next() to proxy the request")
+	val, present := cache.Get(key)
 
-	ctx.Next()
-	return nil
+	// If there is no cached data, continue middlewares to proxy the request
+	if !present {
+		ctx.Next()
+		return nil
+	}
+
+	// If there is a key for 'endpoint' in cache.data, send the json from the cache
+	//! Client has no idea how to read the []byte val
+	//! set headers or save whole request in cache and copy them here?
+	ctx.Send(val)
+
+	return nil // don't continue middlewares in this case
 }
 
 //* remember to use cache hit headers etc
 func writeCacheMiddleware(ctx *fiber.Ctx) error {
-	fmt.Printf("Save the Response() in cache under the key %v here\n", ctx.OriginalURL())
+	cache := ctx.UserContext().Value("cache").(*cache.LRUCache)
 
-	return nil
+	// Save the response body with cache.Set() and return the result
+	key := ctx.OriginalURL()
+	body := ctx.Response().Body()
+
+	cache.Set(key, &body)
+
+	return nil // this is always last step, so no Next()
 }
