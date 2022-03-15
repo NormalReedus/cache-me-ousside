@@ -1,20 +1,29 @@
 package router
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/NormalReedus/lru-cache-microservice/internal/cache"
 	"github.com/NormalReedus/lru-cache-microservice/internal/config"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/proxy"
 )
 
-func Start(conf *config.Config, port string) {
-
+func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	app := fiber.New()
 
+	cacheCtx := context.WithValue(context.Background(), "cache", cache)
+
+	app.Use(func(ctx *fiber.Ctx) error {
+		ctx.SetUserContext(cacheCtx)
+
+		ctx.Next()
+		return nil
+	})
+
 	// Will loop through cachable endpoints in config and set route handlers + middleware to handle caching on those routes
-	setCacheMiddleware(app, conf.ApiUrl)
+	setCachingEndpoints(app, conf)
 
 	// Any non-cache / non-cache-busting requests should just proxy directly to the original API
 	setDefaultProxies(app, conf.ApiUrl)
@@ -26,66 +35,25 @@ func Start(conf *config.Config, port string) {
 // 1. uses cache if anything is cached, if not, then...
 // 2. proxies the request to apiUrl and gets a response, then...
 // 3. sets the response in the cache
-func setCacheMiddleware(app *fiber.App, apiUrl string) {
-	// remember to use cache hit headers etc
+func setCachingEndpoints(app *fiber.App, conf *config.Config) {
+	for _, endpoint := range conf.Cache {
+		app.Get(
+			endpoint,
 
-	// Set these for all cachable get request routes in Config
-	app.Get(
-		"/todos/*", // get from config in a loop
+			readCacheMiddleware,
 
-		// create service for this
-		func(ctx *fiber.Ctx) error {
-			fmt.Println("HIT the cache and return response here, or...")
-			fmt.Println("MISS the cache and Next() to proxy the request")
+			createProxyMiddleware(conf.ApiUrl), // needs ApiUrl to proxy request
 
-			ctx.Next()
-			return nil
-		},
-
-		createProxyMiddleware(apiUrl),
-
-		// create service for this
-		func(ctx *fiber.Ctx) error {
-			fmt.Println("Save the Response() in cache here")
-
-			return nil
-		},
-	)
+			writeCacheMiddleware,
+		)
+	}
 }
 
 func setDefaultProxies(app *fiber.App, apiUrl string) {
-	app.Get("/*", createDefaultProxyHandler(apiUrl))
-	app.Head("/*", createDefaultProxyHandler(apiUrl))
-	app.Post("/*", createDefaultProxyHandler(apiUrl))
-	app.Put("/*", createDefaultProxyHandler(apiUrl))
-	app.Patch("/*", createDefaultProxyHandler(apiUrl))
-	app.Delete("/*", createDefaultProxyHandler(apiUrl))
-}
-
-func createDefaultProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
-	return func(ctx *fiber.Ctx) error {
-		url := apiUrl + ctx.OriginalURL()
-
-		if err := proxy.Do(ctx, url); err != nil {
-			return err
-		}
-
-		// Remove Server header from response
-		ctx.Response().Header.Del(fiber.HeaderServer)
-
-		return nil
-	}
-}
-
-// Decorates createDefaultProxyHandler to work as a middleware by also calling Next() after running.
-// createDefaultProxyHandler must not call Next by itself, since the default handler should always be last.
-func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
-	proxyHandler := createDefaultProxyHandler(apiUrl)
-
-	return func(ctx *fiber.Ctx) error {
-		proxyHandler(ctx)
-
-		ctx.Next()
-		return nil
-	}
+	app.Get("/*", createProxyHandler(apiUrl))
+	app.Head("/*", createProxyHandler(apiUrl))
+	app.Post("/*", createProxyHandler(apiUrl))
+	app.Put("/*", createProxyHandler(apiUrl))
+	app.Patch("/*", createProxyHandler(apiUrl))
+	app.Delete("/*", createProxyHandler(apiUrl))
 }

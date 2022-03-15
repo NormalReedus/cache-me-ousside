@@ -2,16 +2,16 @@
   "maxSize": 500,
   // "apiUrl": "http://localhost:3000",
   "apiUrl": "https://jsonplaceholder.typicode.com",
-  "cache":  [ "/posts", "/posts/:slug" ], // Only GET requests allowed for now
+  "cache":  [ "/posts", "/post/:slug" ], // Only GET requests allowed for now
   "bust": {
     "POST": {
       "/posts": [ "/posts", "/posts/count" ]
     },
     "PUT": {
-      "/posts/:slug": [ "/posts", "/posts/:slug" ]
+      "/post/:slug": [ "/posts", "/post/:slug" ]
     },
     "DELETE": {
-      "/posts/:slug": [ "/posts", "/posts/:slug" ]
+      "/post/:slug": [ "/posts", "/post/:slug" ]
     },
   }
 }

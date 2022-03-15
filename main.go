@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/NormalReedus/lru-cache-microservice/internal/cache"
 	"github.com/NormalReedus/lru-cache-microservice/internal/config"
 	"github.com/NormalReedus/lru-cache-microservice/internal/router"
 	flag "github.com/spf13/pflag"
@@ -16,7 +17,9 @@ func main() {
 
 	conf := config.Load(configPath)
 
-	router.Start(conf, port)
+	lru := cache.New(conf.MaxSize)
+
+	router.Start(conf, port, lru)
 }
 
 func parseArgs() (string, string) {

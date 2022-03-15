@@ -27,7 +27,7 @@ func (cache *LRUCache) Get(endpoint string) json.RawMessage { // return a string
 	// If there is a key for 'endpoint' in cache.data, return the json from the cache and move 'endpoint' to front of queue
 	// If there is no key, send a request to endpoint (separate this logic into a service, remember to take method ie GET, POST into account)
 	// ... then save the result with cache.set() and return the result
-
+	return *new([]byte)
 }
 
 func (cache *LRUCache) set(key string, value *json.RawMessage) {
