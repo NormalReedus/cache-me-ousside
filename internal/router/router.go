@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/NormalReedus/lru-cache-microservice/internal/cache"
-	"github.com/NormalReedus/lru-cache-microservice/internal/config"
+	"github.com/NormalReedus/cache-me-ousside/internal/cache"
+	"github.com/NormalReedus/cache-me-ousside/internal/config"
 	"github.com/fatih/color"
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,13 +19,13 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	})
 
 	// Make cache available in all handlers on ctx.UserContext().Value(key("cache"))
-	app.Use(createCtxCacheMiddleware(cache))
+	app.Use(injectCtxCache(cache))
 
 	// Will loop through cachable endpoints in config and set route handlers + middleware to handle caching on those routes
 	setCachingEndpoints(app, conf)
 
 	// Any non-cache / non-cache-busting requests should just proxy directly to the original API
-	setDefaultProxies(app, conf.ApiUrl)
+	app.Use("/*", createProxyHandler(conf.ApiUrl)) // default behavior
 
 	printHiMom(conf, port)
 
@@ -50,16 +50,7 @@ func setCachingEndpoints(app *fiber.App, conf *config.Config) {
 	}
 }
 
-func setDefaultProxies(app *fiber.App, apiUrl string) {
-	app.Get("/*", createProxyHandler(apiUrl))
-	app.Head("/*", createProxyHandler(apiUrl))
-	app.Post("/*", createProxyHandler(apiUrl))
-	app.Put("/*", createProxyHandler(apiUrl))
-	app.Patch("/*", createProxyHandler(apiUrl))
-	app.Delete("/*", createProxyHandler(apiUrl))
-}
-
-func createCtxCacheMiddleware(cache *cache.LRUCache) func(ctx *fiber.Ctx) error {
+func injectCtxCache(cache *cache.LRUCache) func(ctx *fiber.Ctx) error {
 	cacheCtx := context.WithValue(context.Background(), CACHE_KEY, cache)
 
 	return func(ctx *fiber.Ctx) error {
@@ -71,11 +62,11 @@ func createCtxCacheMiddleware(cache *cache.LRUCache) func(ctx *fiber.Ctx) error 
 
 func printHiMom(conf *config.Config, port string) {
 	cacheColor := color.New(color.FgBlue, color.Bold)
-	urlColor := color.New(color.FgHiGreen).Add(color.Underline)
+	urlColor := color.New(color.FgHiGreen, color.Underline)
 
 	fmt.Print("Your ")
 	cacheColor.Print("LRU cache microservice ")
-	fmt.Printf("is being served on port %v.\n", port)
+	fmt.Printf("is being served on http://localhost:%v.\n", port)
 	fmt.Print("All requests will be proxied to ")
-	urlColor.Print(conf.ApiUrl)
+	urlColor.Println(conf.ApiUrl + "\n")
 }

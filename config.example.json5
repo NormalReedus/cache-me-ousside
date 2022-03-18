@@ -1,8 +1,8 @@
 {
-  "maxSize": 500,
+  "maxSize": 5,
   // "apiUrl": "http://localhost:3000",
-  "apiUrl": "https://jsonplaceholder.typicode.com",
-  "cache":  [ "/posts", "/post/:slug" ], // Only GET requests allowed for now
+  "apiUrl": "https://jsonplaceholder.typicode.com/", // trailing slash is ignored
+  "cache":  [ "/posts", "/post/:slug" ], // Only GET requests supported for now
   "bust": {
     "POST": {
       "/posts": [ "/posts", "/posts/count" ]

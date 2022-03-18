@@ -1,4 +1,4 @@
-module github.com/NormalReedus/lru-cache-microservice
+module github.com/NormalReedus/cache-me-ousside
 
 go 1.17
 

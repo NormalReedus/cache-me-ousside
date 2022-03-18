@@ -3,66 +3,87 @@ package cache
 import (
 	"container/list"
 	"fmt"
+	"log"
+
+	"github.com/fatih/color"
 )
 
 type LRUCache struct {
-	data    map[string][]byte // maps endpoints to JSON data from that endpoint
-	queue   list.List         // doubly linked list with strings that represent last recently used endpoints
+	entries map[string]*list.Element // maps endpoints to JSON data from that endpoint
+	queue   *list.List               // doubly linked list with strings that represent last recently used endpoints
 	maxSize int
 }
 
 func New(size int) *LRUCache {
 	cache := &LRUCache{
-		data:    make(map[string][]byte),
-		queue:   *list.New(),
+		entries: make(map[string]*list.Element),
+		queue:   list.New(),
 		maxSize: size,
 	}
 
 	return cache
 }
 
-func (cache *LRUCache) Size() int {
-	return len(cache.data)
+//! DEBUG FJERN IGEN
+func (cache *LRUCache) Entries() map[string]*list.Element {
+	return cache.entries
 }
 
-func (cache *LRUCache) Get(key string) ([]byte, bool) { // return a string instead, if that is the format that the router wants to return JSON data
-	val, present := cache.data[key]
+func (cache *LRUCache) Size() int {
+	return len(cache.entries)
+}
 
-	// If there was something in cache, move it to MRU
-	if present {
-		listElement := cache.find(key)
+func (cache *LRUCache) Get(key string) ([]byte, bool) {
+	listElement, ok := cache.entries[key]
 
-		if listElement == nil {
-			fmt.Println(fmt.Errorf("the key %v exists in data map but not in queue", key))
-
-			delete(cache.data, key)  // easiest way to handle this issue is to remove value from cache
-			return []byte(""), false // return zero value of map val and as if the key does not exist
-		}
-
-		cache.queue.MoveToFront(listElement)
+	// If there is no cached entry, just continue middlewares
+	if !ok {
+		return []byte(""), false // return zero value of entry val and as if the key does not exist
 	}
 
-	return val, present
+	// If, for some reason, the cached value is empty
+	if listElement == nil || listElement.Value.(cacheElement).Data == nil {
+		log.Println(fmt.Errorf("the key %v exists in as an entry but not in queue", key))
+
+		delete(cache.entries, key) // easiest way to handle this issue is to remove value from cache
+
+		return []byte(""), false // return zero value of entry val and as if the key does not exist
+	}
+
+	// If there was something in cache, move it to MRU
+	cache.queue.MoveToFront(listElement)
+
+	// Return the value in the linked list node (element.Value)
+	return *listElement.Value.(cacheElement).Data, ok
 }
 
 func (cache *LRUCache) Set(key string, val *[]byte) {
-	cache.data[key] = *val
-	cache.queue.PushFront(key)
+	// Saved data needs both key and data, so we can find map key from the linked list in e.g. evict()
+	entry := cacheElement{
+		Key:  key,
+		Data: val,
+	}
 
-	// Check if we have exceeded max size and trim LRU if so
-	cache.trim()
+	// Save value to both queue and entries
+	cache.entries[key] = cache.queue.PushFront(entry)
+
+	// Check if we have exceeded max size and evict LRU if so
+	if cache.Size() > cache.maxSize {
+		cache.evict()
+	}
 }
 
 // This is called from cache.Set() after a new key has been added to make sure we don't exceed maxSize
-func (cache *LRUCache) trim() {
-	// Does not use cache.remove() since remove() uses a key string, whereas trim uses a list element to find target
-	if cache.Size() > cache.maxSize {
-		lru := cache.queue.Back()
+func (cache *LRUCache) evict() {
+	// Does not use cache.remove() since remove() uses a key string, whereas evict uses a list element to find target
+	lru := cache.queue.Back()
 
-		lruKey := cache.queue.Remove(lru).(string)
+	cacheElm := cache.queue.Remove(lru).(cacheElement)
 
-		delete(cache.data, lruKey)
-	}
+	delete(cache.entries, cacheElm.Key)
+
+	clr := color.New(color.FgRed, color.Bold)
+	log.Printf("%v\n", clr.Sprint("CACHE EVICT: "+cacheElm.Key))
 }
 
 func (cache *LRUCache) Bust(endpointSelectors []string) {
@@ -72,26 +93,20 @@ func (cache *LRUCache) Bust(endpointSelectors []string) {
 	// use a selector / regex service (if there are any generics) to convert the 'endpointSelectors' to a slice of strings that are the concrete keys in cache to remove
 }
 
-// this is called from cache.Bust() and should just make sure that cache.data and cache.queue stay by removing keys and nodes from both at the same time
+// this is called from cache.Bust() and should just make sure that cache.data and cache.queue stay synced by removing keys and nodes from both at the same time
 func (cache *LRUCache) remove(key string) {
-	lruElement := cache.find(key)
+	listElement, ok := cache.entries[key]
 
-	cache.queue.Remove(lruElement)
-	delete(cache.data, key)
+	if !ok {
+		return
+	}
+
+	cache.queue.Remove(listElement)
+	delete(cache.entries, key)
 }
 
-func (cache *LRUCache) find(key string) *list.Element {
-	currentElement := cache.queue.Front()
-
-	for {
-		if currentElement == nil {
-			return nil
-		}
-
-		if currentElement.Value == key {
-			return currentElement
-		}
-
-		currentElement = currentElement.Next()
-	}
+// content for list.Element.Value
+type cacheElement struct {
+	Key  string  `json:"key"`  // reference to the key that references this data
+	Data *[]byte `json:"data"` // the cached json data
 }

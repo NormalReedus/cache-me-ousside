@@ -3,8 +3,10 @@ package router
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
-	"github.com/NormalReedus/lru-cache-microservice/internal/cache"
+	"github.com/NormalReedus/cache-me-ousside/internal/cache"
+	"github.com/fatih/color"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 )
@@ -15,6 +17,7 @@ func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 		url := apiUrl + ctx.OriginalURL()
 
 		if err := proxy.Do(ctx, url); err != nil {
+			fmt.Println(fmt.Errorf("could not proxy request to: %v", url))
 			return err
 		}
 
@@ -66,6 +69,19 @@ func readCacheMiddleware(ctx *fiber.Ctx) error {
 	// Let people know they've been served
 	ctx.Set("X-LRU-Cache", "HIT")
 
+	clr := color.New(color.FgGreen, color.Bold)
+	log.Printf("%v\n", clr.Sprint("CACHE READ: "+ctx.OriginalURL()))
+
+	//! DEBUG
+	//! ALLE :SLUG ROUTES VISES SOM CACHED, HVIS BARE EN ENKELT SLUG ER CACHED???
+	keys := make([]string, 0, len(cache.Entries()))
+	for k := range cache.Entries() {
+		keys = append(keys, k)
+	}
+	fmt.Println(keys)
+	// fmt.Printf("%+v\n\n", cachedResponse.Body)
+	//! DEBUG END
+
 	ctx.Send(cachedResponse.Body)
 
 	return nil // don't continue middlewares in this case
@@ -85,12 +101,15 @@ func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	// Stringify the headers + body of the api response
 	jsonResponse, err := json.Marshal(apiResponse)
 	if err != nil {
-		fmt.Println(fmt.Errorf("there was an issue caching the response from %v", cacheKey))
+		log.Println(fmt.Errorf("there was an issue caching the response from %v", cacheKey))
 		return nil
 	}
 
 	// Save the stringified api response in cache
 	cache.Set(cacheKey, &jsonResponse)
+
+	clr := color.New(color.FgBlue, color.Bold)
+	log.Printf("%v\n", clr.Sprint("CACHE WRITE: "+ctx.OriginalURL()))
 
 	return nil // this is always last step, so no Next()
 }
