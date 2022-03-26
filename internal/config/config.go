@@ -33,10 +33,10 @@ func Load(configPath string) *Config {
 }
 
 type Config struct {
-	MaxSize int      `json:"maxSize"`
-	ApiUrl  string   `json:"apiUrl"`
-	Cache   []string `json:"cache"`
-	Bust    BustMap  `json:"bust"`
+	Capacity uint     `json:"capacity"`
+	ApiUrl   string   `json:"apiUrl"`
+	Cache    []string `json:"cache"`
+	Bust     BustMap  `json:"bust"`
 }
 
 func (conf *Config) trimTrailingSlash() {

@@ -1,12 +1,10 @@
 package router
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/NormalReedus/cache-me-ousside/internal/cache"
-	"github.com/fatih/color"
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 )
@@ -42,74 +40,66 @@ func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 	}
 }
 
-//* remember to use cache hit headers etc
 func readCacheMiddleware(ctx *fiber.Ctx) error {
-	cache := ctx.UserContext().Value(key("cache")).(*cache.LRUCache)
+	dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
 	cacheKey := ctx.OriginalURL()
 
-	// Read cached json data (headers + body)
-	// responseVal is a json with { "headers": { HEADERS JSON }, "body": stringified []byte }
-	cachedResponseJson, ok := cache.Get(cacheKey)
+	cachedData := dataCache.Get(cacheKey)
 
 	// If there is no cached data, continue middlewares to proxy the request
-	if !ok {
-		ctx.Set("X-LRU-Cache", "MISS") //! not coming through
+	if cachedData == nil {
+		ctx.Set("X-LRU-Cache", "MISS")
 
 		ctx.Next()
 		return nil
 	}
 
-	// If there is a key for the endpoint in cache, send the json from the cache
-	// Init struct with headers and body of cached response
-	cachedResponse := NewCacheResponseFromJSON(cachedResponseJson)
-
 	// Set all of the cached headers on the current response
-	cachedResponse.SetHeaders(ctx)
+	cachedData.SetHeaders(ctx)
 
 	// Let people know they've been served
 	ctx.Set("X-LRU-Cache", "HIT")
 
-	clr := color.New(color.FgGreen, color.Bold)
-	log.Printf("%v\n", clr.Sprint("CACHE READ: "+ctx.OriginalURL()))
+	// Let SysAdmin know they served something
+	logger.CacheRead(ctx.OriginalURL())
 
-	//! DEBUG
-	//! ALLE :SLUG ROUTES VISES SOM CACHED, HVIS BARE EN ENKELT SLUG ER CACHED???
-	keys := make([]string, 0, len(cache.Entries()))
-	for k := range cache.Entries() {
-		keys = append(keys, k)
-	}
-	fmt.Println(keys)
-	// fmt.Printf("%+v\n\n", cachedResponse.Body)
-	//! DEBUG END
+	// //! ALLE :SLUG ROUTES VISES SOM CACHED, HVIS BARE EN ENKELT SLUG ER CACHED???
+	// //! DEBUG END
 
-	ctx.Send(cachedResponse.Body)
+	ctx.Send(cachedData.Body)
 
 	return nil // don't continue middlewares in this case
 }
 
 //* remember to use cache hit headers etc
 func writeCacheMiddleware(ctx *fiber.Ctx) error {
-	cache := ctx.UserContext().Value(key("cache")).(*cache.LRUCache)
+	// If the response is not a 2xx, don't cache it
+	status := ctx.Response().StatusCode()
+	if status < 200 && status >= 300 {
+		logger.CacheSkip(ctx.OriginalURL())
+		return nil
+	}
+
+	dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
 	cacheKey := ctx.OriginalURL()
 
-	// Init the current response as a struct we stringify
-	apiResponse := CacheResponse{
+	// Init the current response
+	apiResponse := cache.CacheData{
 		Headers: ctx.GetRespHeaders(),
 		Body:    ctx.Response().Body(),
 	}
 
-	// Stringify the headers + body of the api response
-	jsonResponse, err := json.Marshal(apiResponse)
-	if err != nil {
-		log.Println(fmt.Errorf("there was an issue caching the response from %v", cacheKey))
-		return nil
-	}
+	// Save the api response in cache
+	dataCache.Set(cacheKey, &apiResponse)
 
-	// Save the stringified api response in cache
-	cache.Set(cacheKey, &jsonResponse)
+	logger.CacheWrite(ctx.OriginalURL())
 
-	clr := color.New(color.FgBlue, color.Bold)
-	log.Printf("%v\n", clr.Sprint("CACHE WRITE: "+ctx.OriginalURL()))
+	//! DEBUG
+	// Slet de her metoder, når debugging er fixed
+	// fmt.Printf("Size: %v\n", dataCache.Size())
+	// fmt.Printf("MRU: %v\n", dataCache.MRU().Key())
+	// fmt.Printf("LRU: %v\n", dataCache.LRU().Key())
+	fmt.Printf("Keys: %v\n", dataCache.Keys())
 
 	return nil // this is always last step, so no Next()
 }

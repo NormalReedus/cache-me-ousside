@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const CACHE_KEY key = "cache"
+// const CACHE_KEY key = "cache"
 
 func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	app := fiber.New(fiber.Config{
@@ -25,7 +24,7 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	setCachingEndpoints(app, conf)
 
 	// Any non-cache / non-cache-busting requests should just proxy directly to the original API
-	app.Use("/*", createProxyHandler(conf.ApiUrl)) // default behavior
+	app.Use("*", createProxyHandler(conf.ApiUrl)) // default behavior
 
 	printHiMom(conf, port)
 
@@ -51,10 +50,8 @@ func setCachingEndpoints(app *fiber.App, conf *config.Config) {
 }
 
 func injectCtxCache(cache *cache.LRUCache) func(ctx *fiber.Ctx) error {
-	cacheCtx := context.WithValue(context.Background(), CACHE_KEY, cache)
-
 	return func(ctx *fiber.Ctx) error {
-		ctx.SetUserContext(cacheCtx)
+		ctx.Locals("cache", cache)
 		ctx.Next()
 		return nil
 	}

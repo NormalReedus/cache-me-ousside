@@ -1,17 +1,18 @@
 {
-  "maxSize": 5,
+  "capacity": 5,
   // "apiUrl": "http://localhost:3000",
   "apiUrl": "https://jsonplaceholder.typicode.com/", // trailing slash is ignored
-  "cache":  [ "/posts", "/post/:slug" ], // Only GET requests supported for now
-  "bust": {
-    "POST": {
-      "/posts": [ "/posts", "/posts/count" ]
-    },
-    "PUT": {
-      "/post/:slug": [ "/posts", "/post/:slug" ]
-    },
-    "DELETE": {
-      "/post/:slug": [ "/posts", "/post/:slug" ]
-    },
-  }
+  // "cache":  [ "/posts", "/posts/:id" ], // Only GET requests supported for now
+  "cache":  [ "/", "/posts", "/posts/1", "/posts/2", "/posts/3", "/posts/4", "/posts/5" ], // Only GET requests supported for now
+  // "bust": {
+  //   "POST": {
+  //     "/posts": [ "/posts", "/posts/count" ]
+  //   },
+  //   "PUT": {
+  //     "/posts/:slug": [ "/posts", "/posts/:id" ]
+  //   },
+  //   "DELETE": {
+  //     "/posts/:id": [ "/posts", "/posts/:id" ]
+  //   },
+  // }
 }

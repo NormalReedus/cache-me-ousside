@@ -17,7 +17,7 @@ func main() {
 
 	conf := config.Load(configPath)
 
-	lru := cache.New(conf.MaxSize)
+	lru := cache.New(conf.Capacity)
 
 	router.Start(conf, port, lru)
 }

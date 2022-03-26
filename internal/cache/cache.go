@@ -1,11 +1,18 @@
 package cache
 
+import (
+	"fmt"
+	"log"
+
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
+)
+
 func New(cap uint) *LRUCache {
 	cache := &LRUCache{
 		capacity: int(cap),
 		entries:  make(map[string]*Entry),
-		head:     nil,
-		tail:     nil,
+		mru:      nil,
+		lru:      nil,
 	}
 
 	return cache
@@ -18,54 +25,111 @@ type LRUCache struct {
 	lru      *Entry
 }
 
+//! TEST
+func (cache *LRUCache) MRU() *Entry {
+	return cache.mru
+}
+func (cache *LRUCache) LRU() *Entry {
+	return cache.lru
+}
+func (cache *LRUCache) Keys() []string {
+	keys := make([]string, 0, len(cache.entries))
+	for k := range cache.entries {
+		keys = append(keys, k)
+	}
+
+	return keys
+}
+
+//! TESTEND
+
 func (cache *LRUCache) Size() int {
 	return len(cache.entries)
 }
 
-func (cache *LRUCache) Get(key string) *Entry {
-}
+func (cache *LRUCache) Get(key string) *CacheData {
+	entry, exists := cache.entries[key]
 
-func (cache *LRUCache) Set(key string, entry *Entry) {
-
-	// If there are no entries, set entry as head and tail
-	if cache.lru == nil && cache.mru == nil {
-		cache.setFirst(entry)
+	if !exists {
+		return nil
 	}
 
+	// Set as head
+	cache.moveToMRU(entry)
+
+	// Unpack data from []byte to CacheData
+	data := entry.unmarshalData()
+
+	return &data
+}
+
+func (cache *LRUCache) Set(key string, data *CacheData) {
+	// You should never set something with a key that already exists
+	//... since the cached data should have been returned instead in that case
+	if _, exists := cache.entries[key]; exists {
+		log.Println(fmt.Errorf("setting the key: %v in the cache should not be done, since that key already exists", key))
+		return
+	}
+
+	// Ready the data for saving
+	entry := newEntry(key, data)
+
+	// If there are no entries, set entry as both head and tail
+	if cache.lru == nil && cache.mru == nil {
+		cache.entries[key] = cache.setFirst(entry)
+	} else {
+		// If there are entries, set entry as head
+		cache.entries[key] = cache.mru.setNext(entry)
+		cache.mru = entry
+	}
+
+	// If the cache is full, evict the LRU entry
+	if cache.Size() > cache.capacity {
+		cache.evict()
+	}
 }
 
 func (cache *LRUCache) evict() *Entry {
-	if cache.Size() == 0 {
-		return nil
-	}
-
+	// Save ref to removed entry
 	evicted := cache.lru
 
-	if cache.lru == cache.mru {
-		// Only one element in the cache
-
-	}
-
-	// if cache.head == nil {
-	// 	cache.tail = nil
-	// }
-
-	// delete(cache.entries, entry.Key)
-
-	// return entry
-}
-
-func (cache *LRUCache) moveToMRU(entry *Entry) *Entry {
-	if entry == nil {
+	// If there is no lru (cache is empty), don't do anything
+	if evicted == nil {
 		return nil
 	}
 
-	// If this entry is head, don't do anything
-	if entry == cache.mru {
-		return entry
+	// If there is only one element in the cache
+	if cache.Size() == 1 {
+		cache.lru = nil
+		cache.mru = nil
+
+		return nil
+
+	} else {
+		// If there is more than one element in the cache
+		// Point tail to second-to-last entry
+		cache.lru = evicted.next
+
+		// Dereference the removed entry by pointing the prev entry of second-to-last entry to nil
+		evicted.next.prev = nil
 	}
 
-	// If this entry is tail, move to head, but don't link the new tail's prev node
+	// Remove entry from map
+	delete(cache.entries, evicted.key)
+
+	logger.CacheEvict(evicted.key)
+
+	return evicted
+}
+
+// Must be used on existing entry to move it to head position
+func (cache *LRUCache) moveToMRU(entry *Entry) {
+	// If this entry is already head, don't do anything
+	if entry == nil || entry == cache.mru {
+		return
+	}
+
+	cache.mru.setNext(entry)
 }
 
 // If there are no lru or mru, use this to set both to entry
@@ -73,79 +137,8 @@ func (cache *LRUCache) setFirst(entry *Entry) *Entry {
 	cache.lru = entry
 	cache.mru = entry
 
+	entry.prev = nil
+	entry.next = nil
+
 	return entry
-}
-
-// func (cache *LRUCache) moveToLRU(entry *Entry) {
-// 	// if cache.head == nil {
-// 	// 	cache.head = entry
-// 	// 	cache.tail = entry
-// 	// 	return
-// 	// }
-
-// 	// if cache.head == cache.tail {
-// 	// 	cache.head.Prev = entry
-// 	// 	cache.tail.Next = entry
-// 	// 	cache.head = entry
-// 	// 	cache.tail = entry
-// 	// 	return
-// 	// }
-
-// 	// entry.Next = cache.head
-// 	// cache.head.Prev = entry
-// 	// cache.head = entry
-// }
-
-type Entry struct {
-	key     string
-	headers map[string]string
-	value   []byte // this is the marshaled json data
-	next    *Entry
-	prev    *Entry
-}
-
-func (entry *Entry) SetNext(newEntry *Entry) *Entry {
-	if newEntry == nil {
-		return nil
-	}
-
-	// If this entry is head (or only entry), set newEntry as head
-	if entry.next == nil {
-		entry.next = newEntry
-		newEntry.prev = entry
-
-		return newEntry
-	}
-
-	// If this entry is not head, insert newEntry between this entry and next entry
-	nextEntry := entry.next
-	entry.next = newEntry
-	newEntry.prev = entry
-	newEntry.next = nextEntry
-	nextEntry.prev = newEntry
-
-	return newEntry
-}
-
-func (entry *Entry) SetPrev(newEntry *Entry) *Entry {
-	if newEntry == nil {
-		return nil
-	}
-
-	// If this entry is tail (or only entry), set newEntry as tail
-	if entry.prev == nil {
-		entry.prev = newEntry
-		newEntry.next = entry
-
-		return newEntry
-	}
-
-	// If this entry is not tail, insert newEntry between this entry and prev entry
-	prevEntry := entry.prev
-	entry.prev = newEntry
-	newEntry.next = entry
-	newEntry.prev = prevEntry
-	prevEntry.next = newEntry
-
-	return newEntry
 }
