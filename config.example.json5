@@ -2,15 +2,15 @@
   "capacity": 5,
   "apiUrl": "https://jsonplaceholder.typicode.com/", // trailing slash is ignored
   "cache":  [ "/posts", "/posts/:id" ], // Only GET requests supported for now
-  // "bust": {
-  //   "POST": {
-  //     "/posts": [ "/posts", "/posts/count" ]
-  //   },
-  //   "PUT": {
-  //     "/posts/:slug": [ "/posts", "/posts/:id" ]
-  //   },
-  //   "DELETE": {
-  //     "/posts/:id": [ "/posts", "/posts/:id" ]
-  //   },
-  // }
+  "bust": {
+    "POST": {
+      "/posts": [ "/posts", "/posts/count" ]
+    },
+    "PUT": {
+      "/posts/:slug": [ "/posts", "/posts/:id" ]
+    },
+    "DELETE": {
+      "/posts/:id": [ "/posts", "/posts/:id" ]
+    },
+  }
 }

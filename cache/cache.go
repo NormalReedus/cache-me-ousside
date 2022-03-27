@@ -3,6 +3,7 @@ package cache
 import (
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 )
@@ -78,6 +79,24 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	if cache.Size() > cache.capacity {
 		cache.evict()
 	}
+}
+
+func (cache *LRUCache) Bust(key string) {
+	// TODO
+	// should both remove entry from map and linked list
+	// remember to use existing methods and check edge cases such as no entries, 1 entry, head / tail entry etc
+}
+
+func (cache *LRUCache) Match(pattern *regexp.Regexp) []string {
+	// This was 100% made by Copilot with no instructions, damn
+	var keys []string
+	for k := range cache.entries {
+		if pattern.MatchString(k) {
+			keys = append(keys, k)
+		}
+	}
+
+	return keys
 }
 
 func (cache *LRUCache) evict() *Entry {

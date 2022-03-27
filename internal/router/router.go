@@ -19,6 +19,9 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	// Make cache available in all handlers on ctx.UserContext().Value(key("cache"))
 	app.Use(injectCtxCache(cache))
 
+	// Will loop through methods, endpoints, and patterns and set a middleware for each that removes cache entries when patterns are matched
+	setBustingEndpoints(app, conf)
+
 	// Will loop through cachable endpoints in config and set route handlers + middleware to handle caching on those routes
 	setCachingEndpoints(app, conf)
 
@@ -30,9 +33,18 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	log.Fatal(app.Listen(fmt.Sprintf("localhost:%v", port)))
 }
 
+// Will loop through methods, endpoints, and patterns and set a middleware for each that removes cache entries when patterns are matched
+func setBustingEndpoints(app *fiber.App, conf *config.Config) {
+	for method, endpointMap := range conf.Bust {
+		for endpoint, patterns := range endpointMap {
+			app.Add(method, endpoint, createBustMiddleware(patterns))
+		}
+	}
+}
+
 // Sets route handlers and middleware that:
-// 1. uses cache if anything is cached, if not, then...
-// 2. proxies the request to apiUrl and gets a response, then...
+// 1. uses cache if anything is cached, if not, then
+// 2. proxies the request to apiUrl and gets a response, then
 // 3. sets the response in the cache
 func setCachingEndpoints(app *fiber.App, conf *config.Config) {
 	for _, endpoint := range conf.Cache {

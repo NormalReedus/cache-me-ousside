@@ -36,7 +36,7 @@ type Config struct {
 	Capacity uint     `json:"capacity"`
 	ApiUrl   string   `json:"apiUrl"`
 	Cache    []string `json:"cache"`
-	Bust     BustMap  `json:"bust"`
+	Bust     bustMap  `json:"bust"`
 }
 
 func (conf *Config) trimTrailingSlash() {
@@ -51,11 +51,5 @@ func (conf Config) String() string {
 	return string(confJSON)
 }
 
-type BustMap struct {
-	GET    map[string][]string `json:"GET"`
-	HEAD   map[string][]string `json:"HEAD"`
-	POST   map[string][]string `json:"POST"`
-	PUT    map[string][]string `json:"PUT"`
-	PATCH  map[string][]string `json:"PATCH"`
-	DELETE map[string][]string `json:"DELETE"`
-}
+// Is a map of methods with maps of endpoints with slices of patterns to match to cache entries to bust.
+type bustMap map[string]map[string][]string

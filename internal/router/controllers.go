@@ -2,6 +2,8 @@ package router
 
 import (
 	"fmt"
+	"log"
+	"regexp"
 
 	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
@@ -15,7 +17,7 @@ func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 		url := apiUrl + ctx.OriginalURL()
 
 		if err := proxy.Do(ctx, url); err != nil {
-			fmt.Println(fmt.Errorf("could not proxy request to: %v", url))
+			log.Println(fmt.Errorf("could not proxy request to: %v", url))
 			return err
 		}
 
@@ -92,4 +94,32 @@ func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	logger.CacheWrite(ctx.OriginalURL())
 
 	return nil // this is always last step, so no Next()
+}
+
+func createBustMiddleware(patterns []string) func(*fiber.Ctx) error {
+	return func(ctx *fiber.Ctx) error {
+		dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
+
+		// Loops through all patterns and finds cache entry keys matching the regex
+		var matchedEntries []string
+		for _, pattern := range patterns {
+			regexp, err := regexp.Compile(pattern)
+			if err != nil {
+				log.Println(fmt.Errorf("could bust entries with pattern: %s on: %s %s", pattern, ctx.Method(), ctx.OriginalURL()))
+			}
+
+			matches := dataCache.Match(regexp)
+
+			if len(matches) > 0 {
+				matchedEntries = append(matchedEntries, matches...)
+			}
+		}
+
+		for _, entryKey := range matchedEntries {
+			dataCache.Bust(entryKey)
+		}
+
+		ctx.Next()
+		return nil
+	}
 }
