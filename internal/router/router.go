@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/NormalReedus/cache-me-ousside/internal/cache"
+	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/config"
-	"github.com/fatih/color"
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
-// const CACHE_KEY key = "cache"
-
 func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	app := fiber.New(fiber.Config{
-		DisableStartupMessage: true,
+		DisableStartupMessage: true, // has own HiMom message
+		Immutable:             true, // muy importante - makes sure that OriginalUrl() cannot mutate cached endpoints somehow
 	})
 
 	// Make cache available in all handlers on ctx.UserContext().Value(key("cache"))
@@ -26,7 +25,7 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	// Any non-cache / non-cache-busting requests should just proxy directly to the original API
 	app.Use("*", createProxyHandler(conf.ApiUrl)) // default behavior
 
-	printHiMom(conf, port)
+	logger.HiMom(conf, port)
 
 	log.Fatal(app.Listen(fmt.Sprintf("localhost:%v", port)))
 }
@@ -55,15 +54,4 @@ func injectCtxCache(cache *cache.LRUCache) func(ctx *fiber.Ctx) error {
 		ctx.Next()
 		return nil
 	}
-}
-
-func printHiMom(conf *config.Config, port string) {
-	cacheColor := color.New(color.FgBlue, color.Bold)
-	urlColor := color.New(color.FgHiGreen, color.Underline)
-
-	fmt.Print("Your ")
-	cacheColor.Print("LRU cache microservice ")
-	fmt.Printf("is being served on http://localhost:%v.\n", port)
-	fmt.Print("All requests will be proxied to ")
-	urlColor.Println(conf.ApiUrl + "\n")
 }

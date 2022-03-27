@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/NormalReedus/cache-me-ousside/internal/cache"
+	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/config"
 	"github.com/NormalReedus/cache-me-ousside/internal/router"
 	flag "github.com/spf13/pflag"

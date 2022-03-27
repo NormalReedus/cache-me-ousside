@@ -25,14 +25,7 @@ type LRUCache struct {
 	lru      *Entry
 }
 
-//! TEST
-func (cache *LRUCache) MRU() *Entry {
-	return cache.mru
-}
-func (cache *LRUCache) LRU() *Entry {
-	return cache.lru
-}
-func (cache *LRUCache) Keys() []string {
+func (cache *LRUCache) CachedEndpoints() []string {
 	keys := make([]string, 0, len(cache.entries))
 	for k := range cache.entries {
 		keys = append(keys, k)
@@ -40,8 +33,6 @@ func (cache *LRUCache) Keys() []string {
 
 	return keys
 }
-
-//! TESTEND
 
 func (cache *LRUCache) Size() int {
 	return len(cache.entries)

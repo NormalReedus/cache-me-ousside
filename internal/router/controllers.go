@@ -3,7 +3,7 @@ package router
 import (
 	"fmt"
 
-	"github.com/NormalReedus/cache-me-ousside/internal/cache"
+	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
@@ -60,11 +60,8 @@ func readCacheMiddleware(ctx *fiber.Ctx) error {
 	// Let people know they've been served
 	ctx.Set("X-LRU-Cache", "HIT")
 
-	// Let SysAdmin know they served something
+	// Let SysAdmin know they served from cache
 	logger.CacheRead(ctx.OriginalURL())
-
-	// //! ALLE :SLUG ROUTES VISES SOM CACHED, HVIS BARE EN ENKELT SLUG ER CACHED???
-	// //! DEBUG END
 
 	ctx.Send(cachedData.Body)
 
@@ -93,13 +90,6 @@ func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	dataCache.Set(cacheKey, &apiResponse)
 
 	logger.CacheWrite(ctx.OriginalURL())
-
-	//! DEBUG
-	// Slet de her metoder, når debugging er fixed
-	// fmt.Printf("Size: %v\n", dataCache.Size())
-	// fmt.Printf("MRU: %v\n", dataCache.MRU().Key())
-	// fmt.Printf("LRU: %v\n", dataCache.LRU().Key())
-	fmt.Printf("Keys: %v\n", dataCache.Keys())
 
 	return nil // this is always last step, so no Next()
 }

@@ -28,13 +28,6 @@ type Entry struct {
 	prev *Entry
 }
 
-//! TEST
-func (entry *Entry) Key() string {
-	return entry.key
-}
-
-//! TESTEND
-
 func (entry *Entry) setNext(newEntry *Entry) *Entry {
 	if newEntry == nil {
 		return nil

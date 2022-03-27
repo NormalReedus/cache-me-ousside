@@ -1,9 +1,7 @@
 {
   "capacity": 5,
-  // "apiUrl": "http://localhost:3000",
   "apiUrl": "https://jsonplaceholder.typicode.com/", // trailing slash is ignored
-  // "cache":  [ "/posts", "/posts/:id" ], // Only GET requests supported for now
-  "cache":  [ "/", "/posts", "/posts/1", "/posts/2", "/posts/3", "/posts/4", "/posts/5" ], // Only GET requests supported for now
+  "cache":  [ "/posts", "/posts/:id" ], // Only GET requests supported for now
   // "bust": {
   //   "POST": {
   //     "/posts": [ "/posts", "/posts/count" ]
