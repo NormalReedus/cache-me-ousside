@@ -8,7 +8,7 @@ import (
 	"github.com/NormalReedus/cache-me-ousside/internal/utils"
 )
 
-func New(cap uint) *LRUCache {
+func New(cap uint64) *LRUCache {
 	cache := &LRUCache{
 		capacity: int(cap),
 		entries:  make(map[string]*Entry),

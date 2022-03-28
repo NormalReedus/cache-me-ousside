@@ -6,7 +6,6 @@ import (
 
 	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
-	"github.com/NormalReedus/cache-me-ousside/internal/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 )
@@ -91,8 +90,6 @@ func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	dataCache.Set(cacheKey, &apiResponse)
 
 	logger.CacheWrite(ctx.OriginalURL())
-
-	utils.PrintMemUsage()
 
 	return nil // this is always last step, so no Next()
 }

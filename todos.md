@@ -1,7 +1,5 @@
-* busting
-* dynamiske route selectors
-  * f.eks. skal alle queries (/xyz?something=himom) caches under hele OriginalURL, men busting på /xyz skal sandsynligvis kunne buste alle queries der kunne være cached til /xyz
+* Testing
+  * Tjek om alle public metoder i cache.go fungerer, hvis man giver dem forskellige inputs (evt noget 1.18 fuzzing mht endpoints / patterns?)
 * Find ud af hvordan man manipulerer hostname, hvis man ikke vil bruge endnu en reverse proxy
-* Lav alle logs inde i logger
-  * f.eks. fejl ved busting etc
-* lav alle fejl med rød evt
+* Caching af HEAD og andre GET-lignende requests (se TODO i config.go)
+* Memorybaseret caching limit (se TODO i config.go)

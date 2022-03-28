@@ -1,7 +1,8 @@
 {
   "capacity": 5,
+  "capacityUnit": "", // MB / GB / B etc - empty for an entry-number based cache limit
   "apiUrl": "https://jsonplaceholder.typicode.com/", // trailing slash is ignored
-  "cache":  [ "/posts", "/posts/:id" ], // Only GET requests supported for now
+  "cache":  [ "/posts", "/posts/:id", "/albums", "/users", "/todos" ], // Only GET requests supported for now
   "bust": {
     "POST": {
       "/posts": [ "/posts", "/posts/count" ]

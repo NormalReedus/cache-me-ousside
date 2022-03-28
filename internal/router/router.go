@@ -35,7 +35,7 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 
 // Will loop through methods, endpoints, and patterns and set a middleware for each that removes cache entries when patterns are matched
 func setBustingEndpoints(app *fiber.App, conf *config.Config) {
-	for method, endpointMap := range conf.Bust {
+	for method, endpointMap := range conf.BustMap {
 		for endpoint, patterns := range endpointMap {
 			app.Add(method, endpoint, createBustMiddleware(patterns))
 		}
