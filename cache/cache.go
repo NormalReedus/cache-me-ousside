@@ -2,10 +2,10 @@ package cache
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
+	"github.com/NormalReedus/cache-me-ousside/internal/utils"
 )
 
 func New(cap uint) *LRUCache {
@@ -59,7 +59,7 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	// You should never set something with a key that already exists
 	//... since the cached data should have been returned instead in that case
 	if _, exists := cache.entries[key]; exists {
-		log.Println(fmt.Errorf("setting the key: %v in the cache should not be done, since that key already exists", key))
+		logger.Error(fmt.Errorf("setting the key: %v in the cache should not be done, since that key already exists", key))
 		return
 	}
 
@@ -81,22 +81,55 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	}
 }
 
-func (cache *LRUCache) Bust(key string) {
-	// TODO
-	// should both remove entry from map and linked list
-	// remember to use existing methods and check edge cases such as no entries, 1 entry, head / tail entry etc
+func (cache *LRUCache) Bust(keys ...string) {
+	for _, entryKey := range keys {
+		entry, exists := cache.entries[entryKey]
+
+		// It's completely fine if this thing doesn't exist
+		if !exists {
+			continue
+		}
+
+		delete(cache.entries, entryKey)
+
+		if entry == cache.lru {
+			cache.lru = entry.next
+			if cache.lru != nil {
+				cache.lru.prev = nil
+			}
+		}
+
+		if entry == cache.mru {
+			cache.mru = entry.prev
+			if cache.mru != nil {
+				cache.mru.next = nil
+			}
+		}
+
+		// It might look weird to not stop execution here if entry were both mru and lru, but if both of those
+		// were true, both of these conditions would be nil and thus skipped
+		if entry.prev != nil {
+			entry.prev.next = entry.next
+		}
+
+		if entry.next != nil {
+			entry.next.prev = entry.prev
+		}
+
+		logger.CacheBust(entryKey)
+	}
 }
 
 func (cache *LRUCache) Match(pattern *regexp.Regexp) []string {
-	// This was 100% made by Copilot with no instructions, damn
-	var keys []string
-	for k := range cache.entries {
-		if pattern.MatchString(k) {
-			keys = append(keys, k)
+	keys := make(utils.Set[string])
+
+	for key := range cache.entries {
+		if pattern.MatchString(key) {
+			keys.Add(key)
 		}
 	}
 
-	return keys
+	return keys.Elements()
 }
 
 func (cache *LRUCache) evict() *Entry {

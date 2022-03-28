@@ -2,7 +2,6 @@ package router
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/NormalReedus/cache-me-ousside/cache"
@@ -17,7 +16,7 @@ func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 		url := apiUrl + ctx.OriginalURL()
 
 		if err := proxy.Do(ctx, url); err != nil {
-			log.Println(fmt.Errorf("could not proxy request to: %v", url))
+			logger.Error(fmt.Errorf("could not proxy request to: %v", url))
 			return err
 		}
 
@@ -70,7 +69,6 @@ func readCacheMiddleware(ctx *fiber.Ctx) error {
 	return nil // don't continue middlewares in this case
 }
 
-//* remember to use cache hit headers etc
 func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	// If the response is not a 2xx, don't cache it
 	status := ctx.Response().StatusCode()
@@ -105,7 +103,7 @@ func createBustMiddleware(patterns []string) func(*fiber.Ctx) error {
 		for _, pattern := range patterns {
 			regexp, err := regexp.Compile(pattern)
 			if err != nil {
-				log.Println(fmt.Errorf("could bust entries with pattern: %s on: %s %s", pattern, ctx.Method(), ctx.OriginalURL()))
+				logger.Error(fmt.Errorf("could bust entries with pattern: %s on: %s %s", pattern, ctx.Method(), ctx.OriginalURL()))
 			}
 
 			matches := dataCache.Match(regexp)
@@ -115,9 +113,7 @@ func createBustMiddleware(patterns []string) func(*fiber.Ctx) error {
 			}
 		}
 
-		for _, entryKey := range matchedEntries {
-			dataCache.Bust(entryKey)
-		}
+		dataCache.Bust(matchedEntries...)
 
 		ctx.Next()
 		return nil

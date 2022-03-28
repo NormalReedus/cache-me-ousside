@@ -10,22 +10,27 @@ import (
 
 func CacheWrite(key string) {
 	clr := color.New(color.FgBlue, color.Bold)
-	log.Printf("%v\n", clr.Sprint("CACHE WRITE: "+key))
+	log.Println(clr.Sprint("CACHE WRITE: " + key))
 }
 
 func CacheRead(key string) {
 	clr := color.New(color.FgGreen, color.Bold)
-	log.Printf("%v\n", clr.Sprint("CACHE READ: "+key))
+	log.Println(clr.Sprint("CACHE READ: " + key))
 }
 
 func CacheEvict(key string) {
 	clr := color.New(color.FgRed, color.Bold)
-	log.Printf("%v\n", clr.Sprint("CACHE EVICT: "+key))
+	log.Println(clr.Sprint("CACHE EVICT: " + key))
+}
+
+func CacheBust(key string) {
+	clr := color.New(color.FgRed, color.Bold)
+	log.Println(clr.Sprint("CACHE BUST: " + key))
 }
 
 func CacheSkip(key string) {
 	clr := color.New(color.FgYellow, color.Bold)
-	log.Printf("%v\n", clr.Sprint("CACHE SKIP: "+key))
+	log.Println(clr.Sprint("CACHE SKIP: " + key))
 }
 
 func HiMom(conf *config.Config, port string) {
