@@ -8,6 +8,7 @@ import (
 	"github.com/NormalReedus/cache-me-ousside/internal/utils"
 )
 
+// To use partial memory units, use whole units of lower size instead (e.g. 1.5kb == 1536bytes)
 func New(cap uint64) *LRUCache {
 	cache := &LRUCache{
 		capacity: int(cap),

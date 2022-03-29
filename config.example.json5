@@ -5,13 +5,13 @@
   "cache":  [ "/posts", "/posts/:id", "/albums", "/users", "/todos" ], // Only GET requests supported for now
   "bust": {
     "POST": {
-      "/posts": [ "/posts", "/posts/count" ]
+      "/posts": [ "^/posts", "^/posts/count" ]
     },
     "PUT": {
-      "/posts/:slug": [ "/posts", "/posts/:id" ]
+      "/posts/:slug": [ "^/posts", "^/posts/:id" ]
     },
     "DELETE": {
-      "/posts/:id": [ "/posts", "/posts/:id" ]
+      "/posts/:id": [ "^/posts", "^/posts/:id" ]
     },
   }
 }

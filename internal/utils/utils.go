@@ -24,6 +24,12 @@ func (set Set[T]) Remove(elem T) {
 	delete(set, elem)
 }
 
+// Actually not needed for this specific project
+func (set Set[T]) Has(elem T) bool {
+	_, ok := set[elem]
+	return ok
+}
+
 func (set Set[T]) Elements() []T {
 	elements := make([]T, 0, len(set))
 	for k := range set {
