@@ -17,9 +17,9 @@ func main() {
 
 	conf := config.Load(configPath)
 
-	lru := cache.New(conf.Capacity)
+	dataCache := cache.New(conf.Capacity)
 
-	router.Start(conf, port, lru)
+	router.Start(conf, port, dataCache)
 }
 
 func parseArgs() (string, string) {

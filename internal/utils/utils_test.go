@@ -34,12 +34,16 @@ func TestToBytes(t *testing.T) {
 	}
 }
 
-func TestSet(t *testing.T) {
+func TestSetInitEmpty(t *testing.T) {
 	set := make(Set[string])
 
 	if len(set) != 0 {
 		t.Errorf("Set should be initialized empty, but has %d elements", len(set))
 	}
+}
+
+func TestSetAddAndHas(t *testing.T) {
+	set := make(Set[string])
 
 	set.Add("a")
 	if len(set) != 1 {
@@ -51,15 +55,24 @@ func TestSet(t *testing.T) {
 	if set.Has("b") == true {
 		t.Errorf("set.Has() should return false when the set does not include the given element")
 	}
+}
 
-	set.Add("b")
+func TestSetRemove(t *testing.T) {
+	set := make(Set[string])
+
+	set.Add("a")
 	set.Remove("a")
 	if set.Has("a") == true {
 		t.Errorf("set.Remove() should remove the given element")
 	}
+}
 
-	set.Add("c")
-	if sliceEqual(set.Elements(), []string{"c", "b"}) == false {
+func TestSetElements(t *testing.T) {
+	set := make(Set[string])
+
+	set.Add("a")
+	set.Add("b")
+	if sliceEqual(set.Elements(), []string{"a", "b"}) == false {
 		t.Errorf("set.Elements() should return the elements in the set in the order they were added, but returned %v", set.Elements())
 	}
 }

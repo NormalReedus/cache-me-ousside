@@ -28,7 +28,7 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	// Any non-cache / non-cache-busting requests should just proxy directly to the original API
 	app.Use("*", createProxyHandler(conf.ApiUrl)) // default behavior
 
-	logger.HiMom(conf, port)
+	logger.HiMom(conf.ApiUrl, port)
 
 	log.Fatal(app.Listen(fmt.Sprintf("localhost:%v", port)))
 }

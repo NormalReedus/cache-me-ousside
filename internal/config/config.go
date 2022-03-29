@@ -2,25 +2,24 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/flynn/json5"
 )
 
 func Load(configPath string) *Config {
 	jsonFile, err := os.Open(configPath)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	defer jsonFile.Close()
 
 	jsonByteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	var config = &Config{}
@@ -62,7 +61,7 @@ func (conf *Config) trimTrailingSlash() {
 func (conf Config) String() string {
 	confJSON, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
-		fmt.Println("there was an issue printing the configuration")
+		logger.Warn("there was an issue printing the configuration")
 	}
 	return string(confJSON)
 }
