@@ -1,0 +1,16 @@
+{
+  "capacity": 5,
+  "capacityUnit": "",
+  "apiUrl": "https://jsonplaceholder.typicode.com/",
+  "bust": {
+    "POST": {
+      "/posts": [ "^/posts", "^/posts/count" ]
+    },
+    "PUT": {
+      "/posts/:slug": [ "^/posts", "^/posts/:id" ]
+    },
+    "DELETE": {
+      "/posts/:id": [ "^/posts", "^/posts/:id" ]
+    },
+  }
+}

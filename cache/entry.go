@@ -48,8 +48,5 @@ func (entry *Entry) setNext(newEntry *Entry) *Entry {
 }
 
 func (entry *Entry) unmarshalData() CacheData {
-	var data CacheData
-	json.Unmarshal(entry.data, &data)
-
-	return data
+	return NewCacheDataFromJSON(entry.data)
 }

@@ -10,6 +10,10 @@ import (
 
 // To use partial memory units, use whole units of lower size instead (e.g. 1.5kb == 1536bytes)
 func New(cap uint64) *LRUCache {
+	if cap == 0 {
+		logger.Panic(fmt.Errorf("cache capacity must be greater than 0"))
+	}
+
 	cache := &LRUCache{
 		capacity: int(cap),
 		entries:  make(map[string]*Entry),
@@ -60,7 +64,7 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	// You should never set something with a key that already exists
 	//... since the cached data should have been returned instead in that case
 	if _, exists := cache.entries[key]; exists {
-		logger.Error(fmt.Errorf("setting the key: %v in the cache should not be done, since that key already exists", key))
+		logger.Warn(fmt.Sprintf("setting the key: %v in the cache should not be done, since that key already exists", key))
 		return
 	}
 
@@ -121,12 +125,20 @@ func (cache *LRUCache) Bust(keys ...string) {
 	}
 }
 
-func (cache *LRUCache) Match(pattern *regexp.Regexp) []string {
-	keys := make(utils.Set[string])
+func (cache *LRUCache) Match(patterns []string) []string {
+	keys := make(utils.Set[string]) // use a set so we don't duplicate keys
 
-	for key := range cache.entries {
-		if pattern.MatchString(key) {
-			keys.Add(key)
+	for _, pattern := range patterns {
+		patternExp, err := regexp.Compile(pattern)
+		if err != nil {
+			logger.Error(fmt.Errorf("there was an error finding cache entries with pattern: " + pattern))
+			continue
+		}
+
+		for key := range cache.entries {
+			if patternExp.MatchString(key) {
+				keys.Add(key)
+			}
 		}
 	}
 
@@ -172,8 +184,14 @@ func (cache *LRUCache) moveToMRU(entry *Entry) {
 	if entry == nil || entry == cache.mru {
 		return
 	}
+	if cache.lru == entry {
+		cache.lru = entry.next
+	}
+
+	cache.mru = entry
 
 	cache.mru.setNext(entry)
+
 }
 
 // If there are no lru or mru, use this to set both to entry

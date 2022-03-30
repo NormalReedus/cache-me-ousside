@@ -6,11 +6,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func NewCacheDataFromJSON(jsonData []byte) *CacheData {
+// Used when reading data (headers and body) from the cache
+func NewCacheDataFromJSON(jsonData []byte) CacheData {
 	var data CacheData
 	json.Unmarshal(jsonData, &data)
 
-	return &data
+	return data
 }
 
 type CacheData struct {

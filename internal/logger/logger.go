@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	clrInfo := color.New(color.FgBlue, color.Bold)
+	clrInfo := color.New(color.Bold)
 	infoLog = log.New(os.Stdout, clrInfo.Sprint("ℹ️ INFO - "), log.Ldate|log.Ltime|log.Lmsgprefix)
 
 	clrWarn := color.New(color.FgYellow, color.Bold)
@@ -56,9 +56,17 @@ func Warn(msg string) {
 	warningLog.Println(msg)
 }
 
-func Fatal(err error) {
-	errorLog.Fatalln(err)
+func Error(err error) {
+	errorLog.Println(err)
 }
+
+func Panic(err error) {
+	errorLog.Panicln(err)
+}
+
+// func Fatal(err error) {
+// 	errorLog.Fatalln(err)
+// }
 
 func HiMom(apiUrl string, port string) {
 	cacheColor := color.New(color.FgBlue, color.Bold)

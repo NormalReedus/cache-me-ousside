@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -13,18 +14,21 @@ import (
 func Load(configPath string) *Config {
 	jsonFile, err := os.Open(configPath)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Panic(err)
 	}
 	defer jsonFile.Close()
 
 	jsonByteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Panic(err)
 	}
 
 	var config = &Config{}
-
 	json5.Unmarshal(jsonByteValue, &config)
+
+	if err := config.validateRequiredProps(); err != nil {
+		logger.Panic(err)
+	}
 
 	config.trimTrailingSlash()
 
@@ -32,10 +36,10 @@ func Load(configPath string) *Config {
 }
 
 type Config struct {
-	Capacity     uint64   `json:"capacity"`
+	Capacity     uint64   `json:"capacity"`     // required
 	CapacityUnit string   `json:"capacityUnit"` // Used if you want memory based cache limit
-	ApiUrl       string   `json:"apiUrl"`
-	Cache        []string `json:"cache"`
+	ApiUrl       string   `json:"apiUrl"`       // required
+	Cache        []string `json:"cache"`        // required
 	BustMap      bustMap  `json:"bust"`
 }
 
@@ -56,6 +60,23 @@ type Config struct {
 
 func (conf *Config) trimTrailingSlash() {
 	conf.ApiUrl = strings.TrimSuffix(conf.ApiUrl, "/")
+}
+
+func (conf *Config) validateRequiredProps() error {
+	if conf.Capacity == 0 {
+		return fmt.Errorf("missing required property: capacity")
+	}
+
+	if conf.ApiUrl == "" {
+		return fmt.Errorf("missing required property: apiUrl")
+	}
+
+	// TODO: edit this when cache changes to cachemap
+	if conf.Cache == nil || len(conf.Cache) == 0 {
+		return fmt.Errorf("missing required property: cacheMap")
+	}
+
+	return nil
 }
 
 func (conf Config) String() string {
