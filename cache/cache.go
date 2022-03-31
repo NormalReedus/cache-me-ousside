@@ -31,6 +31,7 @@ type LRUCache struct {
 	lru      *Entry
 }
 
+// NOTE: Does not always return keys in the order they were added.
 func (cache *LRUCache) CachedEndpoints() []string {
 	keys := make([]string, 0, len(cache.entries))
 	for k := range cache.entries {
@@ -180,18 +181,19 @@ func (cache *LRUCache) evict() *Entry {
 
 // Must be used on existing entry to move it to head position
 func (cache *LRUCache) moveToMRU(entry *Entry) {
-	// If this entry is already head, don't do anything
+	// If this entry is already head (or only entry), don't do anything
 	if entry == nil || entry == cache.mru {
 		return
 	}
+
 	if cache.lru == entry {
 		cache.lru = entry.next
+		cache.lru.prev = nil
 	}
-
-	cache.mru = entry
 
 	cache.mru.setNext(entry)
 
+	cache.mru = entry
 }
 
 // If there are no lru or mru, use this to set both to entry

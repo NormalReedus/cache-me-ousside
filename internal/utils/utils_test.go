@@ -28,6 +28,7 @@ func TestToBytes(t *testing.T) {
 
 	for _, c := range testCases {
 		bytes := ToBytes(c.size, c.unit)
+
 		if bytes != c.expected {
 			t.Errorf("Expected ToBytes(%d, %s) to return %d, it returned %d", c.size, c.unit, c.expected, bytes)
 		}

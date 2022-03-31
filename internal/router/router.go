@@ -1,15 +1,13 @@
 package router
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/config"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
+//TODO: tests for router https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf
 func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true, // has own HiMom message
@@ -30,7 +28,7 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 
 	logger.HiMom(conf.ApiUrl, port)
 
-	log.Fatal(app.Listen(fmt.Sprintf("localhost:%v", port)))
+	logger.Panic(app.Listen("localhost:" + port))
 }
 
 // Will loop through methods, endpoints, and patterns and set a middleware for each that removes cache entries when patterns are matched

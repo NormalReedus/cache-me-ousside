@@ -9,6 +9,7 @@ import (
 )
 
 //TODO: take a log file from config to output to if provided, otherwise use Stdout
+//TODO: write tests for log file (check for file existence and creation in testdata/ when used, remember to delete file again)
 
 var (
 	infoLog    *log.Logger

@@ -3,13 +3,14 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 )
 
 func newEntry(key string, data *CacheData) *Entry {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		log.Println(fmt.Errorf("there was an creating the entry: %v", key))
+		logger.Error(fmt.Errorf("there was an error creating the entry: %s", key))
 		return nil
 	}
 

@@ -10,7 +10,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-const DEFAULT_CONFIG_PATH = "./cache-config.json5"
+const DEFAULT_CONFIG_PATH = "./cache.config.json5"
 
 func main() {
 	var configPath, port string = parseArgs()
