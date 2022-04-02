@@ -5,21 +5,32 @@ import (
 	"os"
 
 	"github.com/NormalReedus/cache-me-ousside/cache"
+	"github.com/NormalReedus/cache-me-ousside/internal/cli"
 	"github.com/NormalReedus/cache-me-ousside/internal/config"
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/NormalReedus/cache-me-ousside/internal/router"
 	flag "github.com/spf13/pflag"
 )
 
-const DEFAULT_CONFIG_PATH = "./cache.config.json5"
-
 func main() {
-	var configPath, port string = parseArgs()
+	app := cli.Setup()
 
+	err := app.Run(os.Args)
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	// var configPath, port string = parseArgs()
+
+}
+
+func run(configPath string, port string) {
 	conf := config.Load(configPath)
 
 	dataCache := cache.New(conf.Capacity)
 
 	router.Start(conf, port, dataCache)
+
 }
 
 func parseArgs() (string, string) {

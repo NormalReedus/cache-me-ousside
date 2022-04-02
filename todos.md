@@ -1,3 +1,4 @@
+* Lav CLI hvor config er optional hvis man hellere vil give alt som options inline
 * Testing
   * Tests til routeren: https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf
   * Se om andre tests kan omskrives til at bruge assert-pakken (ligesom i linket)

@@ -7,10 +7,13 @@ require (
 	github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
 	github.com/gofiber/fiber/v2 v2.29.0
 	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.7.1
+	github.com/urfave/cli/v2 v2.4.0
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
@@ -18,7 +21,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
-	github.com/stretchr/testify v1.7.1 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.34.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
