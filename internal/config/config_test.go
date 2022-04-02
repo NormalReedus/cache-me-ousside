@@ -2,50 +2,46 @@ package config
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Make sure all props are set on the config object properlu
 func TestLoadProps(t *testing.T) {
-	config := Load("testdata/test.config.json5")
+	assert := assert.New(t)
 
-	if config.Capacity == 0 {
-		t.Error("Expected config.Capacity to not be 0 when given a valid config file")
-	}
+	configPath := "testdata/test.config.json5"
 
-	if config.ApiUrl == "" {
-		t.Error("Expected config.ApiUrl to not be empty when given a valid config file")
-	}
+	assert.FileExists(configPath, "Expected test configuration file to exist for test to work")
+
+	config := Load(configPath)
+
+	assert.NotZero(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a non-zero value")
+	assert.Positive(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a positive number")
+
+	assert.NotZero(config.ApiUrl, "Expected required prop config.ApiUrl to be loaded correctly as a non-zero value")
 
 	// TODO: change to be a map of []string with GET and HEAD (and more?)
-	if len(config.Cache) == 0 {
-		t.Error("Expected config.Cache to not be empty when given a valid config file")
-	}
+	assert.NotEmpty(config.Cache, "Expected config.Cache to not be empty when given a valid config file")
 
-	if len(config.BustMap) == 0 {
-		t.Error("Expected config.BustMap to not be empty when given a valid config file")
-	}
-	if len(config.BustMap["POST"]["/posts"]) == 0 {
-		t.Error("Expected config.BustMap's POST /posts endpoint to not be empty when given a valid config file")
-	}
-	if len(config.BustMap["PUT"]["/posts/:slug"]) == 0 {
-		t.Error("Expected config.BustMap's PUT /posts/:slug endpoint to not be empty when given a valid config file")
-	}
-	if len(config.BustMap["DELETE"]["/posts/:id"]) == 0 {
-		t.Error("Expected config.BustMap's DELETE /posts/:id endpoint to not be empty when given a valid config file")
-	}
+	assert.NotEmpty(config.BustMap, "Expected config.BustMap to not be empty when given a valid config file")
+
+	assert.NotEmpty(config.BustMap["POST"]["/posts"], "Expected config.BustMap's POST /posts endpoint to not be empty when given a valid config file")
+
+	assert.NotEmpty(config.BustMap["PUT"]["/posts/:slug"], "Expected config.BustMap's PUT /posts/:slug endpoint to not be empty when given a valid config file")
+
+	assert.NotEmpty(config.BustMap["DELETE"]["/posts/:id"], "Expected config.BustMap's DELETE /posts/:id endpoint to not be empty when given a valid config file")
 }
 
 func TestBadPathPanic(t *testing.T) {
-	defer func() { recover() }()
-
 	configPath := "testdata/does.not.exist.json5"
 
-	Load(configPath)
+	assert.NoFileExists(t, configPath, "Expected test configuration file to not exist for test to work")
 
-	t.Errorf("Expected config.Load to panic if the config file: %s doesn't exist", configPath)
+	assert.Panics(t, func() { Load(configPath) }, "Expected config.Load to panic when the config file does not exist")
 }
 
-// TODO: edit this when more props are added to config
+// TODO: edit this when more required props are added to config
 func TestRequiredProps(t *testing.T) {
 	missingProps := []string{
 		"capacity",
@@ -54,20 +50,20 @@ func TestRequiredProps(t *testing.T) {
 	}
 
 	for _, prop := range missingProps {
-		defer func() { recover() }()
-
 		configPath := "testdata/missing." + prop + ".json5"
 
-		Load(configPath)
+		assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-		t.Errorf("Expected config.Load to panic when the file: %s is missing the required prop: %s", configPath, prop)
+		assert.Panics(t, func() { Load(configPath) }, "Expected config.Load to panic when the file: %s is missing the required prop: %s", configPath, prop)
 	}
 }
 
 func TestTrimTrailingSlash(t *testing.T) {
-	config := Load("testdata/test.config.json5")
+	configPath := "testdata/test.config.json5"
 
-	if config.ApiUrl[:len(config.ApiUrl)-1] == "/" {
-		t.Error("Expected config.Load to remove trailing slashes from the apiUrl")
-	}
+	assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
+
+	config := Load(configPath)
+
+	assert.Equal(t, config.ApiUrl, "https://jsonplaceholder.typicode.com", "Expected config.Load to remove trailing slashes from the apiUrl")
 }

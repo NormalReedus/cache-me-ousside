@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"fmt"
 	"runtime"
 	"strings"
+
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 )
 
 //* SET
@@ -52,19 +55,23 @@ func MemUsage() uint64 {
 
 // Converts kb, mb, gb, tb to bytes.
 // If the unit is not set, it will return the size passed into the function as if they are already in bytes.
-func ToBytes(size uint64, unit string) uint64 {
+func ToBytes(size uint64, unit string) (uint64, error) {
 	unit = strings.ToLower(unit)
 
 	switch unit {
 	case "kb":
-		return size << 10
+		return size << 10, nil
 	case "mb":
-		return size << 20
+		return size << 20, nil
 	case "gb":
-		return size << 30
+		return size << 30, nil
 	case "tb":
-		return size << 40
+		return size << 40, nil
 	default:
-		return size
+		err := fmt.Errorf("unknown unit: %s", unit)
+
+		logger.Error(err)
+
+		return 0, err
 	}
 }

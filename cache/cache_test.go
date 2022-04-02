@@ -1,11 +1,12 @@
 package cache
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-var testData CacheData = CacheData{
+var testData = CacheData{
 	Headers: map[string]string{
 		"Content-Type": "application/json",
 		"X-Test":       "hi-mom",
@@ -16,9 +17,7 @@ var testData CacheData = CacheData{
 func TestRequiredCapacity(t *testing.T) {
 	defer func() { recover() }()
 
-	New(0)
-
-	t.Error("Expected cache.New to panic if the capacity is 0")
+	assert.Panics(t, func() { New(0) }, "Expected cache.New to panic if the capacity is 0")
 }
 
 func TestSetEntry(t *testing.T) {
@@ -74,13 +73,9 @@ func TestGetEntry(t *testing.T) {
 	}
 	sanityCheck(t, cache, expectedKeys)
 
-	if data == nil {
-		t.Error("Expected cache.Get to return the entry set with cache.Set")
-	}
+	assert.NotNil(t, data, "Expected cache.Get to return the entry set with cache.Set")
 
-	if !reflect.DeepEqual(*data, testData) {
-		t.Error("Expected cache.Get to return the exact data that was set with cache.Set")
-	}
+	assert.Equal(t, data, &testData, "Expected cache.Get to return the exact data that was set with cache.Set")
 }
 
 func TestGetMissingEntry(t *testing.T) {
@@ -96,9 +91,7 @@ func TestGetMissingEntry(t *testing.T) {
 	}
 	sanityCheck(t, cache, expectedKeys)
 
-	if data != nil {
-		t.Errorf("Expected cache.Get to return nil when the entry does not exist, but returned: %+v", data)
-	}
+	assert.Nil(t, data, "Expected cache.Get to return nil when the entry does not exist, but returned: %+v", data)
 }
 
 func TestEvict(t *testing.T) {
@@ -116,10 +109,9 @@ func TestEvict(t *testing.T) {
 	}
 	sanityCheck(t, cache, expectedKeys)
 
-	size := cache.Size() // sanity check validates that this is also length of list, not just entries
-	if size != 2 {
-		t.Errorf("Expected cache size to not go above 2 when capacity is 2, but it is: %d", size)
-	}
+	size := cache.Size() // sanity check validates that Size() is also length of list, not just entries
+
+	assert.Equal(t, size, 2, "Expected cache size to not go above 2 when capacity is 2, but it is: %d", size)
 
 	expectedKeys = []string{
 		"/test2",
@@ -147,11 +139,20 @@ func TestMatch(t *testing.T) {
 	}
 	sanityCheck(t, cache, expectedKeys)
 
-	matches := cache.Match([]string{"^/test[1-2]", "^/posts/.+"})
-	// matches are not something on the cache, so we can't use sanityCheck with expectedKeys to validate
-	if !reflect.DeepEqual(matches, []string{"/test1", "/test2", "/posts/4", "/posts/5"}) {
-		t.Errorf("Expected cache.Match to return 4 matches, but it returned: %v", matches)
+	patterns := []string{
+		"^/test[1-2]",
+		"^/posts/.+",
 	}
+	expectedMatches := []string{
+		"/test1",
+		"/test2",
+		"/posts/4",
+		"/posts/5",
+	}
+
+	matches := cache.Match(patterns)
+	// matches are not something on the cache, so we can't use sanityCheck with expectedKeys to validate
+	assert.ElementsMatch(t, expectedMatches, matches, "Expected cache.Match to return the the keys %v, but returned %v", expectedMatches, matches)
 }
 
 func TestBust(t *testing.T) {
@@ -200,118 +201,77 @@ func sanityCheck(t *testing.T, cache *LRUCache, expectedKeys []string) {
 // Also makes sure lengths of both map and list are the same.
 func assertEntriesMatch(t *testing.T, cache *LRUCache) {
 	t.Helper()
+	assert := assert.New(t)
 
 	// Get all keys from list so we can compare them with map keys
-	listKeys := make([]string, 0, len(cache.entries)) // init slice same capacity as map, since we expect those to match
-	current := cache.lru
-	for {
-		if current == nil {
-			break
-		}
-
-		listKeys = append(listKeys, current.key)
-		current = current.next
-	}
+	listKeys := listKeys(cache)
 
 	// Lengths should be the same
 	keysLen := len(cache.entries)
 	listLen := len(listKeys)
-	if keysLen != listLen {
-		t.Errorf("Expected cache.entries to have same number of entries as the linked list, but the list has %d entries, and cache.entries has %d entries", listLen, keysLen)
-	}
+
+	assert.Equal(keysLen, listLen, "Expected cache.entries to have same number of entries as the linked list, but the list has %d entries, and cache.entries has %d entries", listLen, keysLen)
 
 	// All keys should be the same, so we check from both map and list to see which are missing
-	for _, key := range listKeys {
-		if _, ok := cache.entries[key]; !ok {
-			t.Errorf("Expected cache.entries to have entry for '%s', but it only exists in the linked list", key)
-		}
-	}
-
-	for key := range cache.entries {
-		if !elemInSlice(key, &listKeys) {
-			t.Errorf("Expected linked list to have entry for '%s', but it only exists in cache.entries", key)
-		}
-	}
+	assert.ElementsMatch(listKeys, cache.CachedEndpoints(), "Expected cache.entries to have the same keys as the linked list, but the list has %v, and cache.entries has %v", listKeys, cache.CachedEndpoints())
 }
 
 // Make sure that MRU and LRU prev / next pointers are set correctly.
 // This includes cases when there are 0 entries, 1 entry, 2 entries and more than 2 entries.
 func assertListEnds(t *testing.T, cache *LRUCache, expectedKeys []string) {
 	t.Helper()
+	assert := assert.New(t)
 
 	listLen := listLength(cache)
 
 	// 0 entries
 	if listLen == 0 {
-		if cache.lru != nil {
-			t.Error("Expected cache.lru to be nil when there are no entries in cache, but it is not")
-		}
+		assert.Nil(cache.lru, "Expected cache.lru to be nil when there are no entries in cache, but it is not")
 
-		if cache.mru != nil {
-			t.Error("Expected cache.mru to be nil when there are no entries in cache, but it is not")
-		}
+		assert.Nil(cache.mru, "Expected cache.mru to be nil when there are no entries in cache, but it is not")
 
 		return
 	}
 
 	// Make sure LRU and MRU are set to the first and last expected keys
-	if cache.lru.key != expectedKeys[0] {
-		t.Errorf("Expected cache.lru to be set to the first entry in the list, but it is set to '%s', where '%s' was expected", cache.lru.key, expectedKeys[0])
-	}
-	if cache.mru.key != expectedKeys[len(expectedKeys)-1] {
-		t.Errorf("Expected cache.mru to be set to the last entry in the list, but it is set to '%s', where '%s' was expected", cache.mru.key, expectedKeys[len(expectedKeys)-1])
-	}
+	assert.Equal(expectedKeys[0], cache.lru.key, "Expected cache.lru to be set to the first entry in the list, but it is set to '%s', where '%s' was expected", cache.lru.key, expectedKeys[0])
+
+	assert.Equal(expectedKeys[len(expectedKeys)-1], cache.mru.key, "Expected cache.mru to be set to the last entry in the list, but it is set to '%s', where '%s' was expected", cache.mru.key, expectedKeys[len(expectedKeys)-1])
 
 	// LRU should always be the first entry
-	if cache.lru.prev != nil {
-		t.Errorf("Expected cache.lru.prev to always be nil, but it is: %+v", cache.lru.prev)
-	}
+	assert.Nil(cache.lru.prev, "Expected cache.lru.prev to always be nil, but it is: %+v", cache.lru.prev)
 
 	// MRU should always be the last entry
-	if cache.mru.next != nil {
-		t.Errorf("Expected cache.mru.next to always be nil, but it is: %+v", cache.mru.next)
-	}
+	assert.Nil(cache.mru.next, "Expected cache.mru.next to always be nil, but it is: %+v", cache.mru.next)
 
 	// 1 entry
 	if listLen == 1 {
-		if cache.lru != cache.mru {
-			t.Error("Expected cache.lru and cache.mru to be the same entry when there is only one entry, but they are not")
-		}
+		assert.Same(cache.lru, cache.mru, "Expected cache.lru and cache.mru to be the same entry when there is only one entry, but they are not")
 
 		// lru.next can only be nil if there is only one entry
-		if cache.lru.next != nil {
-			t.Error("Expected cache.lru.next to be nil when it is the only entry, but it is not")
-		}
+		assert.Nil(cache.lru.next, "Expected cache.lru.next to be nil when it is the only entry, but it is: %+v", cache.lru.next)
 
 		// mru.prev can only be nil if there is only one entry
-		if cache.mru.prev != nil {
-			t.Error("Expected cache.mru.prev to be nil when it is the only entry, but it is not")
-		}
+		assert.Nil(cache.mru.next, "Expected cache.mru.next to be nil when it is the only entry, but it is: %+v", cache.mru.next)
 
 		return
 	}
 
 	// 2 entries
 	if listLen == 2 {
-		if cache.lru.next != cache.mru {
-			t.Error("Expected cache.lru.next to be the same entry as cache.mru when they are the only two entries, but they are not")
-		}
+		assert.Same(cache.lru.next, cache.mru, "Expected cache.lru.next to be the same entry as cache.mru when they are the only two entries, but they are not")
 
-		if cache.mru.prev != cache.lru {
-			t.Error("Expected cache.mru.prev to be the same entry as cache.lru when they are the only two entries, but they are not")
-		}
+		assert.Same(cache.mru.prev, cache.lru, "Expected cache.mru.prev to be the same entry as cache.lru when they are the only two entries, but they are not")
+
 		return
 	}
 
 	// lru and mru cannot point to each other unless there are only 2 entries
 	if listLen > 2 {
-		if cache.lru.next == cache.mru {
-			t.Error("Expected cache.lru.next to not be the same entry as cache.mru when there are more than 2 entries, but they are the same entry")
-		}
+		assert.NotSame(cache.lru.next, cache.mru, "Expected cache.lru.next to not be the same entry as cache.mru when there are more than 2 entries, but they are the same entry")
 
-		if cache.mru.prev == cache.lru {
-			t.Error("Expected cache.mru.prev to not be the same entry as cache.lru when there are more than 2 entries, but they are the same entry")
-		}
+		assert.NotSame(cache.mru.prev, cache.lru, "Expected cache.mru.prev to not be the same entry as cache.lru when there are more than 2 entries, but they are the same entry")
+
 		return
 	}
 }
@@ -319,57 +279,24 @@ func assertListEnds(t *testing.T, cache *LRUCache, expectedKeys []string) {
 // Also tests MRU and LRU are set correctly
 func assertListOrder(t *testing.T, cache *LRUCache, expectedKeys []string) {
 	t.Helper()
+	assert := assert.New(t)
 
-	current := cache.lru
+	// Get all keys from list so we can compare them with expected order
+	listKeys := listKeys(cache)
 
-	for entryNum, key := range expectedKeys {
-		// Make sure that the expected keys array is not longer than the list
-		if current == nil {
-			t.Fatal("Expected list to have the same number of entries as the expected keys, but expectedKeys is longer")
-			// return
-		}
+	assert.Equal(len(expectedKeys), len(listKeys), "Expected list to have the same number of entries as the expected keys, got %d, but expected %d", len(listKeys), len(expectedKeys))
 
-		// Make sure all entry keys are in the list
-		if current.key != key {
-			if entryNum == 0 {
-				t.Errorf("Expected cache.lru to be '%s', but it is '%s'", key, current.key)
-			} else if entryNum == len(expectedKeys)-1 {
-				t.Errorf("Expected cache.mru to be '%s', but it is '%s'", key, current.key)
-			} else {
-				t.Errorf("Expected entry %d to be '%s', but it is '%s'", entryNum, key, current.key)
-			}
-		}
-		current = current.next
-
-		if entryNum == len(expectedKeys)-1 && current != nil {
-			t.Fatal("Expected list to have as many entries as the expectedKeys, but list is longer")
-			// return
-		}
-	}
+	assert.Equal(expectedKeys, listKeys, "Expected list to have the same keys as the expected keys, got %v, but expected %v", listKeys, expectedKeys)
 }
 
 // Make sure that cache entry map has all expected entries and nothing else
 func assertKeys(t *testing.T, cache *LRUCache, expectedKeys []string) {
 	t.Helper()
+	assert := assert.New(t)
 
-	if len(cache.entries) != len(expectedKeys) {
-		t.Errorf("Expected cache.entries to have %d entries, but it has %d", len(expectedKeys), len(cache.entries))
-	}
+	assert.Equal(len(expectedKeys), len(cache.entries), "Expected cache.entries to have %d entries, but it has %d", len(expectedKeys), len(cache.entries))
 
-	for _, key := range expectedKeys {
-		if _, ok := cache.entries[key]; !ok {
-			t.Errorf("Expected cache.entries to have entry for '%s', but it does not", key)
-		}
-	}
-}
-
-func elemInSlice[T comparable](elem T, list *[]T) bool {
-	for _, b := range *list {
-		if b == elem {
-			return true
-		}
-	}
-	return false
+	assert.ElementsMatch(expectedKeys, cache.CachedEndpoints(), "Expected cache to have entries for %v, but got %v", expectedKeys, cache.CachedEndpoints())
 }
 
 func listLength(cache *LRUCache) int {
@@ -378,4 +305,14 @@ func listLength(cache *LRUCache) int {
 		length++
 	}
 	return length
+}
+
+func listKeys(cache *LRUCache) []string {
+	keys := make([]string, 0, len(cache.entries))
+
+	for current := cache.lru; current != nil; current = current.next {
+		keys = append(keys, current.key)
+	}
+
+	return keys
 }

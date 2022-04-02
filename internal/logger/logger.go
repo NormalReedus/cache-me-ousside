@@ -70,12 +70,12 @@ func Panic(err error) {
 // }
 
 func HiMom(apiUrl string, port string) {
-	cacheColor := color.New(color.FgBlue, color.Bold)
-	urlColor := color.New(color.FgHiGreen, color.Underline)
+	urlClr := color.New(color.FgHiGreen, color.Underline)
+	cacheClr := color.New(color.FgBlue, color.Underline)
 
-	fmt.Print("Your ")
-	cacheColor.Print("LRU cache microservice ")
-	fmt.Printf("is being served on http://localhost:%v.\n", port)
-	fmt.Print("All requests will be proxied to ")
-	urlColor.Println(apiUrl + "\n")
+	fmt.Println()
+	fmt.Println("Your LRU cache microservice is caching requests to your proxied API.")
+	fmt.Println()
+	fmt.Println("Proxied API: " + urlClr.Sprint(apiUrl))
+	fmt.Println("Cache URL: " + cacheClr.Sprint("http://localhost:"+port))
 }
