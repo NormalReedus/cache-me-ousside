@@ -11,7 +11,10 @@ import (
 	"github.com/flynn/json5"
 )
 
-func Load(configPath string) *Config {
+var CACHEABLE_METHODS = [...]string{"GET", "HEAD"}
+var UNCACHEABLE_METHODS = [...]string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
+
+func LoadJSON(configPath string) *Config {
 	jsonFile, err := os.Open(configPath)
 	if err != nil {
 		logger.Panic(err)
@@ -26,11 +29,11 @@ func Load(configPath string) *Config {
 	var config = &Config{}
 	json5.Unmarshal(jsonByteValue, &config)
 
-	if err := config.validateRequiredProps(); err != nil {
-		logger.Panic(err)
-	}
+	// if err := config.validateRequiredProps(); err != nil {
+	// 	logger.Panic(err)
+	// }
 
-	config.trimTrailingSlash()
+	// config.trimTrailingSlash()
 
 	return config
 }
@@ -40,12 +43,12 @@ type Config struct {
 	CapacityUnit string   `json:"capacityUnit"` // Used if you want memory based cache limit
 	ApiUrl       string   `json:"apiUrl"`       // required
 	Cache        []string `json:"cache"`        // required
-	BustMap      bustMap  `json:"bust"`
+	Bust         BustMap  `json:"bust"`
 }
 
 // TODO: add support for caching HEAD requests as well
 // Also add support for any other methods that function like GET
-// This requires renaming conf.Cache to conf.CacheMap which works kinda like BustMap
+// This requires creating a type for conf.Cache that works like bustMap
 // and updating the middleware factory for caching
 
 // TODO: add memory based cache limit
@@ -58,11 +61,11 @@ type Config struct {
 // be checked with a bool on the config that is initialized in the factory function, so busting
 // knows whether to use memory or entries
 
-func (conf *Config) trimTrailingSlash() {
+func (conf *Config) TrimTrailingSlash() {
 	conf.ApiUrl = strings.TrimSuffix(conf.ApiUrl, "/")
 }
 
-func (conf *Config) validateRequiredProps() error {
+func (conf *Config) ValidateRequiredProps() error {
 	if conf.Capacity == 0 {
 		return fmt.Errorf("missing required property: capacity")
 	}
@@ -71,9 +74,9 @@ func (conf *Config) validateRequiredProps() error {
 		return fmt.Errorf("missing required property: apiUrl")
 	}
 
-	// TODO: edit this when cache changes to cachemap
+	// TODO: edit this when cache changes to a map of methods
 	if conf.Cache == nil || len(conf.Cache) == 0 {
-		return fmt.Errorf("missing required property: cacheMap")
+		return fmt.Errorf("missing required property: cache")
 	}
 
 	return nil
@@ -88,4 +91,4 @@ func (conf Config) String() string {
 }
 
 // Is a map of methods with maps of endpoints with slices of patterns to match to cache entries to bust.
-type bustMap map[string]map[string][]string
+type BustMap map[string]map[string][]string

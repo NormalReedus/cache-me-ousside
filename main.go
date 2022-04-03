@@ -5,15 +5,13 @@ import (
 	"os"
 
 	"github.com/NormalReedus/cache-me-ousside/cache"
-	"github.com/NormalReedus/cache-me-ousside/internal/cli"
 	"github.com/NormalReedus/cache-me-ousside/internal/config"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/NormalReedus/cache-me-ousside/internal/router"
-	flag "github.com/spf13/pflag"
 )
 
 func main() {
-	app := cli.Setup()
+	app := parseCli()
 
 	err := app.Run(os.Args)
 	if err != nil {
@@ -24,35 +22,32 @@ func main() {
 
 }
 
-func run(configPath string, port string) {
-	conf := config.Load(configPath)
-
+func run(conf *config.Config, port string) {
 	dataCache := cache.New(conf.Capacity)
 
 	router.Start(conf, port, dataCache)
-
 }
 
-func parseArgs() (string, string) {
-	helpPtr := flag.BoolP("help", "h", false, "Print help.")
-	portPtr := flag.StringP("port", "p", "3000", "The port to serve the service on.")
-	flag.Parse()
+// func parseArgs() (string, string) {
+// 	helpPtr := flag.BoolP("help", "h", false, "Print help.")
+// 	portPtr := flag.StringP("port", "p", "3000", "The port to serve the service on.")
+// 	flag.Parse()
 
-	if *helpPtr {
-		printHelp()
-		os.Exit(0)
-	}
+// 	if *helpPtr {
+// 		printHelp()
+// 		os.Exit(0)
+// 	}
 
-	// Grab config file path from first arg given through CLI
-	configPath := flag.Arg(0)
+// 	// Grab config file path from first arg given through CLI
+// 	configPath := flag.Arg(0)
 
-	// If no config path is given from CLI, use default
-	if configPath == "" {
-		configPath = DEFAULT_CONFIG_PATH
-	}
+// 	// If no config path is given from CLI, use default
+// 	if configPath == "" {
+// 		configPath = DEFAULT_CONFIG_PATH
+// 	}
 
-	return configPath, *portPtr
-}
+// 	return configPath, *portPtr
+// }
 
 func printHelp() {
 	fmt.Print("lru-cache-microservice is a reverse proxy for caching simple requests to a REST API. You only have to configure your API to trust this proxy for optimal conditions.\n\n")

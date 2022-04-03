@@ -24,13 +24,13 @@ func TestLoadProps(t *testing.T) {
 	// TODO: change to be a map of []string with GET and HEAD (and more?)
 	assert.NotEmpty(config.Cache, "Expected config.Cache to not be empty when given a valid config file")
 
-	assert.NotEmpty(config.BustMap, "Expected config.BustMap to not be empty when given a valid config file")
+	assert.NotEmpty(config.Bust, "Expected config.Bust to not be empty when given a valid config file")
 
-	assert.NotEmpty(config.BustMap["POST"]["/posts"], "Expected config.BustMap's POST /posts endpoint to not be empty when given a valid config file")
+	assert.NotEmpty(config.Bust["POST"]["/posts"], "Expected config.Bust's POST /posts endpoint to not be empty when given a valid config file")
 
-	assert.NotEmpty(config.BustMap["PUT"]["/posts/:slug"], "Expected config.BustMap's PUT /posts/:slug endpoint to not be empty when given a valid config file")
+	assert.NotEmpty(config.Bust["PUT"]["/posts/:slug"], "Expected config.Bust's PUT /posts/:slug endpoint to not be empty when given a valid config file")
 
-	assert.NotEmpty(config.BustMap["DELETE"]["/posts/:id"], "Expected config.BustMap's DELETE /posts/:id endpoint to not be empty when given a valid config file")
+	assert.NotEmpty(config.Bust["DELETE"]["/posts/:id"], "Expected config.Bust's DELETE /posts/:id endpoint to not be empty when given a valid config file")
 }
 
 func TestBadPathPanic(t *testing.T) {
@@ -46,7 +46,7 @@ func TestRequiredProps(t *testing.T) {
 	missingProps := []string{
 		"capacity",
 		"apiUrl",
-		"cacheMap", // TODO: create a version where the prop exists but there are empty slices etc
+		"cache", // TODO: create a version where the prop exists but there are empty slices etc
 	}
 
 	for _, prop := range missingProps {

@@ -16,6 +16,8 @@ func TestToBytes(t *testing.T) {
 	}
 
 	testCases := [...]toBytesArgs{
+		{size: 12345, unit: "b", expected: 12345},
+		{size: 6789, unit: "B", expected: 6789},
 		{size: 1, unit: "kb", expected: 1024},
 		{size: 4, unit: "KB", expected: 1024 * 4},
 		{size: 2, unit: "mb", expected: 2097152},
@@ -84,19 +86,3 @@ func TestSetElements(t *testing.T) {
 	assert.ElementsMatch(t, set.Elements(), []string{"a", "b"}, "Expected set.Elements to return the elements: [ \"a\", \"b\" ]")
 	assert.Len(t, set, 2, "Expected set to only include 2 elements")
 }
-
-// // sliceEqual tells whether a and b contain the same elements.
-// // A nil argument is equivalent to an empty slice.
-// func sliceEqual[T comparable](t *testing.T, a, b []T) bool {
-// 	t.Helper()
-
-// 	if len(a) != len(b) {
-// 		return false
-// 	}
-// 	for i, v := range a {
-// 		if v != b[i] {
-// 			return false
-// 		}
-// 	}
-// 	return true
-// }

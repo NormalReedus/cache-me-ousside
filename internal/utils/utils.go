@@ -59,6 +59,8 @@ func ToBytes(size uint64, unit string) (uint64, error) {
 	unit = strings.ToLower(unit)
 
 	switch unit {
+	case "b":
+		return size, nil
 	case "kb":
 		return size << 10, nil
 	case "mb":
@@ -68,7 +70,7 @@ func ToBytes(size uint64, unit string) (uint64, error) {
 	case "tb":
 		return size << 40, nil
 	default:
-		err := fmt.Errorf("unknown unit: %s", unit)
+		err := fmt.Errorf("unknown unit: \"%s\"", unit)
 
 		logger.Error(err)
 
