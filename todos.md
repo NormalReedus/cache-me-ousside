@@ -1,6 +1,6 @@
-* FIX at cli Destination flags ikke fungerer
-  * Skal nok bare droppe Destination og så lave en func, der kan populate Args med cli context, hvor man manuelt tager fat i alle individuelle flags
 * Testing
+  * Hvordan tester man om CLI laver korrekt config ud fra args, uden at den kører serveren?
+    * Eventuelt kan man selv definere en Action eller lignende, så man kan adskille det hele, dvs at man måske bare kan få CLI til at return en config og så manuelt starte serveren i main, i stedet for at CLI også kører serveren?
   * Tests til routeren: https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf
   * Se om andre tests kan omskrives til at bruge assert-pakken (ligesom i linket)
   * Se på code coverage om der er dele, der ikke bliver testet
@@ -18,3 +18,6 @@
 * Find ud af hvordan man manipulerer hostname, hvis man ikke vil bruge endnu en reverse proxy
 * Caching af HEAD og andre GET-lignende requests (se TODO i config.go)
 * Memorybaseret caching limit (se TODO i config.go)
+* Print konfigurationen af cachen når den kører
+* README
+  * Beskriv alle flags / config props + hvordan man laver multiple vals (f.eks. flere cache:GET hvor man skal gentage flaget)

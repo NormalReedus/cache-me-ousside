@@ -14,6 +14,7 @@ import (
 // TODO: https://github.com/urfave/cli/blob/master/docs/v2/manual.md#getting-started
 // set up with cli, making everything in config file optional
 type CLIArgs struct {
+	configPath   string
 	capacity     uint64
 	capacityUnit string
 	apiUrl       string
@@ -28,6 +29,9 @@ type CLIArgs struct {
 	bustOPTIONS  cli.StringSlice // first element is the path, rest are the patterns of entries to bust
 }
 
+func (a *CLIArgs) fromContext(c *cli.Context) {
+}
+
 func (a *CLIArgs) addToConfig(c *config.Config) {
 	if c == nil {
 		c = &config.Config{}
@@ -39,7 +43,6 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 	if a.capacityUnit != "" {
 		c.CapacityUnit = a.capacityUnit
 	}
-	fmt.Println("apiUrl:", a.apiUrl)
 	if a.apiUrl != "" {
 		c.ApiUrl = a.apiUrl
 	}
@@ -75,7 +78,7 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 }
 
 func parseCli() *cli.App {
-	args := CLIArgs{}
+	args := CLIArgs{} // holds the flags that should overwrite potential config file values
 
 	app := &cli.App{
 		Name:      "cache-me-ousside",
@@ -89,13 +92,20 @@ func parseCli() *cli.App {
 			},
 		},
 
-		Usage: "Sets up an LRU cache microservice that will proxy all your requests to a specified REST API and cache the responses.",
+		Usage:     "Sets up an LRU cache microservice that will proxy all your requests to a specified REST API and cache the responses.",
+		ArgsUsage: "first argument passed is an optional json5 config file path",
 
 		Flags: []cli.Flag{
+			&cli.PathFlag{
+				Destination: &args.configPath,
+				Name:        "config",
+				Aliases:     []string{"conf", "path"},
+				Usage:       "the `PATH` to a json5 config file specifying the cache settings (will be overwritten by command line flags)",
+			},
 			&cli.Uint64Flag{
 				Destination: &args.capacity,
 				Name:        "capacity",
-				Aliases:     []string{"c"},
+				Aliases:     []string{"cap"},
 				Usage:       "the `NUMBER` of entries to cache. If capacity-unit is specfied, this will instead be used as the amount of memory to use for the cache",
 			},
 			&cli.StringFlag{
@@ -113,80 +123,80 @@ func parseCli() *cli.App {
 			&cli.StringSliceFlag{
 				Destination: &args.cacheGET,
 				Name:        "cache:GET",
-				Aliases:     []string{"c:GET"},
+				Aliases:     []string{"c:GET", "c:get", "c:g"},
 				Usage:       "the list of `PATHS` to cache on GET requests",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.cacheHEAD,
 				Name:        "cache:HEAD",
-				Aliases:     []string{"c:HEAD"},
+				Aliases:     []string{"c:HEAD", "c:head", "c:h"},
 				Usage:       "the list of `PATHS` to cache on HEAD requests",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPOST,
 				Name:        "bust:POST",
-				Aliases:     []string{"b:POST"},
+				Aliases:     []string{"b:POST", "b:post"},
 				Usage:       "first element passed is the path on which a POST request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPUT,
 				Name:        "bust:PUT",
-				Aliases:     []string{"b:PUT"},
+				Aliases:     []string{"b:PUT", "b:put"},
 				Usage:       "first element passed is the path on which a PUT request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustDELETE,
 				Name:        "bust:DELETE",
-				Aliases:     []string{"b:DELETE"},
+				Aliases:     []string{"b:DELETE", "b:delete", "b:d"},
 				Usage:       "first element passed is the path on which a DELETE request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPATCH,
 				Name:        "bust:PATCH",
-				Aliases:     []string{"b:PATCH"},
+				Aliases:     []string{"b:PATCH", "b:patch"},
 				Usage:       "first element passed is the path on which a PATCH request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustTRACE,
 				Name:        "bust:TRACE",
-				Aliases:     []string{"b:TRACE"},
+				Aliases:     []string{"b:TRACE", "b:trace", "b:t"},
 				Usage:       "first element passed is the path on which a TRACE request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustCONNECT,
 				Name:        "bust:CONNECT",
-				Aliases:     []string{"b:CONNECT"},
+				Aliases:     []string{"b:CONNECT", "b:connect", "b:c"},
 				Usage:       "first element passed is the path on which a CONNECT request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustOPTIONS,
 				Name:        "bust:OPTIONS",
-				Aliases:     []string{"b:OPTIONS"},
+				Aliases:     []string{"b:OPTIONS", "b:options", "b:o"},
 				Usage:       "first element passed is the path on which an OPTIONS request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
 			},
 		},
 
+		// Do this when the app is run
 		Action: func(c *cli.Context) error {
-			var configPath string
+			//TODO: separate out and describe
 			var conf = &config.Config{}
 
 			if c.NArg() > 0 {
-				configPath = c.Args().Get(0)
+				logger.Panic(fmt.Errorf("no arguments should be passed. Did you mean to use --config?"))
 			}
 
-			if configPath != "" {
-				conf = config.LoadJSON(configPath)
+			if args.configPath != "" {
+				conf = config.LoadJSON(args.configPath)
 			}
 
 			args.addToConfig(conf)
-
-			fmt.Printf("%+v", conf)
 
 			if err := conf.ValidateRequiredProps(); err != nil {
 				logger.Panic(err)
 			}
 			conf.TrimTrailingSlash()
 
+			// Starts the server
 			run(conf, "3000")
 
 			return nil

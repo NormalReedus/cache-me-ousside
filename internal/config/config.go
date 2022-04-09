@@ -29,12 +29,6 @@ func LoadJSON(configPath string) *Config {
 	var config = &Config{}
 	json5.Unmarshal(jsonByteValue, &config)
 
-	// if err := config.validateRequiredProps(); err != nil {
-	// 	logger.Panic(err)
-	// }
-
-	// config.trimTrailingSlash()
-
 	return config
 }
 
@@ -83,6 +77,7 @@ func (conf *Config) ValidateRequiredProps() error {
 }
 
 func (conf Config) String() string {
+	// TODO: make this print in a non-json format to display configuration when server runs
 	confJSON, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		logger.Warn("there was an issue printing the configuration")

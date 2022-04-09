@@ -14,7 +14,7 @@ func TestLoadProps(t *testing.T) {
 
 	assert.FileExists(configPath, "Expected test configuration file to exist for test to work")
 
-	config := Load(configPath)
+	config := LoadJSON(configPath)
 
 	assert.NotZero(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a non-zero value")
 	assert.Positive(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a positive number")
@@ -38,7 +38,7 @@ func TestBadPathPanic(t *testing.T) {
 
 	assert.NoFileExists(t, configPath, "Expected test configuration file to not exist for test to work")
 
-	assert.Panics(t, func() { Load(configPath) }, "Expected config.Load to panic when the config file does not exist")
+	assert.Panics(t, func() { LoadJSON(configPath) }, "Expected config.LoadJSON to panic when the config file does not exist")
 }
 
 // TODO: edit this when more required props are added to config
@@ -54,7 +54,9 @@ func TestRequiredProps(t *testing.T) {
 
 		assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-		assert.Panics(t, func() { Load(configPath) }, "Expected config.Load to panic when the file: %s is missing the required prop: %s", configPath, prop)
+		conf := LoadJSON(configPath)
+
+		assert.Error(t, conf.ValidateRequiredProps(), "Expected config.ValidateRequiredProps return an error when the file: %s is missing the required prop: %s", configPath, prop)
 	}
 }
 
@@ -63,7 +65,9 @@ func TestTrimTrailingSlash(t *testing.T) {
 
 	assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-	config := Load(configPath)
+	conf := LoadJSON(configPath)
 
-	assert.Equal(t, config.ApiUrl, "https://jsonplaceholder.typicode.com", "Expected config.Load to remove trailing slashes from the apiUrl")
+	conf.TrimTrailingSlash()
+
+	assert.Equal(t, conf.ApiUrl, "https://jsonplaceholder.typicode.com", "Expected config.TrimTrailingSlash to remove trailing slashes from the api url prop, got: %s", conf.ApiUrl)
 }

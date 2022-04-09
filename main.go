@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/NormalReedus/cache-me-ousside/cache"
@@ -49,8 +48,8 @@ func run(conf *config.Config, port string) {
 // 	return configPath, *portPtr
 // }
 
-func printHelp() {
-	fmt.Print("lru-cache-microservice is a reverse proxy for caching simple requests to a REST API. You only have to configure your API to trust this proxy for optimal conditions.\n\n")
-	fmt.Println("When running lru-cache-microservice, you will need to supply the program with a configuration file (JSON/JSON5) that specifies which requests to cache, and when to bust the cache.")
-	fmt.Println("You can find detailed documentation on how to use lru-cache-microservice at https://github.com/NormalReedus/cache-me-ousside/blob/main/README.md.")
-}
+// func printHelp() {
+// 	fmt.Print("lru-cache-microservice is a reverse proxy for caching simple requests to a REST API. You only have to configure your API to trust this proxy for optimal conditions.\n\n")
+// 	fmt.Println("When running lru-cache-microservice, you will need to supply the program with a configuration file (JSON/JSON5) that specifies which requests to cache, and when to bust the cache.")
+// 	fmt.Println("You can find detailed documentation on how to use lru-cache-microservice at https://github.com/NormalReedus/cache-me-ousside/blob/main/README.md.")
+// }
