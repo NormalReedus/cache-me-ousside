@@ -32,6 +32,25 @@ func LoadJSON(configPath string) *Config {
 	return config
 }
 
+// Just has to initialize everything non-primitive so we don't assign to nil-maps
+func New() *Config {
+	bustMap := make(BustMap)
+	bustMap["POST"] = make(map[string][]string)
+	bustMap["PUT"] = make(map[string][]string)
+	bustMap["DELETE"] = make(map[string][]string)
+	bustMap["PATCH"] = make(map[string][]string)
+	bustMap["TRACE"] = make(map[string][]string)
+	bustMap["CONNECT"] = make(map[string][]string)
+	bustMap["OPTIONS"] = make(map[string][]string)
+
+	conf := &Config{
+		Cache: make([]string, 0),
+		Bust:  bustMap,
+	}
+
+	return conf
+}
+
 type Config struct {
 	Capacity     uint64   `json:"capacity"`     // required
 	CapacityUnit string   `json:"capacityUnit"` // Used if you want memory based cache limit

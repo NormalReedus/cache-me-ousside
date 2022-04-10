@@ -1,9 +1,7 @@
 * Testing
-  * Hvordan tester man om CLI laver korrekt config ud fra args, uden at den kører serveren?
-    * Eventuelt kan man selv definere en Action eller lignende, så man kan adskille det hele, dvs at man måske bare kan få CLI til at return en config og så manuelt starte serveren i main, i stedet for at CLI også kører serveren?
   * Tests til routeren: https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf
-  * Se om andre tests kan omskrives til at bruge assert-pakken (ligesom i linket)
   * Se på code coverage om der er dele, der ikke bliver testet
+  * Check alle tests om de har expected og actual i rigtig rækkefølge
 * Lav et config flag, der sætter default bust routes
   * For hvert cached endpoint skal de manipulerende metoder buste
   * Det kræver i hvert fald lister af ikke-manipulerende metoder (GET, HEAD etc) og manipulerende (DELETE, PUT, POST etc)

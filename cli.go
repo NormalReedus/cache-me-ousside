@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/NormalReedus/cache-me-ousside/internal/config"
@@ -29,12 +30,9 @@ type CLIArgs struct {
 	bustOPTIONS  cli.StringSlice // first element is the path, rest are the patterns of entries to bust
 }
 
-func (a *CLIArgs) fromContext(c *cli.Context) {
-}
-
 func (a *CLIArgs) addToConfig(c *config.Config) {
 	if c == nil {
-		c = &config.Config{}
+		c = config.New()
 	}
 
 	if a.capacity != 0 {
@@ -77,8 +75,9 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 	}
 }
 
-func parseCli() *cli.App {
+func createConfFromCli() *config.Config {
 	args := CLIArgs{} // holds the flags that should overwrite potential config file values
+	var conf = config.New()
 
 	app := &cli.App{
 		Name:      "cache-me-ousside",
@@ -176,13 +175,10 @@ func parseCli() *cli.App {
 			},
 		},
 
-		// Do this when the app is run
 		Action: func(c *cli.Context) error {
 			//TODO: separate out and describe
-			var conf = &config.Config{}
-
 			if c.NArg() > 0 {
-				logger.Panic(fmt.Errorf("no arguments should be passed. Did you mean to use --config?"))
+				logger.Panic(fmt.Errorf("no arguments should be passed. Did you mean pass a configuration file path with --config?"))
 			}
 
 			if args.configPath != "" {
@@ -196,12 +192,14 @@ func parseCli() *cli.App {
 			}
 			conf.TrimTrailingSlash()
 
-			// Starts the server
-			run(conf, "3000")
-
 			return nil
 		},
 	}
 
-	return app
+	err := app.Run(os.Args)
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	return conf
 }

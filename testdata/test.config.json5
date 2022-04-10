@@ -1,17 +1,29 @@
 {
-  "capacity": 10,
+  "capacity": 555,
   "capacityUnit": "mb",
   "apiUrl": "https://jsonplaceholder.typicode.com/",
-  "cache":  [ "/posts", "/posts/:id", "/albums", "/users", "/todos" ],
+  "cache":  [ "/posts", "/posts/:id" ],
   "bust": {
     "POST": {
-      "/posts": [ "^/posts", "^/posts/count" ]
+      "/posts": [ "^/posts.*" ]
     },
     "PUT": {
-      "/posts/:slug": [ "^/posts", "^/posts/:id" ]
+      "/posts/:slug": [ "^/posts.*" ]
     },
     "DELETE": {
-      "/posts/:id": [ "^/posts", "^/posts/:id" ]
+      "/posts/:slug": [ "^/posts.*" ]
+    },
+    "PATCH": {
+      "/posts/:slug": [ "^/posts.*" ]
+    },
+    "TRACE": {
+      "/posts/:slug": [ "^/posts.*" ]
+    },
+    "CONNECT": {
+      "/posts": [ "^/posts.*" ]
+    },
+    "OPTIONS": {
+      "/posts": [ "^/posts.*" ]
     },
   }
 }
