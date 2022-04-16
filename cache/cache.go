@@ -5,7 +5,6 @@ import (
 	"regexp"
 
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
-	"github.com/NormalReedus/cache-me-ousside/internal/utils"
 )
 
 // To use partial memory units, use whole units of lower size instead (e.g. 1.5kb == 1536bytes)
@@ -127,7 +126,7 @@ func (cache *LRUCache) Bust(keys ...string) {
 }
 
 func (cache *LRUCache) Match(patterns []string) []string {
-	keys := make(utils.Set[string]) // use a set so we don't duplicate keys
+	keys := make(Set[string]) // use a set so we don't duplicate keys
 
 	for _, pattern := range patterns {
 		patternExp, err := regexp.Compile(pattern)

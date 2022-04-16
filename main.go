@@ -10,7 +10,7 @@ import (
 func main() {
 	conf := createConfFromCli()
 
-	fmt.Println(conf)
+	fmt.Println(conf) //TODO print the prettified / human-readable configuration
 
 	dataCache := cache.New(conf.Capacity)
 

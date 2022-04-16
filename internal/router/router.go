@@ -14,7 +14,7 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 		Immutable:             true, // muy importante - makes sure that OriginalUrl() cannot mutate cached endpoints somehow
 	})
 
-	// Make cache available in all handlers on ctx.UserContext().Value(key("cache"))
+	// Make cache available in all handlers with ctx.Locals("cache").(*cache.LRUCache)
 	app.Use(injectCtxCache(cache))
 
 	// Will loop through methods, endpoints, and patterns and set a middleware for each that removes cache entries when patterns are matched
@@ -31,7 +31,8 @@ func Start(conf *config.Config, port string, cache *cache.LRUCache) {
 	logger.Panic(app.Listen("localhost:" + port))
 }
 
-// Will loop through methods, endpoints, and patterns and set a middleware for each that removes cache entries when patterns are matched
+// Will loop through methods, endpoints, and patterns and set a middleware for each that removes cache entries when patterns are matched.
+// e.g. POST to /users could remove all cache entries that match the pattern ^/users or ^/users/:id etc.
 func setBustingEndpoints(app *fiber.App, conf *config.Config) {
 	for method, endpointMap := range conf.Bust {
 		for endpoint, patterns := range endpointMap {

@@ -316,3 +316,45 @@ func listKeys(cache *LRUCache) []string {
 
 	return keys
 }
+
+func TestSetInitEmpty(t *testing.T) {
+	set := make(Set[string])
+
+	assert.Empty(t, set, "Expected set to be empty after initialization")
+}
+
+func TestSetAddAndHas(t *testing.T) {
+	assert := assert.New(t)
+
+	set := make(Set[string])
+
+	set.Add("a")
+
+	assert.Len(set, 1, "Expected set to increase length to 1 after adding an element, but length is now %d", len(set))
+
+	assert.True(set.Has("a"), "Expected set.Has to return true when the set includes the element: \"a\"")
+	assert.Contains(set, "a", "Expected set's underlying map to contain the element: \"a\"")
+
+	assert.False(set.Has("b"), "Expected set.Has to return false when the set does not include the element: \"b\"")
+	assert.NotContains(set, "b", "Expected set's underlying map to not contain the element: \"b\"")
+}
+
+func TestSetRemove(t *testing.T) {
+	set := make(Set[string])
+
+	set.Add("a")
+	set.Remove("a")
+
+	assert.False(t, set.Has("a"), "Expected set.Remove() to remove the element: \"a\"")
+	assert.NotContains(t, "a", "Expected set's underlying map to not contain the element: \"a\"")
+}
+
+func TestSetElements(t *testing.T) {
+	set := make(Set[string])
+
+	set.Add("a")
+	set.Add("b")
+
+	assert.ElementsMatch(t, set.Elements(), []string{"a", "b"}, "Expected set.Elements to return the elements: [ \"a\", \"b\" ]")
+	assert.Len(t, set, 2, "Expected set to only include 2 elements")
+}

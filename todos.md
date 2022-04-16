@@ -1,8 +1,12 @@
 * Testing
-  * Tests til routeren: https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf
+  * ~~Tests til routeren: https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf~~
   * Se på code coverage om der er dele, der ikke bliver testet
   * Check alle tests om de har expected og actual i rigtig rækkefølge
+* Lav noget i bust controllers der kan læse :id osv syntaks <---
+  * Det kunne være, at når en route skal bustes, så loader man self. alle regexes man skal matche med. Men den controller, der skal buste tager først lige alle regexes og hardcoder alle :xxx med tilsvarende route params ved at bruge f.eks. ctx.AllParams() eller lignende
+  * Fortsæt/tjek at tilføje replaceRouteParams i bust route controlleren lige inden patterns gives til cachen for at matche virker
 * Lav et config flag, der sætter default bust routes
+  * Eller eventuelt bare gør, så alle unsafe methods buster HELE cachen (se om der er forskel på unsafe og busting etc)
   * For hvert cached endpoint skal de manipulerende metoder buste
   * Det kræver i hvert fald lister af ikke-manipulerende metoder (GET, HEAD etc) og manipulerende (DELETE, PUT, POST etc)
   * Hvordan sørger man for at patterns matcher korrekt?
