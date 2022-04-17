@@ -60,7 +60,6 @@ type Config struct {
 }
 
 // TODO: add support for caching HEAD requests as well
-// Also add support for any other methods that function like GET
 // This requires creating a type for conf.Cache that works like bustMap
 // and updating the middleware factory for caching
 

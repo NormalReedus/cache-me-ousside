@@ -75,7 +75,7 @@ func TestGetEntry(t *testing.T) {
 
 	assert.NotNil(t, data, "Expected cache.Get to return the entry set with cache.Set")
 
-	assert.Equal(t, data, &testData, "Expected cache.Get to return the exact data that was set with cache.Set")
+	assert.Equal(t, &testData, data, "Expected cache.Get to return the exact data that was set with cache.Set")
 }
 
 func TestGetMissingEntry(t *testing.T) {
@@ -111,7 +111,7 @@ func TestEvict(t *testing.T) {
 
 	size := cache.Size() // sanity check validates that Size() is also length of list, not just entries
 
-	assert.Equal(t, size, 2, "Expected cache size to not go above 2 when capacity is 2, but it is: %d", size)
+	assert.Equal(t, 2, size, "Expected cache size to not go above 2 when capacity is 2, but it is: %d", size)
 
 	expectedKeys = []string{
 		"/test2",

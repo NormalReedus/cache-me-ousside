@@ -5,8 +5,8 @@
   "cache":  [ "/posts", "/posts/:id", "/albums", "/users", "/todos" ], // Only GET requests supported for now
   "bust": {
     "POST": {
-      "/posts": [ "^/posts", "^/posts/count" ],
-      "/posts/:id": [ "^/posts", "^/posts/count" ]
+      "/posts": [ "^/posts$", "^/posts/count$" ],
+      "/posts/:id": [ "^/posts/:id$", "^/posts$", "^/posts/count$" ]
     },
     "PUT": {
       "/posts/:id": [ "^/posts", "^/posts/:id" ]

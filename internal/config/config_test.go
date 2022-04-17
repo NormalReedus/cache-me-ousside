@@ -69,5 +69,5 @@ func TestTrimTrailingSlash(t *testing.T) {
 
 	conf.TrimTrailingSlash()
 
-	assert.Equal(t, conf.ApiUrl, "https://jsonplaceholder.typicode.com", "Expected config.TrimTrailingSlash to remove trailing slashes from the api url prop, got: %s", conf.ApiUrl)
+	assert.Equal(t, "https://jsonplaceholder.typicode.com", conf.ApiUrl, "Expected config.TrimTrailingSlash to remove trailing slashes from the api url prop, got: %s", conf.ApiUrl)
 }
