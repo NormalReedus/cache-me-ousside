@@ -94,7 +94,7 @@ func TestGetMissingEntry(t *testing.T) {
 	assert.Nil(t, data, "Expected cache.Get to return nil when the entry does not exist, but returned: %+v", data)
 }
 
-func TestEvict(t *testing.T) {
+func TestEvictLRU(t *testing.T) {
 	// Cannot really test for memory based eviction since memory usage will vary
 	cache := New(2)
 
@@ -213,7 +213,7 @@ func assertEntriesMatch(t *testing.T, cache *LRUCache) {
 	assert.Equal(keysLen, listLen, "Expected cache.entries to have same number of entries as the linked list, but the list has %d entries, and cache.entries has %d entries", listLen, keysLen)
 
 	// All keys should be the same, so we check from both map and list to see which are missing
-	assert.ElementsMatch(listKeys, cache.CachedEndpoints(), "Expected cache.entries to have the same keys as the linked list, but the list has %v, and cache.entries has %v", listKeys, cache.CachedEndpoints())
+	assert.ElementsMatch(listKeys, cache.CachedKeys(), "Expected cache.entries to have the same keys as the linked list, but the list has %v, and cache.entries has %v", listKeys, cache.CachedKeys())
 }
 
 // Make sure that MRU and LRU prev / next pointers are set correctly.
@@ -296,7 +296,7 @@ func assertKeys(t *testing.T, cache *LRUCache, expectedKeys []string) {
 
 	assert.Equal(len(expectedKeys), len(cache.entries), "Expected cache.entries to have %d entries, but it has %d", len(expectedKeys), len(cache.entries))
 
-	assert.ElementsMatch(expectedKeys, cache.CachedEndpoints(), "Expected cache to have entries for %v, but got %v", expectedKeys, cache.CachedEndpoints())
+	assert.ElementsMatch(expectedKeys, cache.CachedKeys(), "Expected cache to have entries for %v, but got %v", expectedKeys, cache.CachedKeys())
 }
 
 func listLength(cache *LRUCache) int {

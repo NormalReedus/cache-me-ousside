@@ -12,7 +12,8 @@ import (
 )
 
 var CACHEABLE_METHODS = [...]string{"GET", "HEAD"}
-var UNCACHEABLE_METHODS = [...]string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
+
+// var UNCACHEABLE_METHODS = [...]string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
 
 func LoadJSON(configPath string) *Config {
 	jsonFile, err := os.Open(configPath)
@@ -60,7 +61,7 @@ type Config struct {
 }
 
 // TODO: add support for caching HEAD requests as well
-// This requires creating a type for conf.Cache that works like bustMap
+// This requires creating a type for conf.Cache that works like a map
 // and updating the middleware factory for caching
 
 // TODO: add memory based cache limit

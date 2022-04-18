@@ -19,38 +19,46 @@ var (
 
 func init() {
 	clrInfo := color.New(color.Bold)
-	infoLog = log.New(os.Stdout, clrInfo.Sprint("ℹ️ INFO - "), log.Ldate|log.Ltime|log.Lmsgprefix)
+	// infoLog = log.New(os.Stdout, clrInfo.Sprint("ℹ️ INFO - "), log.Ldate|log.Ltime|log.Lmsgprefix)
+	infoLog = log.New(os.Stdout, clrInfo.Sprint("ℹ️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
 
 	clrWarn := color.New(color.FgYellow, color.Bold)
-	warningLog = log.New(os.Stdout, clrWarn.Sprint("⚠️ WARN - "), log.Ldate|log.Ltime|log.Lmsgprefix)
+	// warningLog = log.New(os.Stdout, clrWarn.Sprint("⚠️ WARN - "), log.Ldate|log.Ltime|log.Lmsgprefix)
+	warningLog = log.New(os.Stdout, clrWarn.Sprint("⚠️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
 
 	clrErr := color.New(color.FgRed, color.Bold)
-	errorLog = log.New(os.Stdout, clrErr.Sprint("⛔ ERROR - "), log.Ldate|log.Ltime|log.Lmsgprefix)
+	// errorLog = log.New(os.Stdout, clrErr.Sprint("⛔ ERROR - "), log.Ldate|log.Ltime|log.Lmsgprefix)
+	errorLog = log.New(os.Stdout, clrErr.Sprint("⛔ "), log.Ldate|log.Ltime|log.Lmsgprefix)
 }
 
 func CacheWrite(key string) {
 	clr := color.New(color.FgBlue, color.Bold)
-	infoLog.Println(clr.Sprint("CACHE WRITE: " + key))
+	// infoLog.Println(clr.Sprint("CACHE WRITE: " + key))
+	infoLog.Println(clr.Sprint("CACHE WRITE - " + key))
 }
 
 func CacheRead(key string) {
 	clr := color.New(color.FgGreen, color.Bold)
-	infoLog.Println(clr.Sprint("CACHE READ: " + key))
+	// infoLog.Println(clr.Sprint("CACHE READ: " + key))
+	infoLog.Println(clr.Sprint("CACHE READ - " + key))
 }
 
 func CacheEvict(key string) {
 	clr := color.New(color.FgRed, color.Bold)
-	infoLog.Println(clr.Sprint("CACHE EVICT: " + key))
+	// infoLog.Println(clr.Sprint("CACHE EVICT: " + key))
+	infoLog.Println(clr.Sprint("CACHE EVICT - " + key))
 }
 
 func CacheBust(key string) {
 	clr := color.New(color.FgRed, color.Bold)
-	infoLog.Println(clr.Sprint("CACHE BUST: " + key))
+	// infoLog.Println(clr.Sprint("CACHE BUST: " + key))
+	infoLog.Println(clr.Sprint("CACHE BUST - " + key))
 }
 
 func CacheSkip(key string) {
 	clr := color.New(color.FgYellow, color.Bold)
-	infoLog.Println(clr.Sprint("CACHE SKIP: " + key))
+	// infoLog.Println(clr.Sprint("CACHE SKIP: " + key))
+	infoLog.Println(clr.Sprint("CACHE SKIP - " + key))
 }
 
 func Warn(msg string) {

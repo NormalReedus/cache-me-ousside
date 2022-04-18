@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 )
 
-// This is used for everything that is not cached
+// This is used for everything that is not cached, and as such it does not call Next()
 func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		url := apiUrl + ctx.OriginalURL()
@@ -28,7 +28,7 @@ func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 
 // Decorates createProxyHandler to work as a middleware by also calling Next() after running.
 // createProxyHandler must not call Next by itself, since the default handler should always be last.
-// this is used for everything that is cached
+// This is used for every route that is cached
 func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 	proxyHandler := createProxyHandler(apiUrl)
 
@@ -40,6 +40,8 @@ func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 	}
 }
 
+// This checks for existing entries on a given route and method and returns the cached item if it exists.
+// Otherwise we call Next() to proxy the request and get data from the api.
 func readCacheMiddleware(ctx *fiber.Ctx) error {
 	dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
 	cacheKey := ctx.OriginalURL()

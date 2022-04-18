@@ -176,26 +176,29 @@ func createConfFromCli() *config.Config {
 		},
 
 		Action: func(c *cli.Context) error {
-			//TODO: separate out and describe
 			if c.NArg() > 0 {
 				logger.Panic(fmt.Errorf("no arguments should be passed. Did you mean pass a configuration file path with --config?"))
 			}
 
+			// If a config path option was passed, initialize config from that file
 			if args.configPath != "" {
 				conf = config.LoadJSON(args.configPath)
 			}
 
+			// Add / overwrite cli arguments to config
 			args.addToConfig(conf)
 
+			// Make sure the config is valid
 			if err := conf.ValidateRequiredProps(); err != nil {
 				logger.Panic(err)
 			}
-			conf.TrimTrailingSlash()
+			conf.TrimTrailingSlash() // Make sure all routes starting with / will work correctly when proxied
 
 			return nil
 		},
 	}
 
+	// Use above cli configuration to actually parse cli arguments and create a usable config
 	err := app.Run(os.Args)
 	if err != nil {
 		logger.Panic(err)

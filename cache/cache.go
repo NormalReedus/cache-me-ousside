@@ -31,7 +31,7 @@ type LRUCache struct {
 }
 
 // NOTE: Does not always return keys in the order they were added.
-func (cache *LRUCache) CachedEndpoints() []string {
+func (cache *LRUCache) CachedKeys() []string {
 	keys := make([]string, 0, len(cache.entries))
 	for k := range cache.entries {
 		keys = append(keys, k)
@@ -64,7 +64,7 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	// You should never set something with a key that already exists
 	//... since the cached data should have been returned instead in that case
 	if _, exists := cache.entries[key]; exists {
-		logger.Warn(fmt.Sprintf("setting the key: %v in the cache should not be done, since that key already exists", key))
+		logger.Warn(fmt.Sprintf("the key: \"%s\" already exists in the cache and has been ignored", key))
 		return
 	}
 
@@ -82,7 +82,7 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 
 	// If the cache is full, evict the LRU entry
 	if cache.Size() > cache.capacity {
-		cache.evict()
+		cache.evictLRU()
 	}
 }
 
@@ -131,7 +131,7 @@ func (cache *LRUCache) Match(patterns []string) []string {
 	for _, pattern := range patterns {
 		patternExp, err := regexp.Compile(pattern)
 		if err != nil {
-			logger.Error(fmt.Errorf("there was an error finding cache entries with pattern: " + pattern))
+			logger.Error(fmt.Errorf("there was an error finding cache entries with RegExp pattern: \"%s\"", pattern))
 			continue
 		}
 
@@ -145,7 +145,7 @@ func (cache *LRUCache) Match(patterns []string) []string {
 	return keys.Elements()
 }
 
-func (cache *LRUCache) evict() *Entry {
+func (cache *LRUCache) evictLRU() *Entry {
 	// Save ref to removed entry
 	evicted := cache.lru
 
