@@ -36,11 +36,11 @@ func TestToBytes(t *testing.T) {
 		bytes, err := ToBytes(tt.size, tt.unit)
 
 		if tt.unit == "nb" || tt.unit == "NB" || tt.unit == "" {
-			assert.Error(err, "Expected unknown unit \"%s\" to return an error", tt.unit)
+			assert.Error(err, "Expected unknown unit %q to return an error", tt.unit)
 			assert.Zero(bytes)
 		} else {
 			assert.NoError(err)
-			assert.Equal(tt.expected, bytes, "Expected ToBytes(%d, \"%s\") to return %d, it returned %d", tt.size, tt.unit, tt.expected, bytes)
+			assert.Equal(tt.expected, bytes, "Expected ToBytes(%d, %q) to return %d, it returned %d", tt.size, tt.unit, tt.expected, bytes)
 		}
 	}
 }

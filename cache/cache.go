@@ -64,7 +64,7 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	// You should never set something with a key that already exists
 	//... since the cached data should have been returned instead in that case
 	if _, exists := cache.entries[key]; exists {
-		logger.Warn(fmt.Sprintf("the key: \"%s\" already exists in the cache and has been ignored", key))
+		logger.Warn(fmt.Sprintf("the key: %q already exists in the cache and has been ignored", key))
 		return
 	}
 
@@ -131,7 +131,7 @@ func (cache *LRUCache) Match(patterns []string) []string {
 	for _, pattern := range patterns {
 		patternExp, err := regexp.Compile(pattern)
 		if err != nil {
-			logger.Error(fmt.Errorf("there was an error finding cache entries with RegExp pattern: \"%s\"", pattern))
+			logger.Error(fmt.Errorf("there was an error finding cache entries with RegExp pattern: %q", pattern))
 			continue
 		}
 

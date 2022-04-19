@@ -37,7 +37,7 @@ func ToBytes(size uint64, unit string) (uint64, error) {
 	case "tb":
 		return size << 40, nil
 	default:
-		err := fmt.Errorf("unknown unit: \"%s\"", unit)
+		err := fmt.Errorf("unknown unit: %q", unit)
 
 		logger.Error(err)
 

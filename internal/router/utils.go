@@ -16,7 +16,7 @@ func replaceRouteParams(paramMap map[string]string, routePatternTemplates []stri
 
 	for param, value := range paramMap {
 		for i, pattern := range newRoutePatterns {
-			newRoutePatterns[i] = strings.Replace(pattern, ":"+param, value, -1)
+			newRoutePatterns[i] = strings.ReplaceAll(pattern, ":"+param, value)
 		}
 	}
 

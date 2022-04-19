@@ -1,8 +1,3 @@
-* Sørg for at strings.Replace ikke kun erstatter første route param (skal man bruge -1 for at den erstatter alle?)
-* Sæt TrimTrailingSlash til at være private method og bare kald den i config.New() constructor og så ændre tests til bare at tjekke efter config bliver created + ændr cli til ikke at kalde metoden selv
-  * i config.LoadJSON skal der også lige kaldes trimTrailingSlash efter json5.Unmarshal
-  * TestTrimTrailingSlash skal både teste med config.New() og med config.LoadJSON()
-* Sæt strings i testbeskrivelser til at bruge %q i stedet for manuelt at printe citationstegn
 * Caching af HEAD (se TODO i config.go) <--
   * SE OM IKKE DET KAN LADE SIG GØRE BARE AT PREFIXE ALLE CACHED ENDPOINTS MED METODEN
     * f.eks. `GET:/posts/123`
