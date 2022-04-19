@@ -65,9 +65,12 @@ func TestTrimTrailingSlash(t *testing.T) {
 
 	assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-	conf := LoadJSON(configPath)
+	conf1 := New()
+	conf1.ApiUrl = "https://jsonplaceholder.typicode.com/"
+	conf1.TrimTrailingSlash()
+	assert.Equal(t, "https://jsonplaceholder.typicode.com", conf1.ApiUrl, "Expected config.TrimTrailingSlash to remove trailing slashes from the api url prop, got: %s", conf1.ApiUrl)
 
-	conf.TrimTrailingSlash()
+	conf2 := LoadJSON(configPath)
+	assert.Equal(t, "https://jsonplaceholder.typicode.com", conf2.ApiUrl, "Expected config.LoadJSON to remove trailing slashes from the api url prop when initialized, got: %s", conf2.ApiUrl)
 
-	assert.Equal(t, "https://jsonplaceholder.typicode.com", conf.ApiUrl, "Expected config.TrimTrailingSlash to remove trailing slashes from the api url prop, got: %s", conf.ApiUrl)
 }

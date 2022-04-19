@@ -77,7 +77,7 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 
 func createConfFromCli() *config.Config {
 	args := CLIArgs{} // holds the flags that should overwrite potential config file values
-	var conf = config.New()
+	var conf *config.Config
 
 	app := &cli.App{
 		Name:      "cache-me-ousside",
@@ -183,6 +183,8 @@ func createConfFromCli() *config.Config {
 			// If a config path option was passed, initialize config from that file
 			if args.configPath != "" {
 				conf = config.LoadJSON(args.configPath)
+			} else {
+				conf = config.New()
 			}
 
 			// Add / overwrite cli arguments to config
@@ -192,8 +194,8 @@ func createConfFromCli() *config.Config {
 			if err := conf.ValidateRequiredProps(); err != nil {
 				logger.Panic(err)
 			}
-			conf.TrimTrailingSlash() // Make sure all routes starting with / will work correctly when proxied
 
+			conf.TrimTrailingSlash() // Make sure all routes starting with / will work correctly when proxied
 			return nil
 		},
 	}

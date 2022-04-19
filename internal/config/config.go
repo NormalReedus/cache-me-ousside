@@ -27,8 +27,10 @@ func LoadJSON(configPath string) *Config {
 		logger.Panic(err)
 	}
 
-	var config = &Config{}
+	var config = New()
 	json5.Unmarshal(jsonByteValue, &config)
+
+	config.TrimTrailingSlash()
 
 	return config
 }
