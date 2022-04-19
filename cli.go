@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/NormalReedus/cache-me-ousside/internal/config"
@@ -51,27 +52,46 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 	// 	c.Cache = a.cacheHead.Value()
 	// }
 
-	// These must have 2 or more elements, since first element should be the path
-	if len(a.bustPOST.Value()) >= 2 {
-		c.Bust["POST"][a.bustPOST.Value()[0]] = a.bustPOST.Value()[1:]
+	// if len(a.bustPOST.Value()) >= 2 {
+	// 	c.Bust["POST"][a.bustPOST.Value()[0]] = a.bustPOST.Value()[1:]
+	// }
+
+	// Every busting flag should be a string of a path followed by a colon and then a comma separated list of regex patterns to bust
+	// so for every Value() we split on colon and comma to set the endpoint and the patterns
+	if len(a.bustPOST.Value()) > 0 {
+		for _, args := range a.bustPOST.Value() {
+			parseAndSetBustArgs(c, "POST", args)
+		}
 	}
-	if len(a.bustPUT.Value()) >= 2 {
-		c.Bust["PUT"][a.bustPUT.Value()[0]] = a.bustPUT.Value()[1:]
+	if len(a.bustPUT.Value()) > 0 {
+		for _, args := range a.bustPUT.Value() {
+			parseAndSetBustArgs(c, "PUT", args)
+		}
 	}
-	if len(a.bustDELETE.Value()) >= 2 {
-		c.Bust["DELETE"][a.bustDELETE.Value()[0]] = a.bustDELETE.Value()[1:]
+	if len(a.bustDELETE.Value()) > 0 {
+		for _, args := range a.bustDELETE.Value() {
+			parseAndSetBustArgs(c, "DELETE", args)
+		}
 	}
-	if len(a.bustPATCH.Value()) >= 2 {
-		c.Bust["PATCH"][a.bustPATCH.Value()[0]] = a.bustPATCH.Value()[1:]
+	if len(a.bustPATCH.Value()) > 0 {
+		for _, args := range a.bustPATCH.Value() {
+			parseAndSetBustArgs(c, "PATCH", args)
+		}
 	}
-	if len(a.bustTRACE.Value()) >= 2 {
-		c.Bust["TRACE"][a.bustTRACE.Value()[0]] = a.bustTRACE.Value()[1:]
+	if len(a.bustTRACE.Value()) > 0 {
+		for _, args := range a.bustTRACE.Value() {
+			parseAndSetBustArgs(c, "TRACE", args)
+		}
 	}
-	if len(a.bustCONNECT.Value()) >= 2 {
-		c.Bust["CONNECT"][a.bustCONNECT.Value()[0]] = a.bustCONNECT.Value()[1:]
+	if len(a.bustCONNECT.Value()) > 0 {
+		for _, args := range a.bustCONNECT.Value() {
+			parseAndSetBustArgs(c, "CONNECT", args)
+		}
 	}
-	if len(a.bustOPTIONS.Value()) >= 2 {
-		c.Bust["OPTIONS"][a.bustOPTIONS.Value()[0]] = a.bustOPTIONS.Value()[1:]
+	if len(a.bustOPTIONS.Value()) > 0 {
+		for _, args := range a.bustOPTIONS.Value() {
+			parseAndSetBustArgs(c, "OPTIONS", args)
+		}
 	}
 }
 
@@ -135,43 +155,43 @@ func createConfFromCli() *config.Config {
 				Destination: &args.bustPOST,
 				Name:        "bust:POST",
 				Aliases:     []string{"b:POST", "b:post"},
-				Usage:       "first element passed is the path on which a POST request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
+				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a POST request is made to the route",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPUT,
 				Name:        "bust:PUT",
 				Aliases:     []string{"b:PUT", "b:put"},
-				Usage:       "first element passed is the path on which a PUT request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
+				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a PUT request is made to the route",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustDELETE,
 				Name:        "bust:DELETE",
 				Aliases:     []string{"b:DELETE", "b:delete", "b:d"},
-				Usage:       "first element passed is the path on which a DELETE request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
+				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a DELETE request is made to the route",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPATCH,
 				Name:        "bust:PATCH",
 				Aliases:     []string{"b:PATCH", "b:patch"},
-				Usage:       "first element passed is the path on which a PATCH request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
+				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a PATCH request is made to the route",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustTRACE,
 				Name:        "bust:TRACE",
 				Aliases:     []string{"b:TRACE", "b:trace", "b:t"},
-				Usage:       "first element passed is the path on which a TRACE request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
+				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a TRACE request is made to the route",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustCONNECT,
 				Name:        "bust:CONNECT",
 				Aliases:     []string{"b:CONNECT", "b:connect", "b:c"},
-				Usage:       "first element passed is the path on which a CONNECT request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
+				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a CONNECT request is made to the route",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustOPTIONS,
 				Name:        "bust:OPTIONS",
 				Aliases:     []string{"b:OPTIONS", "b:options", "b:o"},
-				Usage:       "first element passed is the path on which an OPTIONS request will bust cache entries, subsequent elements are the regex patterns to match to entries to bust",
+				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a OPTIONS request is made to the route",
 			},
 		},
 
@@ -207,4 +227,35 @@ func createConfFromCli() *config.Config {
 	}
 
 	return conf
+}
+
+func parseAndSetBustArgs(c *config.Config, method, args string) {
+	// All busting args must have an arrow (=>) to separate the route from the busting pattern
+	if !strings.Contains(args, "=>") {
+		parseBustArgError(method, args)
+	}
+	routeAndPatterns := strings.Split(args, "=>")
+	if len(routeAndPatterns) != 2 {
+		parseBustArgError(method, args)
+	}
+
+	// First part of the string (before =>) will be the route to listen on
+	route := routeAndPatterns[0]
+	// Second part of the string (after =>) will be a comma separated list of patterns to bust
+	patternsString := routeAndPatterns[1]
+	if patternsString == "" {
+		parseBustArgError(method, args)
+	}
+
+	patterns := strings.Split(routeAndPatterns[1], ",")
+
+	if route == "" || patterns == nil || len(patterns) == 0 {
+		parseBustArgError(method, args)
+	}
+
+	c.Bust[method][route] = patterns
+}
+
+func parseBustArgError(method, args string) {
+	logger.Panic(fmt.Errorf("Invalid %s bust argument: %q.\nArgument must be in the format '[route]=>[regex-pattern],[regex-pattern]...'", method, args))
 }

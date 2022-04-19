@@ -2,28 +2,36 @@
   "capacity": 555,
   "capacityUnit": "mb",
   "apiUrl": "https://jsonplaceholder.typicode.com/",
-  "cache":  [ "/posts", "/posts/:id" ],
+  "cache":  {
+    // GET and HEAD requests to /posts and /posts/:id will be cached (e.g.) with the key "GET:/posts/123"
+    "GET": [ "/posts", "/posts/:id" ],
+    "HEAD": [ "/posts", "/posts/:id" ],
+  },
   "bust": {
     "POST": {
-      "/posts": [ "^/posts.*" ]
+      // POST requests to /posts will remove all cached entries in which the substring /posts exists in the key
+      "/posts": [ "/posts" ]
     },
     "PUT": {
-      "/posts/:slug": [ "^/posts.*" ]
+      // PUT requests to /posts will remove all entries that match the regex (GET and HEAD explicited to show how to only bust certain methods' cached requests)
+      "/posts": [ "^GET:/posts", "^HEAD:/posts" ],
+      // PUT requests to /posts/:id will remove all cached entries of any method that contain a substring of /posts/ appended with the route param 'id' of the specific matched endpoint
+      "/posts/:id": [ "/posts/:id" ]
     },
     "DELETE": {
-      "/posts/:slug": [ "^/posts.*" ]
+      "/posts/:id": [ "/posts" ]
     },
     "PATCH": {
-      "/posts/:slug": [ "^/posts.*" ]
+      "/posts/:id": [ "/posts" ]
     },
     "TRACE": {
-      "/posts/:slug": [ "^/posts.*" ]
+      "/posts/:id": [ "/posts" ]
     },
     "CONNECT": {
-      "/posts": [ "^/posts.*" ]
+      "/posts": [ "/posts" ]
     },
     "OPTIONS": {
-      "/posts": [ "^/posts.*" ]
+      "/posts": [ "/posts" ]
     },
   }
 }

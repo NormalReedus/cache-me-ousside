@@ -1,21 +1,23 @@
-* Caching af HEAD (se TODO i config.go) <--
+* Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
+  * Kan det lade sig gøre med go uden at skulle lave any type?
+* Caching af HEAD (se TODO i config.go) <-- fortsæt med at skrive tests inden implementering af resten af ændringer
   * SE OM IKKE DET KAN LADE SIG GØRE BARE AT PREFIXE ALLE CACHED ENDPOINTS MED METODEN
     * f.eks. `GET:/posts/123`
     * Hvis det kan lade sig gøre, så ignorér alle overstregede punkter, da man ikke behøver flere entry maps
     * Steder der skal ændres med prefixmetoden:
       * config.example.json5
-        * `cache` skal være et map med GET og HEAD
-        * Busting skal enten explicitere `GET:` etc foran busting eller ikke starte med `^` 
+        * ✅ `cache` skal være et map med GET og HEAD
+        * ✅ Busting skal enten explicitere `GET:` etc foran busting eller ikke starte med `^` 
       * cli.go
         * addToConfig skal bruge cacheHEAD.Value() (udkommenteret nu) og tilføje værdien til c.Cache["HEAD"] i stedet for c.Cache
         * Ligeledes skal a.CacheGET gemmes i c.Cache["GET"] frem for i c.Cache
       * cli_test.go
-        * fjern // fra --cache:HEAD i generateArgs helper
-        * brug korrekt GET: etc syntaks i generateArgs helper eller fjern ^ i start af patterns
-          * Opdatér TestFlagParsings expected til at reflektere dette også
-          * Gør det samme med TestConfigFileParsing
+        * ✅ fjern // fra --cache:HEAD i generateArgs helper
+        * ✅ brug korrekt GET: etc syntaks i generateArgs helper eller fjern ^ i start af patterns
+          * ✅ Opdatér TestFlagParsings expected til at reflektere dette også
+          * ✅ Gør det samme med TestConfigFileParsing
       * testdata/test.config.json5
-        * Skal have samme ændringer som config.example.json5 og sørge for at de matcher det som cli_test skal bruge
+        * ✅ Skal have samme ændringer som config.example.json5 og sørge for at de matcher det som cli_test skal bruge
       * router.go
         * setCachingEndpoints skal have et ekstra loop over conf.Cache for at lave en caching middleware per endpoint i hver method
           * Dvs. ikke bare brug app.Get, gør det samme med app.Head og sørg for at loops er hen over conf.Cache["GET"] og conf.Cache["HEAD"] frem for bare conf.Cache
