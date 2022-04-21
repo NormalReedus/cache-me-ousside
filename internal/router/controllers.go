@@ -95,15 +95,12 @@ func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	return nil // this is always last step, so no Next()
 }
 
-func createBustMiddleware(patternTemplates []string) func(*fiber.Ctx) error {
+func createBustMiddleware(patterns []string) func(*fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
 
-		// Replace all route params (:id etc) with the actual parameter when this route handler is called
-		patterns := replaceRouteParams(ctx.AllParams(), patternTemplates)
-
 		// Now find all cache entries that match the regex pattern or specific route with param
-		matchedEntries := dataCache.Match(patterns)
+		matchedEntries := dataCache.Match(patterns, ctx.AllParams())
 
 		// Remove the matched entries from the cache
 		dataCache.Bust(matchedEntries...)

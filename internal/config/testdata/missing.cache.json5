@@ -4,13 +4,26 @@
   "apiUrl": "https://jsonplaceholder.typicode.com/",
   "bust": {
     "POST": {
-      "/posts": [ "^/posts", "^/posts/count" ]
+      "/posts": [ "/posts" ]
     },
     "PUT": {
-      "/posts/:slug": [ "^/posts", "^/posts/:id" ]
+      "/posts": [ "^GET:/posts", "^HEAD:/posts" ],
+      "/posts/:id": [ "/posts/:id" ]
     },
     "DELETE": {
-      "/posts/:id": [ "^/posts", "^/posts/:id" ]
+      "/posts/:id": [ "/posts" ]
+    },
+    "PATCH": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "TRACE": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "CONNECT": {
+      "/posts": [ "/posts" ]
+    },
+    "OPTIONS": {
+      "/posts": [ "/posts" ]
     },
   }
 }

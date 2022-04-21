@@ -22,14 +22,12 @@ func TestLoadProps(t *testing.T) {
 	assert.NotZero(config.ApiUrl, "Expected required prop config.ApiUrl to be loaded correctly as a non-zero value")
 
 	// TODO: change to be a map of []string with GET and HEAD (and more?)
-	assert.NotEmpty(config.Cache, "Expected config.Cache to not be empty when given a valid config file")
+	assert.NotEmpty(config.Cache["HEAD"], "Expected config.Cache[\"HEAD\"] to not be empty when given a valid config file")
+	assert.NotEmpty(config.Cache["GET"], "Expected config.Cache[\"GET\"] to not be empty when given a valid config file")
 
 	assert.NotEmpty(config.Bust, "Expected config.Bust to not be empty when given a valid config file")
-
 	assert.NotEmpty(config.Bust["POST"]["/posts"], "Expected config.Bust's POST /posts endpoint to not be empty when given a valid config file")
-
 	assert.NotEmpty(config.Bust["PUT"]["/posts/:slug"], "Expected config.Bust's PUT /posts/:slug endpoint to not be empty when given a valid config file")
-
 	assert.NotEmpty(config.Bust["DELETE"]["/posts/:id"], "Expected config.Bust's DELETE /posts/:id endpoint to not be empty when given a valid config file")
 }
 
@@ -54,9 +52,7 @@ func TestRequiredProps(t *testing.T) {
 
 		assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-		conf := LoadJSON(configPath)
-
-		assert.Error(t, conf.ValidateRequiredProps(), "Expected config.ValidateRequiredProps return an error when the file: %s is missing the required prop: %s", configPath, prop)
+		assert.Panics(t, func() { LoadJSON(configPath) }, "Expected config.LoadJSON to panic when the file: %s is missing the required prop: %q", configPath, prop)
 	}
 }
 

@@ -16,6 +16,7 @@ var CACHEABLE_METHODS = [...]string{"GET", "HEAD"}
 // var UNCACHEABLE_METHODS = [...]string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
 
 func LoadJSON(configPath string) *Config {
+	// Read the configuration json file
 	jsonFile, err := os.Open(configPath)
 	if err != nil {
 		logger.Panic(err)
@@ -27,9 +28,17 @@ func LoadJSON(configPath string) *Config {
 		logger.Panic(err)
 	}
 
+	// Populate a new config with the json file values
 	var config = New()
 	json5.Unmarshal(jsonByteValue, &config)
 
+	// Check if required props are present
+	validationErr := config.ValidateRequiredProps()
+	if validationErr != nil {
+		logger.Panic(validationErr)
+	}
+
+	// Clean the API url
 	config.TrimTrailingSlash()
 
 	return config

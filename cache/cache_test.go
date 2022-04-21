@@ -23,9 +23,9 @@ func TestRequiredCapacity(t *testing.T) {
 func TestSetEntry(t *testing.T) {
 	cache := New(1)
 
-	cache.Set("/test1", &testData)
+	cache.Set("GET:/test1", &testData)
 
-	expectedKeys := []string{"/test1"}
+	expectedKeys := []string{"GET:/test1"}
 
 	sanityCheck(t, cache, expectedKeys)
 }
@@ -33,30 +33,30 @@ func TestSetEntry(t *testing.T) {
 func TestEntriesOrder(t *testing.T) {
 	cache := New(5)
 
-	cache.Set("/test1", &testData)
-	cache.Set("/test2", &testData)
-	cache.Set("/test3", &testData)
-	cache.Set("/posts/4", &testData)
-	cache.Set("/posts/5", &testData)
+	cache.Set("GET:/test1", &testData)
+	cache.Set("GET:/test2", &testData)
+	cache.Set("GET:/test3", &testData)
+	cache.Set("HEAD:/posts/4", &testData)
+	cache.Set("HEAD:/posts/5", &testData)
 
 	expectedKeys := []string{
-		"/test1",
-		"/test2",
-		"/test3",
-		"/posts/4",
-		"/posts/5",
+		"GET:/test1",
+		"GET:/test2",
+		"GET:/test3",
+		"HEAD:/posts/4",
+		"HEAD:/posts/5",
 	}
 	sanityCheck(t, cache, expectedKeys) // implicitly also checks that Set will add things as MRU
 
 	// /test1 should now be moved to MRU
-	cache.Get("/test1")
+	cache.Get("GET:/test1")
 
 	expectedKeys = []string{
-		"/test2",
-		"/test3",
-		"/posts/4",
-		"/posts/5",
-		"/test1",
+		"GET:/test2",
+		"GET:/test3",
+		"HEAD:/posts/4",
+		"HEAD:/posts/5",
+		"GET:/test1",
 	}
 	sanityCheck(t, cache, expectedKeys)
 }
@@ -64,12 +64,12 @@ func TestEntriesOrder(t *testing.T) {
 func TestGetEntry(t *testing.T) {
 	cache := New(1)
 
-	cache.Set("/test1", &testData)
+	cache.Set("GET:/test1", &testData)
 
-	data := cache.Get("/test1")
+	data := cache.Get("GET:/test1")
 
 	expectedKeys := []string{
-		"/test1",
+		"GET:/test1",
 	}
 	sanityCheck(t, cache, expectedKeys)
 
@@ -81,13 +81,13 @@ func TestGetEntry(t *testing.T) {
 func TestGetMissingEntry(t *testing.T) {
 	cache := New(1)
 
-	cache.Set("/test1", &testData)
+	cache.Set("GET:/test1", &testData)
 
-	data := cache.Get("/test2")
+	data := cache.Get("GET:/test2")
 
 	// Sanity check before other tests
 	expectedKeys := []string{
-		"/test1",
+		"GET:/test1",
 	}
 	sanityCheck(t, cache, expectedKeys)
 
@@ -98,14 +98,14 @@ func TestEvictLRU(t *testing.T) {
 	// Cannot really test for memory based eviction since memory usage will vary
 	cache := New(2)
 
-	cache.Set("/test1", &testData)
-	cache.Set("/test2", &testData)
-	cache.Set("/test3", &testData)
+	cache.Set("GET:/test1", &testData)
+	cache.Set("GET:/test2", &testData)
+	cache.Set("GET:/test3", &testData)
 
 	// Sanity check before other tests
 	expectedKeys := []string{
-		"/test2",
-		"/test3",
+		"GET:/test2",
+		"GET:/test3",
 	}
 	sanityCheck(t, cache, expectedKeys)
 
@@ -114,43 +114,45 @@ func TestEvictLRU(t *testing.T) {
 	assert.Equal(t, 2, size, "Expected cache size to not go above 2 when capacity is 2, but it is: %d", size)
 
 	expectedKeys = []string{
-		"/test2",
-		"/test3",
+		"GET:/test2",
+		"GET:/test3",
 	}
 	sanityCheck(t, cache, expectedKeys)
 }
 
 func TestMatch(t *testing.T) {
-	cache := New(5)
+	cache := New(6)
 
-	cache.Set("/test1", &testData)
-	cache.Set("/test2", &testData)
-	cache.Set("/test3", &testData)
-	cache.Set("/posts/4", &testData)
-	cache.Set("/posts/5", &testData)
+	cache.Set("GET:/test1", &testData)
+	cache.Set("HEAD:/test2", &testData)
+	cache.Set("GET:/test3", &testData)
+	cache.Set("HEAD:/posts/4", &testData)
+	cache.Set("GET:/posts/5", &testData)
+	cache.Set("HEAD:/posts/6", &testData)
 
 	// Sanity check before other tests
 	expectedKeys := []string{
-		"/test1",
-		"/test2",
-		"/test3",
-		"/posts/4",
-		"/posts/5",
+		"GET:/test1",
+		"HEAD:/test2",
+		"GET:/test3",
+		"HEAD:/posts/4",
+		"GET:/posts/5",
+		"HEAD:/posts/6",
 	}
 	sanityCheck(t, cache, expectedKeys)
 
 	patterns := []string{
-		"^/test[1-2]",
-		"^/posts/.+",
+		"/test[1-2]",    // disregard method and use regex to select only two entries
+		"^HEAD:/posts/", // specifically select method
 	}
 	expectedMatches := []string{
-		"/test1",
-		"/test2",
-		"/posts/4",
-		"/posts/5",
+		"GET:/test1",
+		"HEAD:/test2",
+		"HEAD:/posts/4",
+		"HEAD:/posts/6",
 	}
 
-	matches := cache.Match(patterns)
+	matches := cache.Match(patterns, nil)
 	// matches are not something on the cache, so we can't use sanityCheck with expectedKeys to validate
 	assert.ElementsMatch(t, expectedMatches, matches, "Expected cache.Match to return the the keys %v, but returned %v", expectedMatches, matches)
 }
@@ -158,31 +160,124 @@ func TestMatch(t *testing.T) {
 func TestBust(t *testing.T) {
 	cache := New(5)
 
-	cache.Set("/test1", &testData)
-	cache.Set("/test2", &testData)
-	cache.Set("/test3", &testData)
-	cache.Set("/posts/4", &testData)
-	cache.Set("/posts/5", &testData)
+	cache.Set("GET:/test1", &testData)
+	cache.Set("GET:/test2", &testData)
+	cache.Set("GET:/test3", &testData)
+	cache.Set("HEAD:/posts/4", &testData)
+	cache.Set("HEAD:/posts/5", &testData)
 
 	// Sanity check before other tests
 	expectedKeys := []string{
-		"/test1",
-		"/test2",
-		"/test3",
-		"/posts/4",
-		"/posts/5",
+		"GET:/test1",
+		"GET:/test2",
+		"GET:/test3",
+		"HEAD:/posts/4",
+		"HEAD:/posts/5",
 	}
 	sanityCheck(t, cache, expectedKeys)
 
 	// Bust over two passes just to try out both single and multi busting
-	cache.Bust("/test1", "/test2")
-	cache.Bust("/posts/5")
+	cache.Bust("GET:/test1", "GET:/test2")
+	cache.Bust("HEAD:/posts/5")
 
 	expectedKeys = []string{
-		"/test3",
-		"/posts/4",
+		"GET:/test3",
+		"HEAD:/posts/4",
 	}
 	sanityCheck(t, cache, expectedKeys)
+}
+
+func TestSetInitEmpty(t *testing.T) {
+	set := make(Set[string])
+
+	assert.Empty(t, set, "Expected set to be empty after initialization")
+}
+
+func TestSetAddAndHas(t *testing.T) {
+	assert := assert.New(t)
+
+	set := make(Set[string])
+
+	set.Add("a")
+
+	assert.Len(set, 1, "Expected set to increase length to 1 after adding an element, but length is now %d", len(set))
+
+	assert.True(set.Has("a"), "Expected set.Has to return true when the set includes the element: \"a\"")
+	assert.Contains(set, "a", "Expected set's underlying map to contain the element: \"a\"")
+
+	assert.False(set.Has("b"), "Expected set.Has to return false when the set does not include the element: \"b\"")
+	assert.NotContains(set, "b", "Expected set's underlying map to not contain the element: \"b\"")
+}
+
+func TestSetRemove(t *testing.T) {
+	set := make(Set[string])
+
+	set.Add("a")
+	set.Remove("a")
+
+	assert.False(t, set.Has("a"), "Expected set.Remove() to remove the element: \"a\"")
+	assert.NotContains(t, "a", "Expected set's underlying map to not contain the element: \"a\"")
+}
+
+func TestSetElements(t *testing.T) {
+	set := make(Set[string])
+
+	set.Add("a")
+	set.Add("b")
+
+	assert.ElementsMatch(t, set.Elements(), []string{"a", "b"}, "Expected set.Elements to return the elements: [ \"a\", \"b\" ]")
+	assert.Len(t, set, 2, "Expected set to only include 2 elements")
+}
+
+func TestHydrateParams(t *testing.T) {
+	assert := assert.New(t)
+
+	type args struct {
+		patterns []string
+		paramMap map[string]string
+		expected []string
+	}
+
+	tests := [...]args{
+		{
+			patterns: []string{
+				"/users/:id",             // replace single param
+				"/users/:id/",            // replace single param with trailing slash
+				"/users/:[a-zA-Z]+",      // only match route param syntax / ignore regex
+				"/users/[:id]+",          // precede/ignore regex / this might fuck up regexes
+				"^GET:/users/:[a-zA-Z]+", // ignore method prefixes even though they use colon
+				"^HEAD:/users/[:id]+",    // ignore method prefixes even though they use colon
+			},
+			paramMap: map[string]string{"id": "123"},
+			expected: []string{
+				"/users/123",             // replace single param
+				"/users/123/",            // replace single param with trailing slash
+				"/users/:[a-zA-Z]+",      // only match route param syntax / ignore regex
+				"/users/[123]+",          // precede/ignore regex / this might fuck up regexes
+				"^GET:/users/:[a-zA-Z]+", // ignore method prefixes even though they use colon
+				"^HEAD:/users/[123]+",    // ignore method prefixes even though they use colon
+			},
+		},
+		{
+			patterns: []string{"/users/:id"}, // don't replace non-existent params in pattern
+			paramMap: map[string]string{},
+			expected: []string{"/users/:id"},
+		},
+		{
+			patterns: []string{"/users/:id"}, // don't do anything with params that do not exist in pattern
+			paramMap: map[string]string{"notid": "123"},
+			expected: []string{"/users/:id"},
+		},
+		{
+			patterns: []string{"/:author/posts/:slug/"}, // replace multiple params
+			paramMap: map[string]string{"author": "magnus", "slug": "my-post"},
+			expected: []string{"/magnus/posts/my-post/"},
+		},
+	}
+
+	for _, tt := range tests {
+		assert.Equal(tt.expected, hydrateParams(tt.paramMap, tt.patterns))
+	}
 }
 
 //* USEFUL ASSERTIONS
@@ -315,46 +410,4 @@ func listKeys(cache *LRUCache) []string {
 	}
 
 	return keys
-}
-
-func TestSetInitEmpty(t *testing.T) {
-	set := make(Set[string])
-
-	assert.Empty(t, set, "Expected set to be empty after initialization")
-}
-
-func TestSetAddAndHas(t *testing.T) {
-	assert := assert.New(t)
-
-	set := make(Set[string])
-
-	set.Add("a")
-
-	assert.Len(set, 1, "Expected set to increase length to 1 after adding an element, but length is now %d", len(set))
-
-	assert.True(set.Has("a"), "Expected set.Has to return true when the set includes the element: \"a\"")
-	assert.Contains(set, "a", "Expected set's underlying map to contain the element: \"a\"")
-
-	assert.False(set.Has("b"), "Expected set.Has to return false when the set does not include the element: \"b\"")
-	assert.NotContains(set, "b", "Expected set's underlying map to not contain the element: \"b\"")
-}
-
-func TestSetRemove(t *testing.T) {
-	set := make(Set[string])
-
-	set.Add("a")
-	set.Remove("a")
-
-	assert.False(t, set.Has("a"), "Expected set.Remove() to remove the element: \"a\"")
-	assert.NotContains(t, "a", "Expected set's underlying map to not contain the element: \"a\"")
-}
-
-func TestSetElements(t *testing.T) {
-	set := make(Set[string])
-
-	set.Add("a")
-	set.Add("b")
-
-	assert.ElementsMatch(t, set.Elements(), []string{"a", "b"}, "Expected set.Elements to return the elements: [ \"a\", \"b\" ]")
-	assert.Len(t, set, 2, "Expected set to only include 2 elements")
 }

@@ -5,24 +5,24 @@
     * f.eks. `GET:/posts/123`
     * Hvis det kan lade sig gøre, så ignorér alle overstregede punkter, da man ikke behøver flere entry maps
     * Steder der skal ændres med prefixmetoden:
-      * config.example.json5
+      * ✅ config.example.json5
         * ✅ `cache` skal være et map med GET og HEAD
         * ✅ Busting skal enten explicitere `GET:` etc foran busting eller ikke starte med `^` 
       * cli.go
         * addToConfig skal bruge cacheHEAD.Value() (udkommenteret nu) og tilføje værdien til c.Cache["HEAD"] i stedet for c.Cache
         * Ligeledes skal a.CacheGET gemmes i c.Cache["GET"] frem for i c.Cache
-      * cli_test.go
+      * ✅ cli_test.go
         * ✅ fjern // fra --cache:HEAD i generateArgs helper
         * ✅ brug korrekt GET: etc syntaks i generateArgs helper eller fjern ^ i start af patterns
           * ✅ Opdatér TestFlagParsings expected til at reflektere dette også
           * ✅ Gør det samme med TestConfigFileParsing
-      * testdata/test.config.json5
+      * ✅ testdata/test.config.json5
         * ✅ Skal have samme ændringer som config.example.json5 og sørge for at de matcher det som cli_test skal bruge
       * router.go
         * setCachingEndpoints skal have et ekstra loop over conf.Cache for at lave en caching middleware per endpoint i hver method
           * Dvs. ikke bare brug app.Get, gør det samme med app.Head og sørg for at loops er hen over conf.Cache["GET"] og conf.Cache["HEAD"] frem for bare conf.Cache
-      * router_test.go
-        * TestRouteParams skal bruge ny method-syntaks i patterns, så både test med ^GET:/^HEAD: og uden brugen af ^ i starten af pattern for at ramme alle methods
+      * ✅ router_test.go
+        * ✅ TestRouteParams skal bruge ny method-syntaks i patterns, så både test med `^GET:/^HEAD:` og uden brugen af ^ i starten af pattern for at ramme alle methods
       * controllers.go
         * readCacheMiddleware
           * cacheKey skal bruge method med `ctx.Method() + ":" + ctx.OriginalURL()` til at finde cached entries
@@ -35,16 +35,16 @@
         * ændr Config.Cache til at være et map af metoder med endpoints
         * ændr New() til at oprette .Cache som et map[string][]string og brug make() så de initieres tomme
         * ValidateRequiredProps skal ikke kun tjekke len(conf.Cache) men len af conf.Cache["HEAD"] og "GET"
-      * config/testdata/test.config.json5
-        * test.config.json5 skal have samme ændringer som config.example.json5
-      * config/testdata/missing-filerne
-        * Skal have ny syntaks
-      * config_test.go
-        * TestLoadProps skal assert.NotEmpty på config.Cache["HEAD"] og "GET" i stedet for bare config.Cache
-        * TestRequiredProps skal tjekke om cache er et map med indhold, ikke bare et array
-      * cache_test.go
-        * Hele filen skal bruge "GET:" og "HEAD:" til alle test entries
-        * TestMatch skal bruge nye syntaks i patterns til også at teste om den kan matche kun én metode og begge metoder vha. `^GET:` og ved at undlade brug af `^`
+      * ✅ config/testdata/test.config.json5
+        * ✅ test.config.json5 skal have samme ændringer som config.example.json5
+      * ✅ config/testdata/missing-filerne
+        * ✅ Skal have ny syntaks
+      * ✅ config_test.go
+        * ✅ TestLoadProps skal assert.NotEmpty på config.Cache["HEAD"] og "GET" i stedet for bare config.Cache
+        * ~~TestRequiredProps skal tjekke om cache er et map med indhold, ikke bare et array~~
+      * ✅cache_test.go
+        * ✅ Hele f ilen skal bruge "GET:" og "HEAD:" til alle test entries
+        * ✅ TestMatch skal bruge nye syntaks i patterns til også at teste om den kan matche kun én metode og begge metoder vha. `^GET:` og ved at undlade brug af `^`
   * FØRST SKRIV TESTS
   * ~~Kræver at cachens `entries` er et map af methods (GET og HEAD) som så er maps af endpoints med de gemte værdier~~
     * ~~Dette kræver at `cache.Size()` returner length af entries["HEAD"] + entries["GET"]~~
