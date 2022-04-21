@@ -44,7 +44,9 @@ func TestRequiredProps(t *testing.T) {
 	missingProps := []string{
 		"capacity",
 		"apiUrl",
-		"cache", // TODO: create a version where the prop exists but there are empty slices etc
+		"cache",      // TODO: create a version where the prop exists but there are empty slices etc
+		"cache.GET",  // TODO: create a version where the prop exists but there are empty slices etc
+		"cache.HEAD", // TODO: create a version where the prop exists but there are empty slices etc
 	}
 
 	for _, prop := range missingProps {

@@ -1,5 +1,7 @@
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
   * Kan det lade sig gøre med go uden at skulle lave any type?
+* Skriv test til TrimInvalidMethods og brug den alle steder, der laves en config
+* Test om man kan undlade så mange make() i config.New(), da den allerede kalder make(BustMap)
 * Caching af HEAD (se TODO i config.go) <-- fortsæt med at skrive tests inden implementering af resten af ændringer
   * SE OM IKKE DET KAN LADE SIG GØRE BARE AT PREFIXE ALLE CACHED ENDPOINTS MED METODEN
     * f.eks. `GET:/posts/123`
@@ -31,15 +33,18 @@
           * cacheKey skal sættes magen til i readCacheMiddleware, men skal gøres som det første i funktionen
           * logger.CacheSkip skal tage imod cacheKey i stedet for ctx.OriginalURL()
           * logget.CacheWrite skal tage imod cacheKey også
-      * config.go
-        * ændr Config.Cache til at være et map af metoder med endpoints
-        * ændr New() til at oprette .Cache som et map[string][]string og brug make() så de initieres tomme
-        * ValidateRequiredProps skal ikke kun tjekke len(conf.Cache) men len af conf.Cache["HEAD"] og "GET"
+      * ✅ config.go
+        * ✅ ændr Config.Cache til at være et map af metoder med endpoints
+        * ✅ ændr New() til at oprette .Cache som et map[string][]string og brug make() så de initieres tomme
+        * ✅ ValidateRequiredProps skal ikke kun tjekke len(conf.Cache) men len af conf.Cache["HEAD"] og "GET"
       * ✅ config/testdata/test.config.json5
         * ✅ test.config.json5 skal have samme ændringer som config.example.json5
       * ✅ config/testdata/missing-filerne
         * ✅ Skal have ny syntaks
-      * ✅ config_test.go
+      * config_test.go
+        * TestRequiredProps skal virke med de nye versioner af cache missing
+          * Lige nu panicer LoadJSON ikke, selvom der er filer, der slet ikke har cache.GET og cache.HEAD
+          * Der skal også laves testfiler, hvor disse keys findes, men bare er tomme slices
         * ✅ TestLoadProps skal assert.NotEmpty på config.Cache["HEAD"] og "GET" i stedet for bare config.Cache
         * ~~TestRequiredProps skal tjekke om cache er et map med indhold, ikke bare et array~~
       * ✅cache_test.go

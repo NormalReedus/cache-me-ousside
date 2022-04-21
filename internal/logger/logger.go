@@ -61,6 +61,10 @@ func CacheSkip(key string) {
 	infoLog.Println(clr.Sprint("CACHE SKIP - " + key))
 }
 
+func Info(msg string) {
+	infoLog.Println(msg)
+}
+
 func Warn(msg string) {
 	warningLog.Println(msg)
 }
