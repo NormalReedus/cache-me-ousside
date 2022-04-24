@@ -41,10 +41,10 @@
         * ✅ test.config.json5 skal have samme ændringer som config.example.json5
       * ✅ config/testdata/missing-filerne
         * ✅ Skal have ny syntaks
-      * config_test.go
-        * TestRequiredProps skal virke med de nye versioner af cache missing
-          * Lige nu panicer LoadJSON ikke, selvom der er filer, der slet ikke har cache.GET og cache.HEAD
-          * Der skal også laves testfiler, hvor disse keys findes, men bare er tomme slices
+      * ✅ config_test.go
+        * ✅ TestRequiredProps skal virke med de nye versioner af cache missing
+          * ✅ Lige nu panicer LoadJSON ikke, selvom der er filer, der slet ikke har cache.GET og cache.HEAD
+          * ✅ Der skal også laves testfiler, hvor disse keys findes, men bare er tomme slices
         * ✅ TestLoadProps skal assert.NotEmpty på config.Cache["HEAD"] og "GET" i stedet for bare config.Cache
         * ~~TestRequiredProps skal tjekke om cache er et map med indhold, ikke bare et array~~
       * ✅cache_test.go

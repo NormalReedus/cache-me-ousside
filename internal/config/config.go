@@ -16,13 +16,32 @@ var ALL_METHODS = []string{"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRA
 
 // var UNCACHEABLE_METHODS = []string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
 
+// Just has to initialize everything non-primitive so we don't assign to nil-maps
+func New() *Config {
+	bustMap := make(BustMap)
+	bustMap["POST"] = make(map[string][]string)
+	bustMap["PUT"] = make(map[string][]string)
+	bustMap["DELETE"] = make(map[string][]string)
+	bustMap["PATCH"] = make(map[string][]string)
+	bustMap["TRACE"] = make(map[string][]string)
+	bustMap["CONNECT"] = make(map[string][]string)
+	bustMap["OPTIONS"] = make(map[string][]string)
+
+	conf := &Config{
+		Cache: make(map[string][]string, 0),
+		Bust:  bustMap,
+	}
+
+	return conf
+}
+
 func LoadJSON(configPath string) *Config {
 	// Read the configuration json file
 	jsonFile, err := os.Open(configPath)
+	defer jsonFile.Close()
 	if err != nil {
 		logger.Panic(err)
 	}
-	defer jsonFile.Close()
 
 	jsonByteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
@@ -45,25 +64,6 @@ func LoadJSON(configPath string) *Config {
 	config.TrimInvalidMethods()
 
 	return config
-}
-
-// Just has to initialize everything non-primitive so we don't assign to nil-maps
-func New() *Config {
-	bustMap := make(BustMap)
-	bustMap["POST"] = make(map[string][]string)
-	bustMap["PUT"] = make(map[string][]string)
-	bustMap["DELETE"] = make(map[string][]string)
-	bustMap["PATCH"] = make(map[string][]string)
-	bustMap["TRACE"] = make(map[string][]string)
-	bustMap["CONNECT"] = make(map[string][]string)
-	bustMap["OPTIONS"] = make(map[string][]string)
-
-	conf := &Config{
-		Cache: make(map[string][]string, 0),
-		Bust:  bustMap,
-	}
-
-	return conf
 }
 
 type Config struct {
@@ -130,22 +130,42 @@ func (conf *Config) TrimInvalidMethods() {
 }
 
 func (conf *Config) ValidateRequiredProps() error {
+	missingProps := make([]string, 0)
+
 	if conf.Capacity == 0 {
-		return fmt.Errorf("Config should have a 'Capacity' to know how many entries the cache should hold")
+		missingProps = append(missingProps, "Capacity")
 	}
 
 	if conf.ApiUrl == "" {
-		return fmt.Errorf("Config should have an 'ApiUrl' to know where to proxy requests to and cache the data from")
+		missingProps = append(missingProps, "ApiUrl")
 	}
 
 	// If cache is missing, empty, or it doesn't have either
-	headMissing := conf.Cache["HEAD"] == nil || len(conf.Cache["HEAD"]) == 0
-	getMissing := conf.Cache["GET"] == nil || len(conf.Cache["GET"]) == 0
-	if conf.Cache == nil || (headMissing && getMissing) {
-		return fmt.Errorf("Config should have a list of caching endpoints with their respective HTTP request methods in either 'Cache[\"HEAD\"] or Cache[\"GET\"]")
+	//TODO: add support for just one Cache array that is used for both HEAD and GET
+	getExists := conf.cachePropExists("GET")
+	headExists := conf.cachePropExists("HEAD")
+
+	if !getExists && !headExists {
+		missingProps = append(missingProps, "Cache")
+	} else if !getExists {
+		missingProps = append(missingProps, "Cache[\"GET\"]")
+	} else if !headExists {
+		missingProps = append(missingProps, "Cache[\"HEAD\"]")
+	}
+
+	if len(missingProps) > 0 {
+		return fmt.Errorf("Config is missing the following required properties: %s", strings.Join(missingProps, ", "))
 	}
 
 	return nil
+}
+
+func (conf *Config) cachePropExists(prop string) bool {
+	if conf.Cache[prop] == nil || len(conf.Cache[prop]) == 0 {
+		return false
+	}
+
+	return true
 }
 
 func (conf Config) String() string {

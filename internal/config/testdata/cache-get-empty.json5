@@ -1,0 +1,33 @@
+{
+  "capacity": 5,
+  "capacityUnit": "",
+  "apiUrl": "https://jsonplaceholder.typicode.com/",
+  "cache":  {
+    "GET": [],
+    "HEAD": [ "/posts", "/posts/:id" ],
+  },
+  "bust": {
+    "POST": {
+      "/posts": [ "/posts" ]
+    },
+    "PUT": {
+      "/posts": [ "^GET:/posts", "^HEAD:/posts" ],
+      "/posts/:id": [ "/posts/:id" ]
+    },
+    "DELETE": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "PATCH": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "TRACE": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "CONNECT": {
+      "/posts": [ "/posts" ]
+    },
+    "OPTIONS": {
+      "/posts": [ "/posts" ]
+    },
+  }
+}

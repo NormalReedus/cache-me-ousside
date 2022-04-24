@@ -41,20 +41,25 @@ func TestBadPathPanic(t *testing.T) {
 
 // TODO: edit this when more required props are added to config
 func TestRequiredProps(t *testing.T) {
-	missingProps := []string{
-		"capacity",
-		"apiUrl",
-		"cache",      // TODO: create a version where the prop exists but there are empty slices etc
-		"cache.GET",  // TODO: create a version where the prop exists but there are empty slices etc
-		"cache.HEAD", // TODO: create a version where the prop exists but there are empty slices etc
+	type args struct {
+		testFileIdentifier string
+		property           string
+	}
+	tests := [...]args{
+		{"capacity-missing", "Capacity"},
+		{"api-url-missing", "ApiUrl"},
+		{"cache-get-missing", "Cache[\"GET\"]"},
+		{"cache-get-empty", "Cache[\"GET\"]"},
+		{"cache-head-missing", "Cache[\"HEAD\"]"},
+		{"cache-head-empty", "Cache[\"HEAD\"]"},
 	}
 
-	for _, prop := range missingProps {
-		configPath := "testdata/missing." + prop + ".json5"
+	for _, tt := range tests {
+		configPath := "testdata/" + tt.testFileIdentifier + ".json5"
 
 		assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-		assert.Panics(t, func() { LoadJSON(configPath) }, "Expected config.LoadJSON to panic when the file: %s is missing the required prop: %q", configPath, prop)
+		assert.Panics(t, func() { LoadJSON(configPath) }, "Expected config.LoadJSON(\"%s\") to panic when it does not have required prop: %q", configPath, tt.property)
 	}
 }
 

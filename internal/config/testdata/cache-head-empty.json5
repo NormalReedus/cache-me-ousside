@@ -2,6 +2,10 @@
   "capacity": 5,
   "capacityUnit": "",
   "apiUrl": "https://jsonplaceholder.typicode.com/",
+  "cache":  {
+    "GET": [ "/posts", "/posts/:id" ],
+    "HEAD": [],
+  },
   "bust": {
     "POST": {
       "/posts": [ "/posts" ]
