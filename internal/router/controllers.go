@@ -44,9 +44,9 @@ func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 // Otherwise we call Next() to proxy the request and get data from the api.
 func readCacheMiddleware(ctx *fiber.Ctx) error {
 	dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
-	cacheKey := ctx.OriginalURL()
+	entryKey := generateEntryKey(ctx)                  // which entry to look for in the cache
 
-	cachedData := dataCache.Get(cacheKey)
+	cachedData := dataCache.Get(entryKey)
 
 	// If there is no cached data, continue middlewares to proxy the request
 	if cachedData == nil {
@@ -62,8 +62,8 @@ func readCacheMiddleware(ctx *fiber.Ctx) error {
 	// Let people know they've been served
 	ctx.Set("X-LRU-Cache", "HIT")
 
-	// Let SysAdmin know they served from cache
-	logger.CacheRead(ctx.OriginalURL())
+	// Let SysAdmin know they served something from cache
+	logger.CacheRead(entryKey)
 
 	ctx.Send(cachedData.Body)
 
@@ -71,15 +71,15 @@ func readCacheMiddleware(ctx *fiber.Ctx) error {
 }
 
 func writeCacheMiddleware(ctx *fiber.Ctx) error {
+	entryKey := generateEntryKey(ctx) // the name to use when saving the entry in cache
 	// If the response is not a 2xx, don't cache it
 	status := ctx.Response().StatusCode()
 	if status < 200 && status >= 300 {
-		logger.CacheSkip(ctx.OriginalURL())
+		logger.CacheSkip(entryKey)
 		return nil
 	}
 
 	dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
-	cacheKey := ctx.OriginalURL()
 
 	// Init the current response
 	apiResponse := cache.CacheData{
@@ -88,9 +88,9 @@ func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	}
 
 	// Save the api response in cache
-	dataCache.Set(cacheKey, &apiResponse)
+	dataCache.Set(entryKey, &apiResponse)
 
-	logger.CacheWrite(ctx.OriginalURL())
+	logger.CacheWrite(entryKey)
 
 	return nil // this is always last step, so no Next()
 }
@@ -108,4 +108,8 @@ func createBustMiddleware(patterns []string) func(*fiber.Ctx) error {
 		ctx.Next()
 		return nil
 	}
+}
+
+func generateEntryKey(ctx *fiber.Ctx) string {
+	return ctx.Method() + ":" + ctx.OriginalURL()
 }
