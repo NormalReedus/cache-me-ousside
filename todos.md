@@ -10,9 +10,9 @@
       * ✅ config.example.json5
         * ✅ `cache` skal være et map med GET og HEAD
         * ✅ Busting skal enten explicitere `GET:` etc foran busting eller ikke starte med `^` 
-      * cli.go
-        * addToConfig skal bruge cacheHEAD.Value() (udkommenteret nu) og tilføje værdien til c.Cache["HEAD"] i stedet for c.Cache
-        * Ligeledes skal a.CacheGET gemmes i c.Cache["GET"] frem for i c.Cache
+      * ✅ cli.go
+        * ✅ addToConfig skal bruge cacheHEAD.Value() (udkommenteret nu) og tilføje værdien til c.Cache["HEAD"] i stedet for c.Cache
+        * ✅ Ligeledes skal a.CacheGET gemmes i c.Cache["GET"] frem for i c.Cache
       * ✅ cli_test.go
         * ✅ fjern // fra --cache:HEAD i generateArgs helper
         * ✅ brug korrekt GET: etc syntaks i generateArgs helper eller fjern ^ i start af patterns
@@ -21,8 +21,8 @@
       * ✅ testdata/test.config.json5
         * ✅ Skal have samme ændringer som config.example.json5 og sørge for at de matcher det som cli_test skal bruge
       * router.go
-        * setCachingEndpoints skal have et ekstra loop over conf.Cache for at lave en caching middleware per endpoint i hver method
-          * Dvs. ikke bare brug app.Get, gør det samme med app.Head og sørg for at loops er hen over conf.Cache["GET"] og conf.Cache["HEAD"] frem for bare conf.Cache
+        * ✅ setCachingEndpoints skal have et ekstra loop over conf.Cache for at lave en caching middleware per endpoint i hver method
+          * ✅ Dvs. ikke bare brug app.Get, gør det samme med app.Head og sørg for at loops er hen over conf.Cache["GET"] og conf.Cache["HEAD"] frem for bare conf.Cache
       * ✅ router_test.go
         * ✅ TestRouteParams skal bruge ny method-syntaks i patterns, så både test med `^GET:/^HEAD:` og uden brugen af ^ i starten af pattern for at ramme alle methods
       * controllers.go

@@ -46,15 +46,11 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 		c.ApiUrl = a.apiUrl
 	}
 	if len(a.cacheGET.Value()) > 0 {
-		c.Cache = a.cacheGET.Value()
+		c.Cache["GET"] = a.cacheGET.Value()
 	}
-	// if len(a.cacheHEAD.Value()) > 0 {
-	// 	c.Cache = a.cacheHead.Value()
-	// }
-
-	// if len(a.bustPOST.Value()) >= 2 {
-	// 	c.Bust["POST"][a.bustPOST.Value()[0]] = a.bustPOST.Value()[1:]
-	// }
+	if len(a.cacheHEAD.Value()) > 0 {
+		c.Cache["HEAD"] = a.cacheHEAD.Value()
+	}
 
 	// Every busting flag should be a string of a path followed by a colon and then a comma separated list of regex patterns to bust
 	// so for every Value() we split on colon and comma to set the endpoint and the patterns

@@ -46,16 +46,19 @@ func setBustingEndpoints(app *fiber.App, conf *config.Config) {
 // 2. proxies the request to apiUrl and gets a response, then
 // 3. sets the response in the cache
 func setCachingEndpoints(app *fiber.App, conf *config.Config) {
-	for _, endpoint := range conf.Cache {
-		app.Get(
-			endpoint,
+	// These are the middlewares needed for caching
+	middlewares := []func(*fiber.Ctx) error{
+		readCacheMiddleware,
+		createProxyMiddleware(conf.ApiUrl),
+		writeCacheMiddleware,
+	}
 
-			readCacheMiddleware,
-
-			createProxyMiddleware(conf.ApiUrl), // needs ApiUrl to proxy request
-
-			writeCacheMiddleware,
-		)
+	// For both cacheable methods, set middlewares on each defined endpoint to cache
+	for _, endpoint := range conf.Cache["GET"] {
+		app.Get(endpoint, middlewares...)
+	}
+	for _, endpoint := range conf.Cache["HEAD"] {
+		app.Head(endpoint, middlewares...)
 	}
 }
 
