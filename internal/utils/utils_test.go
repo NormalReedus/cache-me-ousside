@@ -3,8 +3,13 @@ package utils
 import (
 	"testing"
 
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	logger.Initialize("")
+}
 
 func TestToBytes(t *testing.T) {
 	assert := assert.New(t)

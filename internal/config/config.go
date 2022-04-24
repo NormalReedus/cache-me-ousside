@@ -28,7 +28,7 @@ func New() *Config {
 	bustMap["OPTIONS"] = make(map[string][]string)
 
 	conf := &Config{
-		Cache: make(map[string][]string, 0),
+		Cache: make(CacheMap),
 		Bust:  bustMap,
 	}
 
@@ -61,18 +61,18 @@ func LoadJSON(configPath string) *Config {
 	// Clean the API url
 	config.TrimTrailingSlash()
 	// Remove invalid methods and let the user know
-	config.TrimInvalidMethods()
+	config.RemoveInvalidMethods()
 
 	return config
 }
 
 type Config struct {
-	Capacity     uint64              `json:"capacity"`     // required
-	CapacityUnit string              `json:"capacityUnit"` // Used if you want memory based cache limit
-	ApiUrl       string              `json:"apiUrl"`       // required
-	LogFilePath  string              `json:"logFilePath"`
-	Cache        map[string][]string `json:"cache"` // required (either GET or HEAD)
-	Bust         BustMap             `json:"bust"`
+	Capacity     uint64   `json:"capacity"`     // required
+	CapacityUnit string   `json:"capacityUnit"` // Used if you want memory based cache limit
+	ApiUrl       string   `json:"apiUrl"`       // required
+	LogFilePath  string   `json:"logFilePath"`
+	Cache        CacheMap `json:"cache"` // required (either GET or HEAD)
+	Bust         BustMap  `json:"bust"`
 }
 
 func (conf *Config) TrimTrailingSlash() {
@@ -80,7 +80,7 @@ func (conf *Config) TrimTrailingSlash() {
 }
 
 // Removes all map keys that are not valid methods and prints a warning to let the user know, that they might have mistyped
-func (conf *Config) TrimInvalidMethods() {
+func (conf *Config) RemoveInvalidMethods() {
 	// Keep track of if an invalid method was spotted, if so, print a list of the valid methods
 	invalidCacheMethod := false
 	invalidBustMethod := false
@@ -90,7 +90,7 @@ func (conf *Config) TrimInvalidMethods() {
 		if !contains(CACHEABLE_METHODS, method) {
 
 			delete(conf.Cache, method)
-			logger.Warn(fmt.Sprintf("%q is not a valid cacheable method, it will be ignored", method))
+			logger.Warn(fmt.Sprintf("%s is not a valid cacheable http method, it will be ignored", method))
 
 			invalidCacheMethod = true
 		}
@@ -101,18 +101,18 @@ func (conf *Config) TrimInvalidMethods() {
 		if !contains(ALL_METHODS, method) {
 
 			delete(conf.Bust, method)
-			logger.Warn(fmt.Sprintf("%q is not a valid busting method, it will be ignored", method))
+			logger.Warn(fmt.Sprintf("%s is not a valid busting http method, it will be ignored", method))
 
 			invalidCacheMethod = true
 		}
 	}
 
 	if invalidCacheMethod {
-		logger.Info(fmt.Sprintf("The following methods are valid cacheable methods:\n%s", strings.Join(CACHEABLE_METHODS, ", ")))
+		logger.Info(fmt.Sprintf("The following methods are valid cacheable methods: %s", strings.Join(CACHEABLE_METHODS, ", ")))
 	}
 
 	if invalidBustMethod {
-		logger.Info(fmt.Sprintf("The following methods are valid busting methods:\n%s", strings.Join(ALL_METHODS, ", ")))
+		logger.Info(fmt.Sprintf("The following methods are valid busting methods: %s", strings.Join(ALL_METHODS, ", ")))
 	}
 }
 
@@ -163,5 +163,8 @@ func (conf Config) String() string {
 	return string(confJSON)
 }
 
-// Is a map of methods with maps of endpoints with slices of patterns to match to cache entries to bust.
+// Is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust.
 type BustMap map[string]map[string][]string
+
+// Is a map of http methods with slices of endpoints to cache requests to.
+type CacheMap map[string][]string

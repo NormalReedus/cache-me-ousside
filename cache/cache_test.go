@@ -3,6 +3,7 @@ package cache
 import (
 	"testing"
 
+	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,6 +13,10 @@ var testData = CacheData{
 		"X-Test":       "hi-mom",
 	},
 	Body: []byte(`{"test": "hi mom"}`),
+}
+
+func init() {
+	logger.Initialize("")
 }
 
 func TestRequiredCapacity(t *testing.T) {

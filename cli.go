@@ -94,6 +94,14 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 			parseAndSetBustArgs(c, "OPTIONS", args)
 		}
 	}
+
+	// Make sure the config is valid
+	if err := c.ValidateRequiredProps(); err != nil {
+		logger.Panic(err)
+	}
+
+	c.TrimTrailingSlash()
+	c.RemoveInvalidMethods()
 }
 
 func createConfFromCli() *config.Config {
@@ -102,7 +110,7 @@ func createConfFromCli() *config.Config {
 
 	app := &cli.App{
 		Name:      "cache-me-ousside",
-		Version:   "0.0.1",
+		Version:   "0.1.0",
 		Compiled:  time.Now(),
 		Copyright: "(c) 2022 Magnus Bendix Borregaard",
 		Authors: []*cli.Author{
@@ -215,14 +223,8 @@ func createConfFromCli() *config.Config {
 			}
 
 			// Add / overwrite cli arguments to config
-			args.addToConfig(conf)
+			args.addToConfig(conf) // will also trim and validate config
 
-			// Make sure the config is valid
-			if err := conf.ValidateRequiredProps(); err != nil {
-				logger.Panic(err)
-			}
-
-			conf.TrimTrailingSlash() // Make sure all routes starting with / will work correctly when proxied
 			return nil
 		},
 	}

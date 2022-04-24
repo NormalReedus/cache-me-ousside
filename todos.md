@@ -1,7 +1,5 @@
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
   * Kan det lade sig gøre med go uden at skulle lave any type?
-* Skriv test til TrimInvalidMethods og brug den alle steder, der laves en config
-* Test om man kan undlade så mange make() i config.New(), da den allerede kalder make(BustMap)
 * Se om man kan bruge iota eller den der auto-inkrementérbare const til utils.ToBytes (se Golang Dojo video om const)
 * Testing
   * ~~Tests til routeren: https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf~~
