@@ -25,6 +25,7 @@ func TestFlagParsing(t *testing.T) {
 	assert.EqualValues(555, conf.Capacity, "Expected the flag --capacity to set conf.Capacity to 555, got %d", conf.Capacity)
 	assert.Equal("mb", conf.CapacityUnit, "Expected the flag --capacity-unit to set conf.CapacityUnit to \"mb\", got %q", conf.CapacityUnit)
 	assert.Equal("https://jsonplaceholder.typicode.com", conf.ApiUrl, "Expected the flag --api-url to set conf.ApiUrl to \"https://jsonplaceholder.typicode.com\", got %q", conf.ApiUrl)
+	assert.Equal("logfile.log", conf.LogFilePath, "Expected the flag --logfile to set conf.LogFilePath to \"logfile.log\", got %q", conf.LogFilePath)
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["GET"], "Expected the flag --cache:GET to set conf.Cache[\"GET\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["GET"])
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["HEAD"], "Expected the flag --cache:HEAD to set conf.Cache[\"HEAD\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["HEAD"])
 	assert.Equal([]string{"/posts"}, conf.Bust["POST"]["/posts"], "Expected the flag --bust:POST to set conf.Bust[\"POST\"][\"/posts\"] to %v, got %v", []string{"/posts"}, conf.Bust["POST"]["/posts"])
@@ -50,6 +51,7 @@ func TestConfigFileParsing(t *testing.T) {
 	assert.EqualValues(555, conf.Capacity, "Expected the prop capacity to set conf.Capacity to 555, got %d", conf.Capacity)
 	assert.Equal("mb", conf.CapacityUnit, "Expected the prop capacityUnit to set conf.CapacityUnit to \"mb\", got %q", conf.CapacityUnit)
 	assert.Equal("https://jsonplaceholder.typicode.com", conf.ApiUrl, "Expected the prop apiUrl to set conf.ApiUrl to \"https://jsonplaceholder.typicode.com\", got %q", conf.ApiUrl)
+	assert.Equal("logfile.log", conf.LogFilePath, "Expected the prop logFilePath to set conf.LogFilePath to \"logfile.log\", got %q", conf.LogFilePath)
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["GET"], "Expected the prop cache.GET to set conf.Cache[\"GET\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["GET"])
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["HEAD"], "Expected the prop cache.HEAD to set conf.Cache[\"HEAD\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["HEAD"])
 	assert.Equal([]string{"/posts"}, conf.Bust["POST"]["/posts"], "Expected the prop bust.POST to set conf.Bust[\"POST\"][\"/posts\"] to %v, got %v", []string{"/posts"}, conf.Bust["POST"]["/posts"])
@@ -81,6 +83,7 @@ func generateArgs() []string {
 		"--capacity", "555",
 		"--capacity-unit", "mb",
 		"--api-url", "https://jsonplaceholder.typicode.com/",
+		"--logfile", "logfile.log",
 		"--cache:GET", "/posts",
 		"--cache:GET", "/posts/:id",
 		"--cache:HEAD", "/posts",

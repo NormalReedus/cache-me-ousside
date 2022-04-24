@@ -1,8 +1,8 @@
-* Load logfil i main fra config
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
   * Kan det lade sig gøre med go uden at skulle lave any type?
 * Skriv test til TrimInvalidMethods og brug den alle steder, der laves en config
 * Test om man kan undlade så mange make() i config.New(), da den allerede kalder make(BustMap)
+* Se om man kan bruge iota eller den der auto-inkrementérbare const til utils.ToBytes (se Golang Dojo video om const)
 * Testing
   * ~~Tests til routeren: https://dev.to/koddr/go-fiber-by-examples-testing-the-application-1ldf~~
   * Se på code coverage om der er dele, der ikke bliver testet
@@ -21,6 +21,12 @@
   * Lyt på når API beder om at buste cache
 * Find ud af hvordan man manipulerer hostname, hvis man ikke vil bruge endnu en reverse proxy
 * Memorybaseret caching limit (se TODO i config.go)
+  * Create a method to return the cache capacity
+  * if CapacityUnit is set, use utils.ToBytes to convert the capacity to bytes
+  * otherwise return the capacity as a number of entries
+  * (maybe there should be something that tells whether we use entries og memory)
+  * when busting a cache entry, we should then use utils.MemUsage to compare with the capacity
+  * when deciding whether to evict, instead of using entries. Using one over the other should be checked with a bool on the config that is initialized in the factory function, so busting knows whether to use memory or entries
 * Print konfigurationen af cachen når den kører
   * Brug Config.String()
 * README

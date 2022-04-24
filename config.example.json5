@@ -2,6 +2,7 @@
   "capacity": 5,
   "capacityUnit": "",
   "apiUrl": "https://jsonplaceholder.typicode.com/",
+  "logFilePath": "logfile.log",
   "cache":  {
     // GET and HEAD requests to /posts and /posts/:id will be cached (e.g.) with the key "GET:/posts/123"
     "GET": [ "/posts", "/posts/:id" ],

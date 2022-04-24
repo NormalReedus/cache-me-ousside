@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/NormalReedus/cache-me-ousside/internal/router"
@@ -11,12 +9,11 @@ import (
 func main() {
 	conf := createConfFromCli()
 
-	logFile := logger.Initialize("log.log")
+	// If there is no logfile set, just use stdout
+	logFile := logger.Initialize(conf.LogFilePath)
 	if logFile != nil {
 		defer logFile.Close()
 	}
-
-	fmt.Println(conf) //TODO print the prettified / human-readable configuration
 
 	dataCache := cache.New(conf.Capacity)
 

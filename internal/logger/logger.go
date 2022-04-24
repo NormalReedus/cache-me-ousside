@@ -13,6 +13,7 @@ import (
 
 const (
 	DEFAULT_FLAGS = log.Ldate | log.Ltime | log.Lmsgprefix
+	PREFIX_SEP    = " => "
 )
 
 var (
@@ -39,15 +40,6 @@ func Initialize(logFilepath string) *os.File {
 	warningLog.SetFlags(DEFAULT_FLAGS)
 	errorLog.SetFlags(DEFAULT_FLAGS)
 
-	// clrInfo := color.New(color.Bold)
-	// infoLog = log.New(os.Stdout, clrInfo.Sprint("ℹ️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
-
-	// clrWarn := color.New(color.FgYellow, color.Bold)
-	// warningLog = log.New(os.Stdout, clrWarn.Sprint("⚠️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
-
-	// clrErr := color.New(color.FgRed, color.Bold)
-	// errorLog = log.New(os.Stdout, clrErr.Sprint("⛔ "), log.Ldate|log.Ltime|log.Lmsgprefix)
-
 	// Use this for CACHE [OPERATION] printing with / without color
 	if logFile == nil {
 		terminalMode = true
@@ -55,17 +47,6 @@ func Initialize(logFilepath string) *os.File {
 
 	return logFile // Will be nil in terminal mode
 }
-
-// func init() {
-// 	clrInfo := color.New(color.Bold)
-// 	infoLog = log.New(os.Stdout, clrInfo.Sprint("ℹ️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
-
-// 	clrWarn := color.New(color.FgYellow, color.Bold)
-// 	warningLog = log.New(os.Stdout, clrWarn.Sprint("⚠️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
-
-// 	clrErr := color.New(color.FgRed, color.Bold)
-// 	errorLog = log.New(os.Stdout, clrErr.Sprint("⛔ "), log.Ldate|log.Ltime|log.Lmsgprefix)
-// }
 
 func setLogFileMode(filepath string) *os.File {
 	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -84,26 +65,21 @@ func setLogFileMode(filepath string) *os.File {
 }
 
 func setTerminalMode() {
-	// infoLog := log.New(os.Stdout, clrInfo.Sprint("ℹ️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
 	clrInfo := color.New(color.Bold)
 	infoLog.SetOutput(os.Stdout)
 	infoLog.SetPrefix(clrInfo.Sprint("ℹ️ "))
 
-	// warningLog := log.New(os.Stdout, clrWarn.Sprint("⚠️ "), log.Ldate|log.Ltime|log.Lmsgprefix)
 	clrWarn := color.New(color.FgYellow, color.Bold)
 	warningLog.SetOutput(os.Stdout)
 	warningLog.SetPrefix(clrWarn.Sprint("⚠️ "))
 
-	// errorLog := log.New(os.Stdout, clrErr.Sprint("⛔ "), log.Ldate|log.Ltime|log.Lmsgprefix)
 	clrErr := color.New(color.FgRed, color.Bold)
 	errorLog.SetOutput(os.Stdout)
 	errorLog.SetPrefix(clrErr.Sprint("⛔ "))
-
-	// return infoLog, warningLog, errorLog
 }
 
 func CacheWrite(key string) {
-	msg := "CACHE WRITE => " + key
+	msg := "CACHE WRITE" + PREFIX_SEP + key
 
 	if terminalMode {
 		clr := color.New(color.FgBlue, color.Bold)
@@ -114,7 +90,7 @@ func CacheWrite(key string) {
 }
 
 func CacheRead(key string) {
-	msg := "CACHE READ => " + key
+	msg := "CACHE READ" + PREFIX_SEP + key
 
 	if terminalMode {
 		clr := color.New(color.FgGreen, color.Bold)
@@ -125,7 +101,7 @@ func CacheRead(key string) {
 }
 
 func CacheEvict(key string) {
-	msg := "CACHE EVICT => " + key
+	msg := "CACHE EVICT" + PREFIX_SEP + key
 
 	if terminalMode {
 		clr := color.New(color.FgRed, color.Bold)
@@ -136,7 +112,7 @@ func CacheEvict(key string) {
 }
 
 func CacheBust(key string) {
-	msg := "CACHE BUST => " + key
+	msg := "CACHE BUST" + PREFIX_SEP + key
 
 	if terminalMode {
 		clr := color.New(color.FgRed, color.Bold)
@@ -147,7 +123,7 @@ func CacheBust(key string) {
 }
 
 func CacheSkip(key string) {
-	msg := "CACHE SKIP => " + key
+	msg := "CACHE SKIP" + PREFIX_SEP + key
 
 	if terminalMode {
 		clr := color.New(color.FgYellow, color.Bold)
@@ -173,11 +149,9 @@ func Panic(err error) {
 	errorLog.Panicln(err)
 }
 
-// func Fatal(err error) {
-// 	errorLog.Fatalln(err)
-// }
-
 func HiMom(apiUrl string, port string) {
+	// Take the whole conf object instead, and print something like:
+	// "Spinning up the microservice with the following configuration:" and pretty print the conf with the String() implementation
 	urlClr := color.New(color.FgHiGreen, color.Underline)
 	cacheClr := color.New(color.FgBlue, color.Underline)
 

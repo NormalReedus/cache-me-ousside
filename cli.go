@@ -20,6 +20,7 @@ type CLIArgs struct {
 	capacity     uint64
 	capacityUnit string
 	apiUrl       string
+	logFilePath  string
 	cacheGET     cli.StringSlice // will contain all the paths to cache on GET requests
 	cacheHEAD    cli.StringSlice // will contain all the paths to cache on HEAD requests
 	bustPOST     cli.StringSlice // first element is the path, rest are the patterns of entries to bust
@@ -45,6 +46,10 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 	if a.apiUrl != "" {
 		c.ApiUrl = a.apiUrl
 	}
+	if a.logFilePath != "" {
+		c.LogFilePath = a.logFilePath
+	}
+
 	if len(a.cacheGET.Value()) > 0 {
 		c.Cache["GET"] = a.cacheGET.Value()
 	}
@@ -132,8 +137,14 @@ func createConfFromCli() *config.Config {
 			&cli.StringFlag{
 				Destination: &args.apiUrl,
 				Name:        "api-url",
-				Aliases:     []string{"u"},
+				Aliases:     []string{"url", "u"},
 				Usage:       "the `URL` of the API to cache",
+			},
+			&cli.StringFlag{
+				Destination: &args.logFilePath,
+				Name:        "logfile",
+				Aliases:     []string{"log", "l"},
+				Usage:       "the `FILEPATH` to the log file to use for persistent logs. Omit this to output logs to stdout",
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.cacheGET,

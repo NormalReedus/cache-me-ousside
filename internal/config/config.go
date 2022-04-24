@@ -70,23 +70,10 @@ type Config struct {
 	Capacity     uint64              `json:"capacity"`     // required
 	CapacityUnit string              `json:"capacityUnit"` // Used if you want memory based cache limit
 	ApiUrl       string              `json:"apiUrl"`       // required
-	Cache        map[string][]string `json:"cache"`        // required
+	LogFilePath  string              `json:"logFilePath"`
+	Cache        map[string][]string `json:"cache"` // required (either GET or HEAD)
 	Bust         BustMap             `json:"bust"`
 }
-
-// TODO: add support for caching HEAD requests as well
-// This requires creating a type for conf.Cache that works like a map
-// and updating the middleware factory for caching
-
-// TODO: add memory based cache limit
-// Create a method to return the cache capacity
-// if CapacityUnit is set, use utils.ToBytes to convert the capacity to bytes
-// otherwise return the capacity as a number of entries
-// (maybe there should be something that tells whether we use entries og memory)
-// when busting a cache entry, we should then use utils.MemUsage to compare with the capacity
-// when deciding whether to evict, instead of using entries. Using one over the other should
-// be checked with a bool on the config that is initialized in the factory function, so busting
-// knows whether to use memory or entries
 
 func (conf *Config) TrimTrailingSlash() {
 	conf.ApiUrl = strings.TrimSuffix(conf.ApiUrl, "/")
@@ -141,7 +128,6 @@ func (conf *Config) ValidateRequiredProps() error {
 	}
 
 	// If cache is missing, empty, or it doesn't have either
-	//TODO: add support for just one Cache array that is used for both HEAD and GET
 	getExists := conf.cachePropExists("GET")
 	headExists := conf.cachePropExists("HEAD")
 

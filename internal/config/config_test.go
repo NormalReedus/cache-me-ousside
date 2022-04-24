@@ -20,6 +20,7 @@ func TestLoadProps(t *testing.T) {
 	assert.Positive(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a positive number")
 
 	assert.NotZero(config.ApiUrl, "Expected required prop config.ApiUrl to be loaded correctly as a non-zero value")
+	assert.NotZero(config.LogFilePath, "Expected prop config.LogFilePath to be loaded correctly as a non-zero value")
 
 	assert.NotEmpty(config.Cache["HEAD"], "Expected config.Cache[\"HEAD\"] to not be empty when given a valid config file")
 	assert.NotEmpty(config.Cache["GET"], "Expected config.Cache[\"GET\"] to not be empty when given a valid config file")
