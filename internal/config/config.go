@@ -38,10 +38,10 @@ func New() *Config {
 func LoadJSON(configPath string) *Config {
 	// Read the configuration json file
 	jsonFile, err := os.Open(configPath)
-	defer jsonFile.Close()
 	if err != nil {
 		logger.Panic(err)
 	}
+	defer jsonFile.Close()
 
 	jsonByteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {

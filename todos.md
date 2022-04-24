@@ -1,3 +1,4 @@
+* Load logfil i main fra config
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
   * Kan det lade sig gøre med go uden at skulle lave any type?
 * Skriv test til TrimInvalidMethods og brug den alle steder, der laves en config
