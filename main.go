@@ -22,7 +22,7 @@ func main() {
 	app := router.New(conf, dataCache)
 
 	// Say hello in terminal
-	logger.HiMom(conf.ApiUrl, PORT)
+	logger.HiMom(conf.String(), PORT)
 
 	// Set logger to use log file if any is provided
 	if conf.LogFilePath != "" {

@@ -1,12 +1,13 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 
+	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/flynn/json5"
 )
@@ -15,6 +16,12 @@ var CACHEABLE_METHODS = []string{"GET", "HEAD"}
 var ALL_METHODS = []string{"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
 
 // var UNCACHEABLE_METHODS = []string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
+
+// Is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust.
+type BustMap map[string]map[string][]string
+
+// Is a map of http methods with slices of endpoints to cache requests to.
+type CacheMap map[string][]string
 
 // Just has to initialize everything non-primitive so we don't assign to nil-maps
 func New() *Config {
@@ -73,6 +80,32 @@ type Config struct {
 	LogFilePath  string   `json:"logFilePath"`
 	Cache        CacheMap `json:"cache"` // required (either GET or HEAD)
 	Bust         BustMap  `json:"bust"`
+}
+
+// Returns size in bytes or entries as first value and a byteMode bool indicating if the capacity unit is bytes or entries.
+// When byteMode is true, the capacity is in bytes, otherwise it is in entries.
+func (conf Config) CapacityParsed() (size uint64, byteMode bool) {
+	if contains(cache.VALID_CAP_UNITS, strings.ToUpper(conf.CapacityUnit)) {
+		bytes, err := cache.ToBytes(conf.Capacity, conf.CapacityUnit)
+		if err != nil {
+			logger.Panic(err)
+		}
+
+		return bytes, true
+	}
+
+	return conf.Capacity, false
+}
+
+// If capacity is measured in entries, just return the number of entries. Otherwise return the amount of memory the cache can use with the unit appended.
+func (conf Config) CapacityString() string {
+	cap, byteMode := conf.CapacityParsed()
+
+	if byteMode {
+		return fmt.Sprintf("%d %s", cap, conf.CapacityUnit)
+	}
+
+	return strconv.FormatUint(cap, 10)
 }
 
 func (conf *Config) TrimTrailingSlash() {
@@ -155,16 +188,10 @@ func (conf *Config) cachePropExists(prop string) bool {
 }
 
 func (conf Config) String() string {
-	// TODO: make this print in a non-json format to display configuration when server runs
-	confJSON, err := json.MarshalIndent(conf, "", "  ")
-	if err != nil {
-		logger.Warn("there was an issue printing the configuration")
-	}
-	return string(confJSON)
+	var str string
+
+	str += fmt.Sprintf("Capacity: %s\n", conf.CapacityString())
+	str += fmt.Sprintf("Proxied API URL: %s\n", conf.ApiUrl)
+
+	return str
 }
-
-// Is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust.
-type BustMap map[string]map[string][]string
-
-// Is a map of http methods with slices of endpoints to cache requests to.
-type CacheMap map[string][]string

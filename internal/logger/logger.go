@@ -149,15 +149,16 @@ func Panic(err error) {
 	errorLog.Panicln(err)
 }
 
-func HiMom(apiUrl string, port string) {
-	// Take the whole conf object instead, and print something like:
-	// "Spinning up the microservice with the following configuration:" and pretty print the conf with the String() implementation
-	urlClr := color.New(color.FgHiGreen, color.Underline)
-	cacheClr := color.New(color.FgBlue, color.Underline)
+func HiMom(confString string, port string) {
+	fmt.Println("You LRU cache microservice is spinning up with the following configuration:")
+	fmt.Println(confString)
 
-	fmt.Println()
-	fmt.Println("Your LRU cache microservice is caching requests to your proxied API.")
-	fmt.Println()
-	fmt.Println("Proxied API: " + urlClr.Sprint(apiUrl))
-	fmt.Println("Cache URL: " + cacheClr.Sprint("http://localhost:"+port))
+	// urlClr := color.New(color.FgHiGreen, color.Underline)
+	// cacheClr := color.New(color.FgBlue, color.Underline)
+
+	// fmt.Println()
+	// fmt.Println("Your LRU cache microservice is caching requests to your proxied API.")
+	// fmt.Println()
+	// fmt.Println("Proxied API: " + urlClr.Sprint(apiUrl))
+	// fmt.Println("Cache URL: " + cacheClr.Sprint("http://localhost:"+port))
 }

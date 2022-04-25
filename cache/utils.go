@@ -80,21 +80,23 @@ const (
 	TB
 )
 
+var VALID_CAP_UNITS = []string{"B", "KB", "MB", "GB", "TB"}
+
 // Converts kb, mb, gb, tb to bytes.
 // If the unit is not set, it will return the size passed into the function as if they are already in bytes.
 func ToBytes(size uint64, unit string) (uint64, error) {
-	unit = strings.ToLower(unit)
+	unit = strings.ToUpper(unit)
 
 	switch unit {
-	case "b":
+	case "B":
 		return size, nil
-	case "kb":
+	case "KB":
 		return size * KB, nil
-	case "mb":
+	case "MB":
 		return size * MB, nil
-	case "gb":
+	case "GB":
 		return size * GB, nil
-	case "tb":
+	case "TB":
 		return size * TB, nil
 	default:
 		err := fmt.Errorf("unknown unit: %q", unit)

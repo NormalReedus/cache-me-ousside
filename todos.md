@@ -1,5 +1,10 @@
-* Print konfigurationen af cachen når den kører
+* Print konfigurationen af cachen når den kører <--
   * Brug Config.String()
+  * Tilføj HOST og PORT til config
+    * Tilføj også til cli og config-filer
+    * Husk at opdatere tests
+* Skriv validater til capacity unit
+  * antag alle andre steder, at capacity unit altid er valid, siden den blev tjekket ved start
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
   * Kan det lade sig gøre med go uden at skulle lave any type?
 * Testing
