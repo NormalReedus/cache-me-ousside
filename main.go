@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NormalReedus/cache-me-ousside/cache"
+	commandline "github.com/NormalReedus/cache-me-ousside/internal/cli"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/NormalReedus/cache-me-ousside/internal/router"
 )
@@ -11,7 +12,7 @@ func main() {
 	logger.Initialize("") // we want all startup errors etc to be logged to terminal, then we will log to file later if one is provided
 
 	// Get configuration struct from CLI (which might read a config file, if provided)
-	conf := createConfFromCli()
+	conf := commandline.CreateConfFromCli()
 
 	// Create the actual cache to hold entries
 	dataCache := cache.New(conf.Capacity)

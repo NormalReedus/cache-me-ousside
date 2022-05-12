@@ -1,3 +1,7 @@
+* VIGTIGST
+  * FIX: en opdatering til urfave/cli/v2 (https://github.com/urfave/cli/releases/tag/v2.6.0 - simplified flag value access) har fucket parsing af flags <--
+    * cli.go linje 74 prøver at parse argumenter, hvor der først splittes på `=>` for at skelne mellem endpoint og bust pattern, for derefter at splitte på `,` for at skelne mellem separate patterns. Problemet er, at den nye opdatering nu splitter komma, så det sker først. Dermed fejler parseren, fordi den tjekker efter `=>`, som nu ikke er i alle de splittede args.
+      * Jeg er ikke sikker på om denne forklaring er helt rigtig, da `args` burde være en string inde i parseAndSetBustArgs.
 * Deploy beta til npm / gopkg / github
   * gopkg kræver en standard for dokumentation og comments (do that)
   * Skal i første omgang kun deployes som en applikation (ikke et modul), så man bare kan køre programmet.

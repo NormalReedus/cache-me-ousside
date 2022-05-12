@@ -1,4 +1,4 @@
-package main
+package commandline
 
 import (
 	"fmt"
@@ -11,9 +11,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// const DEFAULT_CONFIG_PATH = "./cache.config.json5"
-
-// TODO: https://github.com/urfave/cli/blob/master/docs/v2/manual.md#getting-started
 // set up with cli, making everything in config file optional
 type CLIArgs struct {
 	configPath   string
@@ -112,7 +109,7 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 	c.RemoveInvalidMethods()
 }
 
-func createConfFromCli() *config.Config {
+func CreateConfFromCli() *config.Config {
 	args := CLIArgs{} // holds the flags that should overwrite potential config file values
 	var conf *config.Config
 

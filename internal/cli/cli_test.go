@@ -1,4 +1,4 @@
-package main
+package commandline
 
 import (
 	"os"
@@ -20,7 +20,7 @@ func TestFlagParsing(t *testing.T) {
 
 	os.Args = generateArgs()
 
-	conf := createConfFromCli()
+	conf := CreateConfFromCli()
 
 	assert.EqualValues(555, conf.Capacity, "Expected the flag --capacity to set conf.Capacity to 555, got %d", conf.Capacity)
 	assert.Equal("mb", conf.CapacityUnit, "Expected the flag --capacity-unit to set conf.CapacityUnit to \"mb\", got %q", conf.CapacityUnit)
@@ -48,7 +48,7 @@ func TestConfigFileParsing(t *testing.T) {
 
 	os.Args = []string{"cmd", "--config", "./testdata/test.config.json5"}
 
-	conf := createConfFromCli()
+	conf := CreateConfFromCli()
 
 	assert.EqualValues(555, conf.Capacity, "Expected the prop 'capacity' to set conf.Capacity to 555, got %d", conf.Capacity)
 	assert.Equal("mb", conf.CapacityUnit, "Expected the prop 'capacityUnit' to set conf.CapacityUnit to \"mb\", got %q", conf.CapacityUnit)
@@ -76,7 +76,7 @@ func TestFlagsOverwriteConfigFile(t *testing.T) {
 
 	os.Args = []string{"cmd", "--config", "./testdata/test.config.json5", "--api-url", "test"}
 
-	conf := createConfFromCli()
+	conf := CreateConfFromCli()
 
 	assert.Equal("test", conf.ApiUrl, "Expected the passed flag (--api-url) to overwrite the prop (apiUrl) specified in the config file, but got %q", conf.ApiUrl)
 
