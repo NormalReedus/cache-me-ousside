@@ -1,3 +1,8 @@
+* Deploy beta til npm / gopkg / github
+  * gopkg kræver en standard for dokumentation og comments (do that)
+  * Skal i første omgang kun deployes som en applikation (ikke et modul), så man bare kan køre programmet.
+    * Så på npm skal der være dokumentation, der siger at man skal installere globalt, men er gopkg overhovedet et sted, man deployer apps?
+      * Måske skal man bare deploy buildet binary til github som release, så man kan install med `go get` eller `go install` eller hvad end man nu gør for applikationer.
 * Skriv validater til capacity unit
   * antag alle andre steder, at capacity unit altid er valid, siden den blev tjekket ved start
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
