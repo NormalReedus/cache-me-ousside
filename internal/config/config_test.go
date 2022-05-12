@@ -19,6 +19,8 @@ func TestLoadProps(t *testing.T) {
 	assert.NotZero(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a non-zero value")
 	assert.Positive(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a positive number")
 
+	assert.NotZero(config.Hostname, "Expected required prop config.Hostname to be loaded correctly as a non-zero value")
+	assert.NotZero(config.Port, "Expected required prop config.Port to be loaded correctly as a non-zero value")
 	assert.NotZero(config.ApiUrl, "Expected required prop config.ApiUrl to be loaded correctly as a non-zero value")
 	assert.NotZero(config.LogFilePath, "Expected prop config.LogFilePath to be loaded correctly as a non-zero value")
 
@@ -46,6 +48,8 @@ func TestRequiredProps(t *testing.T) {
 	}
 	tests := [...]args{
 		{"capacity-missing", "Capacity"},
+		{"hostname-missing", "Hostname"},
+		{"port-missing", "Port"},
 		{"api-url-missing", "ApiUrl"},
 		{"cache-get-missing", "Cache[\"GET\"]"},
 		{"cache-get-empty", "Cache[\"GET\"]"},

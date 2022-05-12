@@ -1,8 +1,3 @@
-* Print konfigurationen af cachen når den kører <--
-  * Brug Config.String()
-  * Tilføj HOST og PORT til config
-    * Tilføj også til cli og config-filer
-    * Husk at opdatere tests
 * Skriv validater til capacity unit
   * antag alle andre steder, at capacity unit altid er valid, siden den blev tjekket ved start
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
@@ -26,6 +21,8 @@
   * (maybe there should be something that tells whether we use entries og memory)
   * when busting a cache entry, we should then use utils.MemUsage to compare with the capacity
   * when deciding whether to evict, instead of using entries. Using one over the other should be checked with a bool on the config that is initialized in the factory function, so busting knows whether to use memory or entries
+* Servér en side /info, der viser konfigurationen og hvordan man bruger cachen (gerne med konkrete eksempler ud fra de routes, man har sat etc)
+  * Lav en config til at ændre på routen, hvis man vil bruge andet end /info
 * README
   * Beskriv alle flags / config props + hvordan man laver multiple vals (f.eks. flere cache:GET hvor man skal gentage flaget)
   * Beskriv hvordan route params kan bustes med : og hvordan det altid bliver parsed før regex

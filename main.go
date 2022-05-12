@@ -6,8 +6,6 @@ import (
 	"github.com/NormalReedus/cache-me-ousside/internal/router"
 )
 
-const PORT = "3000"
-
 func main() {
 	// Initialize logger in terminal mode to log any startup errors to stdout before a potential log file is provided
 	logger.Initialize("") // we want all startup errors etc to be logged to terminal, then we will log to file later if one is provided
@@ -22,7 +20,7 @@ func main() {
 	app := router.New(conf, dataCache)
 
 	// Say hello in terminal
-	logger.HiMom(conf.String(), PORT)
+	logger.HiMom(conf.String(), conf.Address())
 
 	// Set logger to use log file if any is provided
 	if conf.LogFilePath != "" {
@@ -33,5 +31,5 @@ func main() {
 	}
 
 	// Start the server
-	logger.Panic(app.Listen("localhost:" + PORT))
+	logger.Panic(app.Listen(conf.Address()))
 }

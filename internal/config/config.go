@@ -10,12 +10,12 @@ import (
 	"github.com/NormalReedus/cache-me-ousside/cache"
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/flynn/json5"
+	"github.com/olekukonko/tablewriter"
 )
 
-var CACHEABLE_METHODS = []string{"GET", "HEAD"}
 var ALL_METHODS = []string{"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
-
-// var UNCACHEABLE_METHODS = []string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
+var CACHEABLE_METHODS = ALL_METHODS[0:2]  //  []string{"GET", "HEAD"}
+var UNCACHEABLE_METHODS = ALL_METHODS[2:] // []string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
 
 // Is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust.
 type BustMap map[string]map[string][]string
@@ -76,6 +76,8 @@ func LoadJSON(configPath string) *Config {
 type Config struct {
 	Capacity     uint64   `json:"capacity"`     // required
 	CapacityUnit string   `json:"capacityUnit"` // Used if you want memory based cache limit
+	Hostname     string   `json:"hostname"`     // required
+	Port         uint     `json:"port"`         // required
 	ApiUrl       string   `json:"apiUrl"`       // required
 	LogFilePath  string   `json:"logFilePath"`
 	Cache        CacheMap `json:"cache"` // required (either GET or HEAD)
@@ -102,10 +104,15 @@ func (conf Config) CapacityString() string {
 	cap, byteMode := conf.CapacityParsed()
 
 	if byteMode {
-		return fmt.Sprintf("%d %s", cap, conf.CapacityUnit)
+		return fmt.Sprintf("%d%s", conf.Capacity, strings.ToUpper(conf.CapacityUnit)) // e.g., "100 MB"
 	}
 
-	return strconv.FormatUint(cap, 10)
+	return strconv.FormatUint(cap, 10) + " entries" // e.g. "100 entries"
+}
+
+// hostname:port
+func (conf Config) Address() string {
+	return fmt.Sprintf("%s:%d", conf.Hostname, conf.Port)
 }
 
 func (conf *Config) TrimTrailingSlash() {
@@ -160,6 +167,14 @@ func (conf *Config) ValidateRequiredProps() error {
 		missingProps = append(missingProps, "ApiUrl")
 	}
 
+	if conf.Hostname == "" {
+		missingProps = append(missingProps, "Host")
+	}
+
+	if conf.Port == 0 {
+		missingProps = append(missingProps, "Port")
+	}
+
 	// If cache is missing, empty, or it doesn't have either
 	getExists := conf.cachePropExists("GET")
 	headExists := conf.cachePropExists("HEAD")
@@ -188,10 +203,54 @@ func (conf *Config) cachePropExists(prop string) bool {
 }
 
 func (conf Config) String() string {
-	var str string
+	// tablewriter writes data to an io.Writer, so we need something that can be written to and converted to a string
+	output := new(strings.Builder)
 
-	str += fmt.Sprintf("Capacity: %s\n", conf.CapacityString())
-	str += fmt.Sprintf("Proxied API URL: %s\n", conf.ApiUrl)
+	//* Create general config table
+	output.WriteString("\nGeneral Configuration\n")
+	generalTable := tablewriter.NewWriter(output)
+	generalTable.SetHeader([]string{"Property", "Value"})
+	generalTable.SetAutoMergeCells(true)
+	generalTable.SetRowLine(true)
+	generalTable.AppendBulk([][]string{
+		{"Cache address", conf.Address()},
+		{"Proxied API URL", conf.ApiUrl},
+		{"Capacity", conf.CapacityString()},
+		{"Log file", conf.LogFilePath},
+	})
+	generalTable.Render()
 
-	return str
+	//* Create cache config table
+	output.WriteString("\nCached Endpoints\n")
+	cacheRows := [][]string{}
+	for _, method := range CACHEABLE_METHODS {
+		for _, endpoint := range conf.Cache[method] {
+			cacheRows = append(cacheRows, []string{method, endpoint})
+		}
+	}
+	cacheTable := tablewriter.NewWriter(output)
+	cacheTable.SetHeader([]string{"Method", "Endpoints"})
+	cacheTable.SetAutoMergeCells(true)
+	cacheTable.SetRowLine(true)
+	cacheTable.AppendBulk(cacheRows)
+	cacheTable.Render()
+
+	//* Create bust config table
+	output.WriteString("\nBusting Patterns\n")
+	bustRows := [][]string{}
+	for _, method := range UNCACHEABLE_METHODS {
+		for endpoint, endpointMap := range conf.Bust[method] {
+			for _, pattern := range endpointMap {
+				bustRows = append(bustRows, []string{method, endpoint, pattern})
+			}
+		}
+	}
+	bustTable := tablewriter.NewWriter(output)
+	bustTable.SetHeader([]string{"Method", "Endpoints", "Patterns"})
+	bustTable.SetAutoMergeCells(true)
+	bustTable.SetRowLine(true)
+	bustTable.AppendBulk(bustRows)
+	bustTable.Render()
+
+	return output.String()
 }

@@ -1,6 +1,8 @@
 {
   "capacity": 5,
   "capacityUnit": "",
+  "hostname": "localhost",
+  "port": 8080,
   "cache":  {
     "GET": [ "/posts", "/posts/:id" ],
     "HEAD": [ "/posts", "/posts/:id" ],

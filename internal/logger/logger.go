@@ -149,16 +149,10 @@ func Panic(err error) {
 	errorLog.Panicln(err)
 }
 
-func HiMom(confString string, port string) {
-	fmt.Println("You LRU cache microservice is spinning up with the following configuration:")
+func HiMom(confString string, url string) {
+	urlClr := color.New(color.FgBlue, color.Underline)
+
+	fmt.Printf("You LRU cache microservice is running on %s with the following configuration:\n", urlClr.Sprint(url))
+
 	fmt.Println(confString)
-
-	// urlClr := color.New(color.FgHiGreen, color.Underline)
-	// cacheClr := color.New(color.FgBlue, color.Underline)
-
-	// fmt.Println()
-	// fmt.Println("Your LRU cache microservice is caching requests to your proxied API.")
-	// fmt.Println()
-	// fmt.Println("Proxied API: " + urlClr.Sprint(apiUrl))
-	// fmt.Println("Cache URL: " + cacheClr.Sprint("http://localhost:"+port))
 }

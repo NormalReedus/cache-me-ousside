@@ -19,6 +19,8 @@ type CLIArgs struct {
 	configPath   string
 	capacity     uint64
 	capacityUnit string
+	hostname     string
+	port         uint
 	apiUrl       string
 	logFilePath  string
 	cacheGET     cli.StringSlice // will contain all the paths to cache on GET requests
@@ -42,6 +44,12 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 	}
 	if a.capacityUnit != "" {
 		c.CapacityUnit = a.capacityUnit
+	}
+	if a.hostname != "" {
+		c.Hostname = a.hostname
+	}
+	if a.port != 0 {
+		c.Port = a.port
 	}
 	if a.apiUrl != "" {
 		c.ApiUrl = a.apiUrl
@@ -141,6 +149,18 @@ func createConfFromCli() *config.Config {
 				Name:        "capacity-unit",
 				Aliases:     []string{"cu"},
 				Usage:       "set this to use a memory-based instead of entry-based cache capacity. Valid `UNIT`s are 'b', 'kb', 'mb', 'gb', and 'tb'",
+			},
+			&cli.StringFlag{
+				Destination: &args.hostname,
+				Name:        "hostname",
+				Aliases:     []string{"host", "hn"},
+				Usage:       "the `HOSTNAME` where the cache is accessible",
+			},
+			&cli.UintFlag{
+				Destination: &args.port,
+				Name:        "port",
+				Aliases:     []string{"p"},
+				Usage:       "the `PORT` where the cache is accessible",
 			},
 			&cli.StringFlag{
 				Destination: &args.apiUrl,
