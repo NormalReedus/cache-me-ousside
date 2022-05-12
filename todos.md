@@ -1,7 +1,3 @@
-* VIGTIGST
-  * FIX: en opdatering til urfave/cli/v2 (https://github.com/urfave/cli/releases/tag/v2.6.0 - simplified flag value access) har fucket parsing af flags <--
-    * cli.go linje 74 prøver at parse argumenter, hvor der først splittes på `=>` for at skelne mellem endpoint og bust pattern, for derefter at splitte på `,` for at skelne mellem separate patterns. Problemet er, at den nye opdatering nu splitter komma, så det sker først. Dermed fejler parseren, fordi den tjekker efter `=>`, som nu ikke er i alle de splittede args.
-      * Jeg er ikke sikker på om denne forklaring er helt rigtig, da `args` burde være en string inde i parseAndSetBustArgs.
 * Deploy beta til npm / gopkg / github
   * gopkg kræver en standard for dokumentation og comments (do that)
   * Skal i første omgang kun deployes som en applikation (ikke et modul), så man bare kan køre programmet.
@@ -33,8 +29,13 @@
 * Servér en side /info, der viser konfigurationen og hvordan man bruger cachen (gerne med konkrete eksempler ud fra de routes, man har sat etc)
   * Lav en config til at ændre på routen, hvis man vil bruge andet end /info
 * README
-  * Beskriv alle flags / config props + hvordan man laver multiple vals (f.eks. flere cache:GET hvor man skal gentage flaget)
-    * Og husk at man skal bruge citationstegn for at undgå at `>` outputter til en fil (tjek om dette stadig gør sig gældende ved den nyeste løsning)
+  * Beskriv alle flags / config props
+    * Og hvordan man laver multiple vals 
+      * f.eks. flere cache:GET hvor man skal gentage flaget
+      * Eller flere bust:POST hvor man enten gentager flaget eller kommaseparerer værdier
+      * Og beskriv syntaksen for bust cli argumenter med `=>` og `||` samt grunden til tegnene
+    * Og husk at man skal bruge citationstegn for at undgå at `>` outputter til en fil
+    * Vis eksempler på alle kombinationer af at bruge komma, || og at tilføje flere flags med samme navn til at buste
   * Beskriv hvordan route params kan bustes med : og hvordan det altid bliver parsed før regex
   * Beskriv hvordan dette er lavet til en almindelig REST api og derfor ikke kan garantere at virke med andre slags API, dvs. at det bygger på safe og unsafe http metoder, hvoraf f.eks. kun GET og HEAD er cacheable og man kan definere entries på baggrund af den route, der er brugt til at requeste entries, da REST er bygget sådan, at routes er lig med ressourcer
     * F.eks. virker det her ikke med GraphQL

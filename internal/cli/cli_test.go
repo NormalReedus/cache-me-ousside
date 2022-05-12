@@ -28,10 +28,10 @@ func TestFlagParsing(t *testing.T) {
 	assert.EqualValues(8080, conf.Port, "Expected the flag --port to set conf.Port to 8080, got %d", conf.Port)
 	assert.Equal("https://jsonplaceholder.typicode.com", conf.ApiUrl, "Expected the flag --api-url to set conf.ApiUrl to \"https://jsonplaceholder.typicode.com\", got %q", conf.ApiUrl)
 	assert.Equal("logfile.log", conf.LogFilePath, "Expected the flag --logfile to set conf.LogFilePath to \"logfile.log\", got %q", conf.LogFilePath)
-	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["GET"], "Expected the flag --cache:GET to set conf.Cache[\"GET\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["GET"])
+	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["GET"], "Expected the flag --cache:GET with comma-separated values to set conf.Cache[\"GET\"] to both of %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["GET"])
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["HEAD"], "Expected the flag --cache:HEAD to set conf.Cache[\"HEAD\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["HEAD"])
 	assert.Equal([]string{"/posts"}, conf.Bust["POST"]["/posts"], "Expected the flag --bust:POST to set conf.Bust[\"POST\"][\"/posts\"] to %v, got %v", []string{"/posts"}, conf.Bust["POST"]["/posts"])
-	assert.Equal([]string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"], "Expected the flag --bust:PUT to set conf.Bust[\"PUT\"][\"/posts\"] to %v, got %v", []string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"])
+	assert.Equal([]string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"], "Expected the flag --bust:PUT with multiple patterns to set conf.Bust[\"PUT\"][\"/posts\"] to both of %v, got %v", []string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"])
 	assert.Equal([]string{"/posts/:id"}, conf.Bust["PUT"]["/posts/:id"], "Expected the flag --bust:PUT to set conf.Bust[\"PUT\"][\"/posts/:id\"] to %v, got %v", []string{"/posts/:id"}, conf.Bust["PUT"]["/posts/:id"])
 	assert.Equal([]string{"/posts"}, conf.Bust["DELETE"]["/posts/:id"], "Expected the flag --bust:DELETE to set conf.Bust[\"DELETE\"][\"/posts/:id\"] to %v, got %v", []string{"/posts"}, conf.Bust["DELETE"]["/posts/:id"])
 	assert.Equal([]string{"/posts"}, conf.Bust["PATCH"]["/posts/:id"], "Expected the flag --bust:PATCH to set conf.Bust[\"PATCH\"][\"/posts/:id\"] to %v, got %v", []string{"/posts"}, conf.Bust["PATCH"]["/posts/:id"])
@@ -92,10 +92,9 @@ func generateArgs() []string {
 		"--logfile", "logfile.log",
 		"--cache:GET", "/posts",
 		"--cache:GET", "/posts/:id",
-		"--cache:HEAD", "/posts",
-		"--cache:HEAD", "/posts/:id",
+		"--cache:HEAD", "/posts,/posts/:id",
 		"--bust:POST", "/posts=>/posts",
-		"--bust:PUT", "/posts=>^GET:/posts,^HEAD:/posts",
+		"--bust:PUT", "/posts=>^GET:/posts||^HEAD:/posts",
 		"--bust:PUT", "/posts/:id=>/posts/:id",
 		"--bust:DELETE", "/posts/:id=>/posts",
 		"--bust:PATCH", "/posts/:id=>/posts",

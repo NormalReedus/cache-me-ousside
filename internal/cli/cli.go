@@ -11,6 +11,9 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const ROUTE_SEP_CHAR = "=>"
+const PATTERN_SEP_CHAR = "||"
+
 // set up with cli, making everything in config file optional
 type CLIArgs struct {
 	configPath   string
@@ -264,10 +267,10 @@ func CreateConfFromCli() *config.Config {
 
 func parseAndSetBustArgs(c *config.Config, method, args string) {
 	// All busting args must have an arrow (=>) to separate the route from the busting pattern
-	if !strings.Contains(args, "=>") {
+	if !strings.Contains(args, ROUTE_SEP_CHAR) {
 		parseBustArgError(method, args)
 	}
-	routeAndPatterns := strings.Split(args, "=>")
+	routeAndPatterns := strings.Split(args, ROUTE_SEP_CHAR)
 	if len(routeAndPatterns) != 2 {
 		parseBustArgError(method, args)
 	}
@@ -280,7 +283,7 @@ func parseAndSetBustArgs(c *config.Config, method, args string) {
 		parseBustArgError(method, args)
 	}
 
-	patterns := strings.Split(routeAndPatterns[1], ",")
+	patterns := strings.Split(routeAndPatterns[1], PATTERN_SEP_CHAR)
 
 	if route == "" || patterns == nil || len(patterns) == 0 {
 		parseBustArgError(method, args)
@@ -290,5 +293,5 @@ func parseAndSetBustArgs(c *config.Config, method, args string) {
 }
 
 func parseBustArgError(method, args string) {
-	logger.Panic(fmt.Errorf("Invalid %s bust argument: %q.\nArgument must be in the format '[route]=>[regex-pattern],[regex-pattern]...'", method, args))
+	logger.Panic(fmt.Errorf("Invalid %s bust argument: %q.\nArgument must be in the format '[route]=>[regex-pattern]||[regex-pattern]...'", method, args))
 }
