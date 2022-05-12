@@ -1,4 +1,7 @@
 * Deploy beta til npm / gopkg / github
+  * https://go.dev/doc/modules/publishing
+  * https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+  * https://go.dev/doc/modules/release-workflow
   * gopkg kræver en standard for dokumentation og comments (do that)
   * Skal i første omgang kun deployes som en applikation (ikke et modul), så man bare kan køre programmet.
     * Så på npm skal der være dokumentation, der siger at man skal installere globalt, men er gopkg overhovedet et sted, man deployer apps?
