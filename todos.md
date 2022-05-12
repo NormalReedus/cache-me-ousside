@@ -34,6 +34,7 @@
   * Lav en config til at ændre på routen, hvis man vil bruge andet end /info
 * README
   * Beskriv alle flags / config props + hvordan man laver multiple vals (f.eks. flere cache:GET hvor man skal gentage flaget)
+    * Og husk at man skal bruge citationstegn for at undgå at `>` outputter til en fil (tjek om dette stadig gør sig gældende ved den nyeste løsning)
   * Beskriv hvordan route params kan bustes med : og hvordan det altid bliver parsed før regex
   * Beskriv hvordan dette er lavet til en almindelig REST api og derfor ikke kan garantere at virke med andre slags API, dvs. at det bygger på safe og unsafe http metoder, hvoraf f.eks. kun GET og HEAD er cacheable og man kan definere entries på baggrund af den route, der er brugt til at requeste entries, da REST er bygget sådan, at routes er lig med ressourcer
     * F.eks. virker det her ikke med GraphQL
