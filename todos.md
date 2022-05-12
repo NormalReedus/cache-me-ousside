@@ -1,8 +1,16 @@
 * Deploy beta til npm / gopkg / github
-  * https://go.dev/doc/modules/publishing
-  * https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
-  * https://go.dev/doc/modules/release-workflow
-  * gopkg kræver en standard for dokumentation og comments (do that)
+  * Kommentarer efter godoc standards
+  * README
+  * License
+  * Tjek exported props osv, gør ting private hvis ikke andre skal kunne bruge det
+    * Tjek om folk kan bruge ting fra internal, når de er exported
+  * Tjek error messages / duplication af dem
+    * F.eks. logger.Panic duplikerer vist fordi den både logger og panicer?
+  * Links
+    * Den her er SUPER https://www.digitalocean.com/community/tutorials/how-to-distribute-go-modules
+    * https://go.dev/doc/modules/publishing
+    * https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+    * https://go.dev/doc/modules/release-workflow
   * Skal i første omgang kun deployes som en applikation (ikke et modul), så man bare kan køre programmet.
     * Så på npm skal der være dokumentation, der siger at man skal installere globalt, men er gopkg overhovedet et sted, man deployer apps?
       * Måske skal man bare deploy buildet binary til github som release, så man kan install med `go get` eller `go install` eller hvad end man nu gør for applikationer.

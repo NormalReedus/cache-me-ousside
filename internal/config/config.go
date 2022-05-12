@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -60,7 +61,7 @@ func LoadJSON(configPath string) *Config {
 	json5.Unmarshal(jsonByteValue, &config)
 
 	// Check if required props are present
-	validationErr := config.ValidateRequiredProps()
+	validationErr := config.ValidateProps()
 	if validationErr != nil {
 		logger.Panic(validationErr)
 	}
@@ -156,9 +157,14 @@ func (conf *Config) RemoveInvalidMethods() {
 	}
 }
 
-func (conf *Config) ValidateRequiredProps() error {
-	missingProps := make([]string, 0)
+func (conf *Config) ValidateProps() error {
+	var errorStr string
 
+	if _, err := cache.ToBytes(conf.Capacity, conf.CapacityUnit); err != nil && conf.CapacityUnit != "" {
+		errorStr += fmt.Sprintf("%s\n", err)
+	}
+
+	missingProps := make([]string, 0)
 	if conf.Capacity == 0 {
 		missingProps = append(missingProps, "Capacity")
 	}
@@ -188,7 +194,11 @@ func (conf *Config) ValidateRequiredProps() error {
 	}
 
 	if len(missingProps) > 0 {
-		return fmt.Errorf("Config is missing the following required properties: %s", strings.Join(missingProps, ", "))
+		errorStr += fmt.Sprintf("Config is missing the following required properties: %s\n", strings.Join(missingProps, ", "))
+	}
+
+	if errorStr != "" {
+		return errors.New(errorStr)
 	}
 
 	return nil

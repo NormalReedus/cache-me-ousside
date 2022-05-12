@@ -104,7 +104,7 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 	}
 
 	// Make sure the config is valid
-	if err := c.ValidateRequiredProps(); err != nil {
+	if err := c.ValidateProps(); err != nil {
 		logger.Panic(err)
 	}
 
