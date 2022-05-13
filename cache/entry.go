@@ -7,6 +7,7 @@ import (
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 )
 
+// newEntry returns a CacheEntry with the given key and data.
 func newEntry(key string, data *CacheData) *CacheEntry {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -22,13 +23,21 @@ func newEntry(key string, data *CacheData) *CacheEntry {
 	return entry
 }
 
+// CacheEntry is used to represent one entry in the LRUCache.
+// It is like a node in a linked list.
 type CacheEntry struct {
-	key  string
-	data []byte // marshaled json of CacheData
+	// key is the name of the entry in the cache.
+	// It is usually named after the route that is being cached.
+	key string
+	// data is a marshaled CacheData, which contains both headers and body of an API response.
+	data []byte
+	// next contains a newer CacheEntry in the cache.
 	next *CacheEntry
+	// prev contains an older CacheEntry in the cache.
 	prev *CacheEntry
 }
 
+// SetNext will insert a newEntry after the current entry in the linked list.
 func (entry *CacheEntry) SetNext(newEntry *CacheEntry) *CacheEntry {
 	if newEntry == nil {
 		return nil
@@ -48,22 +57,27 @@ func (entry *CacheEntry) SetNext(newEntry *CacheEntry) *CacheEntry {
 	return newEntry
 }
 
+// UnmarshalData returns a CacheData from the marshaled json data in the entry.
 func (entry *CacheEntry) UnmarshalData() CacheData {
 	return NewCacheDataFromJSON(entry.data)
 }
 
+// Key returns the key of the entry.
 func (entry CacheEntry) Key() string {
 	return entry.key
 }
 
+// Data returns the data of the entry.
 func (entry CacheEntry) Data() []byte {
 	return entry.data
 }
 
+// Prev returns the previous entry in the cache.
 func (entry *CacheEntry) Prev() *CacheEntry {
 	return entry.prev
 }
 
+// Next returns the next entry in the cache.
 func (entry *CacheEntry) Next() *CacheEntry {
 	return entry.next
 }

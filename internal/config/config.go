@@ -1,3 +1,4 @@
+// Package config loads, validates, and manages the configuration for the LRUCache.
 package config
 
 import (
@@ -14,17 +15,27 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-var ALL_METHODS = []string{"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
-var CACHEABLE_METHODS = ALL_METHODS[0:2]  //  []string{"GET", "HEAD"}
-var UNCACHEABLE_METHODS = ALL_METHODS[2:] // []string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
+var (
+	// AllMethods is a slice of all valid http methods to use in the cache configuration for busting.
+	// 	{"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
+	AllMethods = []string{"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
 
-// Is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust.
-type BustMap map[string]map[string][]string
+	// CacheableMethods is a slice of all cacheable http methods that can be used in the cache configuration for caching.
+	// 	{"GET", "HEAD"}
+	CacheableMethods = AllMethods[0:2]
 
-// Is a map of http methods with slices of endpoints to cache requests to.
-type CacheMap map[string][]string
+	// UncacheableMethods = AllMethods[2:] // []string{"POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
+)
 
-// Just has to initialize everything non-primitive so we don't assign to nil-maps
+type (
+	// BustMap represents a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust.
+	BustMap map[string]map[string][]string
+	// CacheMap represents a map of http methods with slices of endpoints to which requests should be cached.
+	CacheMap map[string][]string
+)
+
+// New returns a Config where Bust and Cache are initialized to empty BustMap and CacheMap respectively.
+// This is done to avoid nil pointers when accessing the nested map properties.
 func New() *Config {
 	bustMap := make(BustMap)
 	bustMap["POST"] = make(map[string][]string)
@@ -43,6 +54,11 @@ func New() *Config {
 	return conf
 }
 
+/*
+LoadJSON returns a Config created from unmarshaling the json5 file at configPath.
+It will also validate the props of the configuration and trim invalid http methods
+in the configuration as well as trailing slashes in the ApiUrl.
+*/
 func LoadJSON(configPath string) *Config {
 	// Read the configuration json file
 	jsonFile, err := os.Open(configPath)
@@ -74,19 +90,58 @@ func LoadJSON(configPath string) *Config {
 	return config
 }
 
+// Config represents the configuration for the cache-me-ousside application.
 type Config struct {
-	Capacity     uint64   `json:"capacity"`     // required
-	CapacityUnit string   `json:"capacityUnit"` // Used if you want memory based cache limit
-	Hostname     string   `json:"hostname"`     // required
-	Port         uint     `json:"port"`         // required
-	ApiUrl       string   `json:"apiUrl"`       // required
-	LogFilePath  string   `json:"logFilePath"`
-	Cache        CacheMap `json:"cache"` // required (either GET or HEAD)
-	Bust         BustMap  `json:"bust"`
+	// Capacity is required, it represents the limit to how much data can be stored in the cache.
+	Capacity uint64 `json:"capacity"`
+	/*
+		CapacityUnit represents the unit of measurement for the capacity.
+		If omitted, the cache Capacity will be measured in entries.
+		Set CapacityUnit to a string to use memory as the unit of measurement, e.g. "mb".
+	*/
+	CapacityUnit string `json:"capacityUnit"`
+	/*
+		Hostname is required, it represents the hostname where the server application can be accessed. E.g.:
+			"localhost".
+	*/
+	Hostname string `json:"hostname"`
+	/*
+		Port is required, it represents the port where the server application can be accessed. E.g.:
+		 	8080
+	*/
+	Port uint `json:"port"`
+	// ApiUrl is required, it represents the url of the API to which all requests are proxied and cached from.
+	ApiUrl string `json:"apiUrl"`
+	// LogFilePath is the path to an optional log file to use instead of stdout (terminal mode).
+	LogFilePath string `json:"logFilePath"`
+	/*
+		Cache is a map of http methods with slices of endpoints to which requests should be cached. E.g.:
+			{
+				"GET": ["/api/v1/users/:id", "/api/v1/users/:id/posts"],
+				"HEAD": ["/api/v1/users/:id", "/api/v1/users/:id/posts"],
+			}
+	*/
+	Cache CacheMap `json:"cache"` // required (either GET or HEAD)
+	/*
+		Bust is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust. E.g.:
+			{
+				"POST": {
+					"/posts": [ "/posts" ]
+				},
+				"PUT": {
+					"/posts": [ "^GET:/posts", "^HEAD:/posts" ],
+					"/posts/:id": [ "/posts/:id" ]
+				}
+			}
+	*/
+	Bust BustMap `json:"bust"`
 }
 
-// Returns size in bytes or entries as first value and a byteMode bool indicating if the capacity unit is bytes or entries.
-// When byteMode is true, the capacity is in bytes, otherwise it is in entries.
+/*
+CapacityParsed returns size in bytes or entries as first value and a byteMode bool
+indicating if the capacity unit is bytes or entries.
+If CapacityUnit is a valid memory size string, the size is converted from the memory unit to bytes (e.g., mb -> bytes).
+*/
 func (conf Config) CapacityParsed() (size uint64, byteMode bool) {
 	if contains(cache.VALID_CAP_UNITS, strings.ToUpper(conf.CapacityUnit)) {
 		bytes, err := cache.ToBytes(conf.Capacity, conf.CapacityUnit)
@@ -100,6 +155,7 @@ func (conf Config) CapacityParsed() (size uint64, byteMode bool) {
 	return conf.Capacity, false
 }
 
+// CapacityString returns a human-readable string representation of the cache capacity.
 // If capacity is measured in entries, just return the number of entries. Otherwise return the amount of memory the cache can use with the unit appended.
 func (conf Config) CapacityString() string {
 	cap, byteMode := conf.CapacityParsed()
@@ -111,16 +167,20 @@ func (conf Config) CapacityString() string {
 	return strconv.FormatUint(cap, 10) + " entries" // e.g. "100 entries"
 }
 
-// hostname:port
+// Address returns the server address in the format hostname:port.
+// This is where the server application can be accessed.
 func (conf Config) Address() string {
 	return fmt.Sprintf("%s:%d", conf.Hostname, conf.Port)
 }
 
+// TrimTrailingSlash mutates the ApiUrl to remove any trailing slashes.
+// This is useful so all specified endpoints and patterns can begin with a slash.
 func (conf *Config) TrimTrailingSlash() {
 	conf.ApiUrl = strings.TrimSuffix(conf.ApiUrl, "/")
 }
 
-// Removes all map keys that are not valid methods and prints a warning to let the user know, that they might have mistyped
+// RemoveInvalidMethods removes all map keys that are not valid http methods
+// and prints a warning to let the user know, that they might have mistyped the configuration.
 func (conf *Config) RemoveInvalidMethods() {
 	// Keep track of if an invalid method was spotted, if so, print a list of the valid methods
 	invalidCacheMethod := false
@@ -128,7 +188,7 @@ func (conf *Config) RemoveInvalidMethods() {
 
 	// Only HEAD and GET are valid cacheable methods
 	for method := range conf.Cache {
-		if !contains(CACHEABLE_METHODS, method) {
+		if !contains(CacheableMethods, method) {
 
 			delete(conf.Cache, method)
 			logger.Warn(fmt.Sprintf("%s is not a valid cacheable http method, it will be ignored", method))
@@ -139,7 +199,7 @@ func (conf *Config) RemoveInvalidMethods() {
 
 	// Bust methods can be any valid method
 	for method := range conf.Bust {
-		if !contains(ALL_METHODS, method) {
+		if !contains(AllMethods, method) {
 
 			delete(conf.Bust, method)
 			logger.Warn(fmt.Sprintf("%s is not a valid busting http method, it will be ignored", method))
@@ -149,14 +209,16 @@ func (conf *Config) RemoveInvalidMethods() {
 	}
 
 	if invalidCacheMethod {
-		logger.Info(fmt.Sprintf("The following methods are valid cacheable methods: %s", strings.Join(CACHEABLE_METHODS, ", ")))
+		logger.Info(fmt.Sprintf("The following methods are valid cacheable methods: %s", strings.Join(CacheableMethods, ", ")))
 	}
 
 	if invalidBustMethod {
-		logger.Info(fmt.Sprintf("The following methods are valid busting methods: %s", strings.Join(ALL_METHODS, ", ")))
+		logger.Info(fmt.Sprintf("The following methods are valid busting methods: %s", strings.Join(AllMethods, ", ")))
 	}
 }
 
+// ValidateProps makes sure required configuration props are set and follow the correct format.
+// TODO: use https://github.com/go-playground/validator.
 func (conf *Config) ValidateProps() error {
 	var errorStr string
 
@@ -204,6 +266,7 @@ func (conf *Config) ValidateProps() error {
 	return nil
 }
 
+// cachePropExists returns true if the cache map has the given prop.
 func (conf *Config) cachePropExists(prop string) bool {
 	if conf.Cache[prop] == nil || len(conf.Cache[prop]) == 0 {
 		return false
@@ -212,6 +275,7 @@ func (conf *Config) cachePropExists(prop string) bool {
 	return true
 }
 
+// String returns a human-readable table-formatted representation of the configuration.
 func (conf Config) String() string {
 	// tablewriter writes data to an io.Writer, so we need something that can be written to and converted to a string
 	output := new(strings.Builder)
@@ -233,7 +297,7 @@ func (conf Config) String() string {
 	//* Create cache config table
 	output.WriteString("\nCached Endpoints\n")
 	cacheRows := [][]string{}
-	for _, method := range CACHEABLE_METHODS {
+	for _, method := range CacheableMethods {
 		for _, endpoint := range conf.Cache[method] {
 			cacheRows = append(cacheRows, []string{method, endpoint})
 		}
@@ -248,7 +312,7 @@ func (conf Config) String() string {
 	//* Create bust config table
 	output.WriteString("\nBusting Patterns\n")
 	bustRows := [][]string{}
-	for _, method := range UNCACHEABLE_METHODS {
+	for _, method := range AllMethods {
 		for endpoint, endpointMap := range conf.Bust[method] {
 			for _, pattern := range endpointMap {
 				bustRows = append(bustRows, []string{method, endpoint, pattern})

@@ -11,10 +11,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const ROUTE_SEP_CHAR = "=>"
-const PATTERN_SEP_CHAR = "||"
+// Separator chars are used to parse cli bust route arguments, since they are complex data types serialized as strings.
+const (
+	RouteSepChar   = "=>"
+	PatternSepChar = "||"
+)
 
-// set up with cli, making everything in config file optional
+// cliArgs are used to store all command line arguments to be used by the config.
 type cliArgs struct {
 	configPath   string
 	capacity     uint64
@@ -34,6 +37,11 @@ type cliArgs struct {
 	bustOPTIONS  cli.StringSlice // first element is the path, rest are the patterns of entries to bust
 }
 
+/*
+	addToConfig will add parsed cliArgs to provided Config.
+	This will also validate config props and trim invalid http methods from
+	caching and busting routes as well as remove trailing slash from ApiUrl.
+*/
 func (a *cliArgs) addToConfig(c *config.Config) {
 	if c == nil {
 		c = config.New()
@@ -65,8 +73,6 @@ func (a *cliArgs) addToConfig(c *config.Config) {
 		c.Cache["HEAD"] = a.cacheHEAD.Value()
 	}
 
-	// Every busting flag should be a string of a path followed by a colon and then a comma separated list of regex patterns to bust
-	// so for every Value() we split on colon and comma to set the endpoint and the patterns
 	if len(a.bustPOST.Value()) > 0 {
 		for _, args := range a.bustPOST.Value() {
 			parseAndSetBustArgs(c, "POST", args)
@@ -112,6 +118,11 @@ func (a *cliArgs) addToConfig(c *config.Config) {
 	c.RemoveInvalidMethods()
 }
 
+/*
+	CreateConfFromCli will parse cli arguments and flags and return a Config with the specified configuration.
+	If a configuration json5 file is provided with --config, any cli flags will overwrite the file's configuration.
+	The configuration is also validated and trimmed for invalid http methods and trailing slash in the ApiUrl.
+*/
 func CreateConfFromCli() *config.Config {
 	args := cliArgs{} // holds the flags that should overwrite potential config file values
 	var conf *config.Config
@@ -128,8 +139,7 @@ func CreateConfFromCli() *config.Config {
 			},
 		},
 
-		Usage:     "Sets up an LRU cache microservice that will proxy all your requests to a specified REST API and cache the responses.",
-		ArgsUsage: "first argument passed is an optional json5 config file path",
+		Usage: "Sets up an LRU cache microservice that will proxy all your requests to a specified REST API and cache the responses.",
 
 		Flags: []cli.Flag{
 			&cli.PathFlag{
@@ -197,43 +207,43 @@ func CreateConfFromCli() *config.Config {
 				Destination: &args.bustPOST,
 				Name:        "bust:POST",
 				Aliases:     []string{"b:POST", "b:post"},
-				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a POST request is made to the route",
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a POST request is made to the route", RouteSepChar, PatternSepChar),
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPUT,
 				Name:        "bust:PUT",
 				Aliases:     []string{"b:PUT", "b:put"},
-				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a PUT request is made to the route",
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a PUT request is made to the route", RouteSepChar, PatternSepChar),
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustDELETE,
 				Name:        "bust:DELETE",
 				Aliases:     []string{"b:DELETE", "b:delete", "b:d"},
-				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a DELETE request is made to the route",
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a DELETE request is made to the route", RouteSepChar, PatternSepChar),
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPATCH,
 				Name:        "bust:PATCH",
 				Aliases:     []string{"b:PATCH", "b:patch"},
-				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a PATCH request is made to the route",
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a PATCH request is made to the route", RouteSepChar, PatternSepChar),
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustTRACE,
 				Name:        "bust:TRACE",
 				Aliases:     []string{"b:TRACE", "b:trace", "b:t"},
-				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a TRACE request is made to the route",
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a TRACE request is made to the route", RouteSepChar, PatternSepChar),
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustCONNECT,
 				Name:        "bust:CONNECT",
 				Aliases:     []string{"b:CONNECT", "b:connect", "b:c"},
-				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a CONNECT request is made to the route",
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a CONNECT request is made to the route", RouteSepChar, PatternSepChar),
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustOPTIONS,
 				Name:        "bust:OPTIONS",
 				Aliases:     []string{"b:OPTIONS", "b:options", "b:o"},
-				Usage:       "is parsed from the format '[route]=>[regex-pattern1],[regex-pattern2]...' where regex-patterns are the cache entries to bust when a OPTIONS request is made to the route",
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a OPTIONS request is made to the route", RouteSepChar, PatternSepChar),
 			},
 		},
 
@@ -265,12 +275,14 @@ func CreateConfFromCli() *config.Config {
 	return conf
 }
 
+// parseAndSetBustArgs will parse / deserialize cli bust configuration args for a method and add them to the Config.
 func parseAndSetBustArgs(c *config.Config, method, args string) {
 	// All busting args must have an arrow (=>) to separate the route from the busting pattern
-	if !strings.Contains(args, ROUTE_SEP_CHAR) {
+	if !strings.Contains(args, RouteSepChar) {
 		parseBustArgError(method, args)
 	}
-	routeAndPatterns := strings.Split(args, ROUTE_SEP_CHAR)
+	// Several patterns for one route are separated by ||
+	routeAndPatterns := strings.Split(args, RouteSepChar)
 	if len(routeAndPatterns) != 2 {
 		parseBustArgError(method, args)
 	}
@@ -283,7 +295,7 @@ func parseAndSetBustArgs(c *config.Config, method, args string) {
 		parseBustArgError(method, args)
 	}
 
-	patterns := strings.Split(routeAndPatterns[1], PATTERN_SEP_CHAR)
+	patterns := strings.Split(routeAndPatterns[1], PatternSepChar)
 
 	if route == "" || patterns == nil || len(patterns) == 0 {
 		parseBustArgError(method, args)
@@ -292,6 +304,7 @@ func parseAndSetBustArgs(c *config.Config, method, args string) {
 	c.Bust[method][route] = patterns
 }
 
+// parseBustArgError will panic with a helpful error message if the bust cli argument is invalid.
 func parseBustArgError(method, args string) {
-	logger.Panic(fmt.Errorf("Invalid %s bust argument: %q.\nArgument must be in the format '[route]=>[regex-pattern]||[regex-pattern]...'", method, args))
+	logger.Panic(fmt.Errorf("Invalid %s bust argument: %q.\nArgument must be in the format '[route]%s[regex-pattern]%s[regex-pattern]...'", method, args, RouteSepChar, PatternSepChar))
 }

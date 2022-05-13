@@ -9,7 +9,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 )
 
-// This is used for everything that is not cached, and as such it does not call Next()
+// createProxyHandler returns a route handler that will proxy all requests to apiUrl.
+// It is always used as the last step of a request,
+// and as such it does not call Next() like middlewares.
+// This is used for all routes that are not cached and should just be proxied to the API.
 func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		url := apiUrl + ctx.OriginalURL()
@@ -26,9 +29,10 @@ func createProxyHandler(apiUrl string) func(ctx *fiber.Ctx) error {
 	}
 }
 
-// Decorates createProxyHandler to work as a middleware by also calling Next() after running.
-// createProxyHandler must not call Next by itself, since the default handler should always be last.
+// createProxyMiddleware returns a route middleware
+// by decorating createProxyHandler to also call Next() after running.
 // This is used for every route that is cached
+// so it is possible to save the proxied response to the cache.
 func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 	proxyHandler := createProxyHandler(apiUrl)
 
@@ -40,8 +44,9 @@ func createProxyMiddleware(apiUrl string) func(ctx *fiber.Ctx) error {
 	}
 }
 
-// This checks for existing entries on a given route and method and returns the cached item if it exists.
-// Otherwise we call Next() to proxy the request and get data from the api.
+// readCacheMiddleware checks for existing cache entries on the http method and route
+// which it is applied to and sends the cached entry back to the requester if it exists.
+// If the entry does not exist, it calls Next() to proxy the request and get data from the api.
 func readCacheMiddleware(ctx *fiber.Ctx) error {
 	dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name
 	entryKey := entryKey(ctx)                          // which entry to look for in the cache
@@ -70,6 +75,8 @@ func readCacheMiddleware(ctx *fiber.Ctx) error {
 	return nil // don't continue middlewares in this case
 }
 
+// writeCacheMiddleware runs after a cacheable request has been proxied to the API.
+// It saves the API response to the cache so it can be read on the next request.
 func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	entryKey := entryKey(ctx) // the name to use when saving the entry in cache
 
@@ -96,6 +103,8 @@ func writeCacheMiddleware(ctx *fiber.Ctx) error {
 	return nil // this is always last step, so no Next()
 }
 
+// createBustMiddleware returns a middleware that will bust the cache
+// for entries that match the patterns when the routes that the middleware is applied to are matched.
 func createBustMiddleware(patterns []string) func(*fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		dataCache := ctx.Locals("cache").(*cache.LRUCache) // not called 'cache' to avoid conflict with package name

@@ -15,7 +15,7 @@ func main() {
 	conf := commandline.CreateConfFromCli()
 
 	// Create the actual cache to hold entries
-	dataCache := cache.New(conf.Capacity)
+	dataCache := cache.New(conf.Capacity, conf.CapacityUnit)
 
 	// Setup the router
 	app := router.New(conf, dataCache)

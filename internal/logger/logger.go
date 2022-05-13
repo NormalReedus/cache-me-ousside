@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	defaultFlags    = log.Ldate | log.Ltime | log.Lmsgprefix
-	prefixSeparator = " => "
-	infoPrefix      = "INFO - "
-	warnPrefix      = "WARN - "
-	errorPrefix     = "ERROR - "
+	defaultFlags    = log.Ldate | log.Ltime | log.Lmsgprefix // defaultFlags to set logs to use date, time, and sets prefix to after the date and time.
+	prefixSeparator = " => "                                 // Separator between cache operation indicator and the requested route.
+	// Prefix for the type of log message.
+	infoPrefix  = "INFO - "
+	warnPrefix  = "WARN - "
+	errorPrefix = "ERROR - "
 )
 
 var (
@@ -24,6 +25,8 @@ var (
 	terminalMode bool
 )
 
+// Initialize configures the logger service to use a log file from logFilepath or run in terminal mode.
+// Returns a reference to the open log file, if a log file is specified.
 func Initialize(logFilepath string) *os.File {
 	var logFile *os.File // will only be populated if a logfile path is provided
 
@@ -48,6 +51,8 @@ func Initialize(logFilepath string) *os.File {
 	return logFile // Will be nil in terminal mode
 }
 
+// setLogFileMode configures the logger to use a file at filepath.
+// Returns a reference to the open log file.
 func setLogFileMode(filepath string) *os.File {
 	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -64,6 +69,8 @@ func setLogFileMode(filepath string) *os.File {
 	return file
 }
 
+// setTerminalMode configures the logger to run in terminal mode.
+// This means using emojis and colors.
 func setTerminalMode() {
 	clrInfo := color.New(color.Bold)
 	infoLog.SetOutput(os.Stdout)
@@ -78,6 +85,8 @@ func setTerminalMode() {
 	errorLog.SetPrefix(clrErr.Sprint("⛔ "))
 }
 
+// CacheWrite will log a formatted message for a cache write operation to key
+// with correct colors and cache operation indicator.
 func CacheWrite(key string) {
 	msg := "CACHE WRITE" + prefixSeparator + key
 
@@ -89,6 +98,8 @@ func CacheWrite(key string) {
 	infoLog.Println(msg)
 }
 
+// CacheRead will log a formatted message for a cache read operation to key
+// with correct colors and cache operation indicator.
 func CacheRead(key string) {
 	msg := "CACHE READ" + prefixSeparator + key
 
@@ -100,6 +111,8 @@ func CacheRead(key string) {
 	infoLog.Println(msg)
 }
 
+// CacheEvict will log a formatted message for a cache evict operation to key
+// with correct colors and cache operation indicator.
 func CacheEvict(key string) {
 	msg := "CACHE EVICT" + prefixSeparator + key
 
@@ -111,6 +124,8 @@ func CacheEvict(key string) {
 	infoLog.Println(msg)
 }
 
+// CacheBust will log a formatted message for a cache bust operation to key
+// with correct colors and cache operation indicator.
 func CacheBust(key string) {
 	msg := "CACHE BUST" + prefixSeparator + key
 
@@ -122,6 +137,8 @@ func CacheBust(key string) {
 	infoLog.Println(msg)
 }
 
+// CacheSkip will log a formatted message for a cache skip operation to key
+// with correct colors and cache operation indicator.
 func CacheSkip(key string) {
 	msg := "CACHE SKIP" + prefixSeparator + key
 
@@ -133,26 +150,33 @@ func CacheSkip(key string) {
 	infoLog.Println(msg)
 }
 
+// Info will log msg with the infoPrefix and correct icon.
 func Info(msg string) {
 	infoLog.Println(msg)
 }
 
+// Warn will log msg with the warnPrefix and correct icon.
 func Warn(msg string) {
 	warningLog.Println(msg)
 }
 
+// Error will log err with the errorPrefix and correct icon.
 func Error(err error) {
 	errorLog.Println(err)
 }
 
+// Panic will log err with the errorPrefix and correct icon
+// as well as stop execution.
+// This is only used for errors during setup.
 func Panic(err error) {
 	errorLog.Panicln(err)
 }
 
+// HiMom will display a startup message with a presentation of used configuration.
 func HiMom(confString string, url string) {
 	urlClr := color.New(color.FgBlue, color.Underline)
 
-	fmt.Printf("You LRU cache microservice is running on %s with the following configuration:\n", urlClr.Sprint(url))
+	fmt.Printf("📦 You LRU cache microservice is running on %s with the following configuration:\n", urlClr.Sprint(url))
 
 	fmt.Println(confString)
 }

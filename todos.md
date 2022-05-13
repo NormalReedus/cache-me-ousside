@@ -1,11 +1,10 @@
+* Tilføj cli args til Bust på GET og HEAD, hvis man nu vil det...
+  * Andre steder bruges allerede AllMethods til at validere bust methods, så bør man også kunne tilføje AllMethods fra CLI
+  * Det skal tilføjes i cli, cliArgs og config (tjek om der er mere)
+* Brug https://github.com/go-playground/validator til a validere config
 * Deploy beta til npm / gopkg / github
   * Kommentarer efter godoc standards
   * README
-  * License
-  * Tjek exported props osv, gør ting private hvis ikke andre skal kunne bruge det
-    * Tjek om folk kan bruge ting fra internal, når de er exported
-  * Tjek error messages / duplication af dem
-    * F.eks. logger.Panic duplikerer vist fordi den både logger og panicer?
   * Links
     * Den her er SUPER https://www.digitalocean.com/community/tutorials/how-to-distribute-go-modules
     * https://go.dev/doc/modules/publishing
@@ -35,6 +34,7 @@
   * (maybe there should be something that tells whether we use entries og memory)
   * when busting a cache entry, we should then use utils.MemUsage to compare with the capacity
   * when deciding whether to evict, instead of using entries. Using one over the other should be checked with a bool on the config that is initialized in the factory function, so busting knows whether to use memory or entries
+  * Husk at fikse så tests giver en tom unit med til New, da vi ikke rigtigt kan teste memory-basered caching.
 * Servér en side /info, der viser konfigurationen og hvordan man bruger cachen (gerne med konkrete eksempler ud fra de routes, man har sat etc)
   * Lav en config til at ændre på routen, hvis man vil bruge andet end /info
 * README

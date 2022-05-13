@@ -9,14 +9,16 @@ import (
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 )
 
-// To use partial memory units, use whole units of lower size instead (e.g. 1.5kb == 1536bytes)
-func New(cap uint64) *LRUCache {
-	if cap == 0 {
+// New returns an LRUCache with the given capacity and optionally a unit to use memory-based cache limit.
+// To use partial memory units, use whole units of lower size instead (e.g. 1.5kb == 1536b).
+// TODO: handle a passed cap unit
+func New(capacity uint64, capacityUnit string) *LRUCache {
+	if capacity == 0 {
 		logger.Panic(fmt.Errorf("cache capacity must be greater than 0"))
 	}
 
 	cache := &LRUCache{
-		capacity: int(cap),
+		capacity: int(capacity),
 		entries:  make(map[string]*CacheEntry),
 		mru:      nil,
 		lru:      nil,
@@ -25,6 +27,7 @@ func New(cap uint64) *LRUCache {
 	return cache
 }
 
+// LRUCache represents all entries in the cache, it's capacity limit, and the first and last entries.
 type LRUCache struct {
 	capacity int
 	entries  map[string]*CacheEntry
@@ -32,6 +35,7 @@ type LRUCache struct {
 	lru      *CacheEntry
 }
 
+// CachedKeys returns a slice of the keys of all cached entries.
 // NOTE: Does not always return keys in the order they were added.
 func (cache *LRUCache) CachedKeys() []string {
 	keys := make([]string, 0, len(cache.entries))
@@ -42,10 +46,12 @@ func (cache *LRUCache) CachedKeys() []string {
 	return keys
 }
 
+// Size returns the number of entries currently saved in the cache.
 func (cache *LRUCache) Size() int {
 	return len(cache.entries)
 }
 
+// Get returns the CacheData of the entry saved under the given key.
 func (cache *LRUCache) Get(key string) *CacheData {
 	entry, exists := cache.entries[key]
 
@@ -62,6 +68,7 @@ func (cache *LRUCache) Get(key string) *CacheData {
 	return &data
 }
 
+// Set saves an entry with the given CacheData under the given key in the cache.
 func (cache *LRUCache) Set(key string, data *CacheData) {
 	// You should never set something with a key that already exists
 	//... since the cached data should have been returned instead in that case
@@ -88,6 +95,7 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	}
 }
 
+// Bust will remove all entries saved under the given keys from the cache.
 func (cache *LRUCache) Bust(keys ...string) {
 	for _, entryKey := range keys {
 		entry, exists := cache.entries[entryKey]
@@ -127,6 +135,8 @@ func (cache *LRUCache) Bust(keys ...string) {
 	}
 }
 
+// Match returns a slice of keys of the entries in the cache that match the given patterns.
+// The patterns are hydrated with URL parameters from paramMap before being compiled as regex.
 func (cache *LRUCache) Match(patterns []string, paramMap map[string]string) []string {
 	keys := make(Set[string]) // use a set so we don't duplicate keys
 
@@ -150,6 +160,7 @@ func (cache *LRUCache) Match(patterns []string, paramMap map[string]string) []st
 	return keys.Elements()
 }
 
+// EvictLRU removes the least recently used entry from the cache to make room for new entries.
 func (cache *LRUCache) EvictLRU() *CacheEntry {
 	// Save ref to removed entry
 	evicted := cache.lru
@@ -183,7 +194,8 @@ func (cache *LRUCache) EvictLRU() *CacheEntry {
 	return evicted
 }
 
-// Must be used on existing entry to move it to head position
+// MoveToMRU moves the given entry to the most recently used position in the cache.
+// NOTE: Must be used on existing entry, cannot be used to add new entries.
 func (cache *LRUCache) MoveToMRU(entry *CacheEntry) {
 	// If this entry is already head (or only entry), don't do anything
 	if entry == nil || entry == cache.mru {
@@ -200,7 +212,8 @@ func (cache *LRUCache) MoveToMRU(entry *CacheEntry) {
 	cache.mru = entry
 }
 
-// If there are no lru or mru, use this to set both to entry
+// SetFirst sets the given entry as the first entry in the cache.
+// This is used because it takes som special setup to add the first node to a linked list.
 func (cache *LRUCache) SetFirst(entry *CacheEntry) *CacheEntry {
 	cache.lru = entry
 	cache.mru = entry
