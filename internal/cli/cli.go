@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NormalReedus/cache-me-ousside/internal/config"
-	"github.com/NormalReedus/cache-me-ousside/internal/logger"
+	"github.com/magnus-bb/cache-me-ousside/internal/config"
+	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 	"github.com/urfave/cli/v2"
 )
 

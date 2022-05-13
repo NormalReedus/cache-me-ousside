@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/NormalReedus/cache-me-ousside/cache"
-	commandline "github.com/NormalReedus/cache-me-ousside/internal/cli"
-	"github.com/NormalReedus/cache-me-ousside/internal/logger"
-	"github.com/NormalReedus/cache-me-ousside/internal/router"
+	"github.com/magnus-bb/cache-me-ousside/cache"
+	commandline "github.com/magnus-bb/cache-me-ousside/internal/cli"
+	"github.com/magnus-bb/cache-me-ousside/internal/logger"
+	"github.com/magnus-bb/cache-me-ousside/internal/router"
 )
 
 func main() {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/NormalReedus/cache-me-ousside/internal/logger"
+	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 )
 
 // New returns an LRUCache with the given capacity and optionally a unit to use memory-based cache limit.

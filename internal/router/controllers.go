@@ -3,10 +3,10 @@ package router
 import (
 	"fmt"
 
-	"github.com/NormalReedus/cache-me-ousside/cache"
-	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
+	"github.com/magnus-bb/cache-me-ousside/cache"
+	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 )
 
 // createProxyHandler returns a route handler that will proxy all requests to apiUrl.

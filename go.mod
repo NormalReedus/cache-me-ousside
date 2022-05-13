@@ -1,4 +1,4 @@
-module github.com/NormalReedus/cache-me-ousside
+module github.com/magnus-bb/cache-me-ousside
 
 go 1.18
 

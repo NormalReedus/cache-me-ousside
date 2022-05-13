@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/NormalReedus/cache-me-ousside/cache"
-	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 	"github.com/flynn/json5"
+	"github.com/magnus-bb/cache-me-ousside/cache"
+	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 	"github.com/olekukonko/tablewriter"
 )
 

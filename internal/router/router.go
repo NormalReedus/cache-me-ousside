@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/NormalReedus/cache-me-ousside/cache"
-	"github.com/NormalReedus/cache-me-ousside/internal/config"
 	"github.com/gofiber/fiber/v2"
+	"github.com/magnus-bb/cache-me-ousside/cache"
+	"github.com/magnus-bb/cache-me-ousside/internal/config"
 )
 
 // New creates a fiber.App and injects the LRUCache into the application's context.

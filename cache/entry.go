@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/NormalReedus/cache-me-ousside/internal/logger"
+	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 )
 
 // newEntry returns a CacheEntry with the given key and data.
