@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// Used when reading data (headers and body) from the cache
+// Used when reading data (headers and body) from the cache.
 func NewCacheDataFromJSON(jsonData []byte) CacheData {
 	var data CacheData
 	json.Unmarshal(jsonData, &data)

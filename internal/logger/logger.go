@@ -8,12 +8,12 @@ import (
 	"github.com/fatih/color"
 )
 
-//TODO: take a log file from config to output to if provided, otherwise use Stdout
-//TODO: write tests for log file (check for file existence and creation in testdata/ when used, remember to delete file again)
-
 const (
-	DEFAULT_FLAGS = log.Ldate | log.Ltime | log.Lmsgprefix
-	PREFIX_SEP    = " => "
+	defaultFlags    = log.Ldate | log.Ltime | log.Lmsgprefix
+	prefixSeparator = " => "
+	infoPrefix      = "INFO - "
+	warnPrefix      = "WARN - "
+	errorPrefix     = "ERROR - "
 )
 
 var (
@@ -36,9 +36,9 @@ func Initialize(logFilepath string) *os.File {
 		setTerminalMode()
 	}
 
-	infoLog.SetFlags(DEFAULT_FLAGS)
-	warningLog.SetFlags(DEFAULT_FLAGS)
-	errorLog.SetFlags(DEFAULT_FLAGS)
+	infoLog.SetFlags(defaultFlags)
+	warningLog.SetFlags(defaultFlags)
+	errorLog.SetFlags(defaultFlags)
 
 	// Use this for CACHE [OPERATION] printing with / without color
 	if logFile == nil {
@@ -55,11 +55,11 @@ func setLogFileMode(filepath string) *os.File {
 	}
 
 	infoLog.SetOutput(file)
-	infoLog.SetPrefix("INFO - ")
+	infoLog.SetPrefix(infoPrefix)
 	warningLog.SetOutput(file)
-	warningLog.SetPrefix("WARN - ")
+	warningLog.SetPrefix(warnPrefix)
 	errorLog.SetOutput(file)
-	errorLog.SetPrefix("ERROR - ")
+	errorLog.SetPrefix(errorPrefix)
 
 	return file
 }
@@ -79,7 +79,7 @@ func setTerminalMode() {
 }
 
 func CacheWrite(key string) {
-	msg := "CACHE WRITE" + PREFIX_SEP + key
+	msg := "CACHE WRITE" + prefixSeparator + key
 
 	if terminalMode {
 		clr := color.New(color.FgBlue, color.Bold)
@@ -90,7 +90,7 @@ func CacheWrite(key string) {
 }
 
 func CacheRead(key string) {
-	msg := "CACHE READ" + PREFIX_SEP + key
+	msg := "CACHE READ" + prefixSeparator + key
 
 	if terminalMode {
 		clr := color.New(color.FgGreen, color.Bold)
@@ -101,7 +101,7 @@ func CacheRead(key string) {
 }
 
 func CacheEvict(key string) {
-	msg := "CACHE EVICT" + PREFIX_SEP + key
+	msg := "CACHE EVICT" + prefixSeparator + key
 
 	if terminalMode {
 		clr := color.New(color.FgRed, color.Bold)
@@ -112,7 +112,7 @@ func CacheEvict(key string) {
 }
 
 func CacheBust(key string) {
-	msg := "CACHE BUST" + PREFIX_SEP + key
+	msg := "CACHE BUST" + prefixSeparator + key
 
 	if terminalMode {
 		clr := color.New(color.FgRed, color.Bold)
@@ -123,7 +123,7 @@ func CacheBust(key string) {
 }
 
 func CacheSkip(key string) {
-	msg := "CACHE SKIP" + PREFIX_SEP + key
+	msg := "CACHE SKIP" + prefixSeparator + key
 
 	if terminalMode {
 		clr := color.New(color.FgYellow, color.Bold)

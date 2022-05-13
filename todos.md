@@ -23,7 +23,7 @@
 * Overhold Cache-Control headers
   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
-  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#freshness forklarer hvordan exp virker
+  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#freshness forklarer hvordan expiration virker
   * Skip caching hvis API siger, at man ikke bør
   * Implementér expiration som kan overholde header regler
   * Lyt på når API beder om at buste cache

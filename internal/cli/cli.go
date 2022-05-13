@@ -15,7 +15,7 @@ const ROUTE_SEP_CHAR = "=>"
 const PATTERN_SEP_CHAR = "||"
 
 // set up with cli, making everything in config file optional
-type CLIArgs struct {
+type cliArgs struct {
 	configPath   string
 	capacity     uint64
 	capacityUnit string
@@ -34,7 +34,7 @@ type CLIArgs struct {
 	bustOPTIONS  cli.StringSlice // first element is the path, rest are the patterns of entries to bust
 }
 
-func (a *CLIArgs) addToConfig(c *config.Config) {
+func (a *cliArgs) addToConfig(c *config.Config) {
 	if c == nil {
 		c = config.New()
 	}
@@ -113,7 +113,7 @@ func (a *CLIArgs) addToConfig(c *config.Config) {
 }
 
 func CreateConfFromCli() *config.Config {
-	args := CLIArgs{} // holds the flags that should overwrite potential config file values
+	args := cliArgs{} // holds the flags that should overwrite potential config file values
 	var conf *config.Config
 
 	app := &cli.App{

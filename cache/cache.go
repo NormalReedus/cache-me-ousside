@@ -1,3 +1,5 @@
+// Package cache provides a simple LRU cache featuring coupled linked list
+// and map data structures to allow for easy lookups and ordered entries.
 package cache
 
 import (
@@ -15,7 +17,7 @@ func New(cap uint64) *LRUCache {
 
 	cache := &LRUCache{
 		capacity: int(cap),
-		entries:  make(map[string]*Entry),
+		entries:  make(map[string]*CacheEntry),
 		mru:      nil,
 		lru:      nil,
 	}
@@ -25,9 +27,9 @@ func New(cap uint64) *LRUCache {
 
 type LRUCache struct {
 	capacity int
-	entries  map[string]*Entry
-	mru      *Entry
-	lru      *Entry
+	entries  map[string]*CacheEntry
+	mru      *CacheEntry
+	lru      *CacheEntry
 }
 
 // NOTE: Does not always return keys in the order they were added.
@@ -52,10 +54,10 @@ func (cache *LRUCache) Get(key string) *CacheData {
 	}
 
 	// Set as head
-	cache.moveToMRU(entry)
+	cache.MoveToMRU(entry)
 
 	// Unpack data from []byte to CacheData
-	data := entry.unmarshalData()
+	data := entry.UnmarshalData()
 
 	return &data
 }
@@ -73,16 +75,16 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 
 	// If there are no entries, set entry as both head and tail
 	if cache.lru == nil && cache.mru == nil {
-		cache.entries[key] = cache.setFirst(entry)
+		cache.entries[key] = cache.SetFirst(entry)
 	} else {
 		// If there are entries, set entry as head
-		cache.entries[key] = cache.mru.setNext(entry)
+		cache.entries[key] = cache.mru.SetNext(entry)
 		cache.mru = entry
 	}
 
 	// If the cache is full, evict the LRU entry
 	if cache.Size() > cache.capacity {
-		cache.evictLRU()
+		cache.EvictLRU()
 	}
 }
 
@@ -148,7 +150,7 @@ func (cache *LRUCache) Match(patterns []string, paramMap map[string]string) []st
 	return keys.Elements()
 }
 
-func (cache *LRUCache) evictLRU() *Entry {
+func (cache *LRUCache) EvictLRU() *CacheEntry {
 	// Save ref to removed entry
 	evicted := cache.lru
 
@@ -182,7 +184,7 @@ func (cache *LRUCache) evictLRU() *Entry {
 }
 
 // Must be used on existing entry to move it to head position
-func (cache *LRUCache) moveToMRU(entry *Entry) {
+func (cache *LRUCache) MoveToMRU(entry *CacheEntry) {
 	// If this entry is already head (or only entry), don't do anything
 	if entry == nil || entry == cache.mru {
 		return
@@ -193,13 +195,13 @@ func (cache *LRUCache) moveToMRU(entry *Entry) {
 		cache.lru.prev = nil
 	}
 
-	cache.mru.setNext(entry)
+	cache.mru.SetNext(entry)
 
 	cache.mru = entry
 }
 
 // If there are no lru or mru, use this to set both to entry
-func (cache *LRUCache) setFirst(entry *Entry) *Entry {
+func (cache *LRUCache) SetFirst(entry *CacheEntry) *CacheEntry {
 	cache.lru = entry
 	cache.mru = entry
 
@@ -207,4 +209,16 @@ func (cache *LRUCache) setFirst(entry *Entry) *Entry {
 	entry.next = nil
 
 	return entry
+}
+
+func (cache LRUCache) Entries() map[string]*CacheEntry {
+	return cache.entries
+}
+
+func (cache LRUCache) MRU() *CacheEntry {
+	return cache.mru
+}
+
+func (cache LRUCache) LRU() *CacheEntry {
+	return cache.lru
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
-
-	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 )
 
 //* SET
@@ -64,7 +62,7 @@ func hydrateParams(paramMap map[string]string, routePatternTemplates []string) [
 // Gets the allocated memory in bytes so we can compare it to the max allowed memory for the cache
 // if that type of 'capacity' is chosen
 
-// MemUsage outputs the currentmemory being used in bytes.
+// MemUsage outputs the current memory being used in bytes.
 func MemUsage() uint64 {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
@@ -100,8 +98,6 @@ func ToBytes(size uint64, unit string) (uint64, error) {
 		return size * TB, nil
 	default:
 		err := fmt.Errorf("unknown capacity unit %q", unit)
-
-		logger.Error(err)
 
 		return 0, err
 	}

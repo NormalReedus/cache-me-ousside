@@ -7,14 +7,14 @@ import (
 	"github.com/NormalReedus/cache-me-ousside/internal/logger"
 )
 
-func newEntry(key string, data *CacheData) *Entry {
+func newEntry(key string, data *CacheData) *CacheEntry {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		logger.Error(fmt.Errorf("there was an error creating the entry: %s", key))
 		return nil
 	}
 
-	entry := &Entry{
+	entry := &CacheEntry{
 		key:  key,
 		data: jsonData,
 	}
@@ -22,14 +22,14 @@ func newEntry(key string, data *CacheData) *Entry {
 	return entry
 }
 
-type Entry struct {
+type CacheEntry struct {
 	key  string
 	data []byte // marshaled json of CacheData
-	next *Entry
-	prev *Entry
+	next *CacheEntry
+	prev *CacheEntry
 }
 
-func (entry *Entry) setNext(newEntry *Entry) *Entry {
+func (entry *CacheEntry) SetNext(newEntry *CacheEntry) *CacheEntry {
 	if newEntry == nil {
 		return nil
 	}
@@ -48,6 +48,22 @@ func (entry *Entry) setNext(newEntry *Entry) *Entry {
 	return newEntry
 }
 
-func (entry *Entry) unmarshalData() CacheData {
+func (entry *CacheEntry) UnmarshalData() CacheData {
 	return NewCacheDataFromJSON(entry.data)
+}
+
+func (entry CacheEntry) Key() string {
+	return entry.key
+}
+
+func (entry CacheEntry) Data() []byte {
+	return entry.data
+}
+
+func (entry *CacheEntry) Prev() *CacheEntry {
+	return entry.prev
+}
+
+func (entry *CacheEntry) Next() *CacheEntry {
+	return entry.next
 }
