@@ -1,6 +1,7 @@
 * Tilføj cli args til Bust på GET og HEAD, hvis man nu vil det...
-  * Andre steder bruges allerede AllMethods til at validere bust methods, så bør man også kunne tilføje AllMethods fra CLI
-  * Det skal tilføjes i cli, cliArgs og config (tjek om der er mere)
+  * ✅ Andre steder bruges allerede AllMethods til at validere bust methods, så bør man også kunne tilføje AllMethods fra CLI
+  * ✅ Det skal tilføjes i cli, cliArgs og config (tjek om der er mere)
+  * tilføj tests til bustGET og bustHEAD <----
 * Brug https://github.com/go-playground/validator til a validere config
 * Deploy beta til npm / gopkg / github
   * Kommentarer efter godoc standards

@@ -120,6 +120,9 @@ func createBustMiddleware(patterns []string) func(*fiber.Ctx) error {
 	}
 }
 
+// entryKey returns takes a route handler fiber context and returns a key
+// that can be used to store the entry in the cache.
+// It is in the format [http method]:[route].
 func entryKey(ctx *fiber.Ctx) string {
 	return ctx.Method() + ":" + ctx.OriginalURL()
 }

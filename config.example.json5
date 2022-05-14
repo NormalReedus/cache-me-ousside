@@ -4,13 +4,17 @@
   "hostname": "localhost",
   "port": 8080,
   "apiUrl": "https://jsonplaceholder.typicode.com/",
-  "logFilePath": "logfile.log",
+  // "logFilePath": "logfile.log",
   "cache":  {
     // GET and HEAD requests to /posts and /posts/:id will be cached (e.g.) with the key "GET:/posts/123"
     "GET": [ "/posts", "/posts/:id" ],
     "HEAD": [ "/posts", "/posts/:id" ],
   },
   "bust": {
+    "GET": {
+      // Contrived and not advised, but you can bust entries with caching methods as well
+      "/todos": [ "/posts" ]
+    },
     "POST": {
       // POST requests to /posts will remove all cached entries in which the substring /posts exists in the key
       "/posts": [ "/posts" ]

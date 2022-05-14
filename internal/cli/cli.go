@@ -28,6 +28,8 @@ type cliArgs struct {
 	logFilePath  string
 	cacheGET     cli.StringSlice // will contain all the paths to cache on GET requests
 	cacheHEAD    cli.StringSlice // will contain all the paths to cache on HEAD requests
+	bustGET      cli.StringSlice // first element is the path, rest are the patterns of entries to bust
+	bustHEAD     cli.StringSlice // first element is the path, rest are the patterns of entries to bust
 	bustPOST     cli.StringSlice // first element is the path, rest are the patterns of entries to bust
 	bustPUT      cli.StringSlice // first element is the path, rest are the patterns of entries to bust
 	bustDELETE   cli.StringSlice // first element is the path, rest are the patterns of entries to bust
@@ -73,6 +75,16 @@ func (a *cliArgs) addToConfig(c *config.Config) {
 		c.Cache["HEAD"] = a.cacheHEAD.Value()
 	}
 
+	if len(a.bustGET.Value()) > 0 {
+		for _, args := range a.bustGET.Value() {
+			parseAndSetBustArgs(c, "GET", args)
+		}
+	}
+	if len(a.bustHEAD.Value()) > 0 {
+		for _, args := range a.bustHEAD.Value() {
+			parseAndSetBustArgs(c, "HEAD", args)
+		}
+	}
 	if len(a.bustPOST.Value()) > 0 {
 		for _, args := range a.bustPOST.Value() {
 			parseAndSetBustArgs(c, "POST", args)
@@ -202,6 +214,18 @@ func CreateConfFromCli() *config.Config {
 				Name:        "cache:HEAD",
 				Aliases:     []string{"c:HEAD", "c:head", "c:h"},
 				Usage:       "the list of `PATHS` to cache on HEAD requests",
+			},
+			&cli.StringSliceFlag{
+				Destination: &args.bustGET,
+				Name:        "bust:GET",
+				Aliases:     []string{"b:GET", "b:get"},
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a GET request is made to the route", RouteSepChar, PatternSepChar),
+			},
+			&cli.StringSliceFlag{
+				Destination: &args.bustHEAD,
+				Name:        "bust:HEAD",
+				Aliases:     []string{"b:HEAD", "b:head"},
+				Usage:       fmt.Sprintf("is parsed from the format '[route]%s[regex-pattern1]%s[regex-pattern2]...' where regex-patterns are the cache entries to bust when a HEAD request is made to the route", RouteSepChar, PatternSepChar),
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.bustPOST,

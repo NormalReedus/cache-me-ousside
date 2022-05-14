@@ -38,13 +38,9 @@ type (
 // This is done to avoid nil pointers when accessing the nested map properties.
 func New() *Config {
 	bustMap := make(BustMap)
-	bustMap["POST"] = make(map[string][]string)
-	bustMap["PUT"] = make(map[string][]string)
-	bustMap["DELETE"] = make(map[string][]string)
-	bustMap["PATCH"] = make(map[string][]string)
-	bustMap["TRACE"] = make(map[string][]string)
-	bustMap["CONNECT"] = make(map[string][]string)
-	bustMap["OPTIONS"] = make(map[string][]string)
+	for _, method := range AllMethods {
+		bustMap[method] = make(map[string][]string)
+	}
 
 	conf := &Config{
 		Cache: make(CacheMap),
@@ -138,9 +134,9 @@ type Config struct {
 }
 
 /*
-CapacityParsed returns size in bytes or entries as first value and a byteMode bool
-indicating if the capacity unit is bytes or entries.
-If CapacityUnit is a valid memory size string, the size is converted from the memory unit to bytes (e.g., mb -> bytes).
+	CapacityParsed returns size in bytes or entries as first value and a byteMode bool
+	indicating if the capacity unit is bytes or entries.
+	If CapacityUnit is a valid memory size string, the size is converted from the memory unit to bytes (e.g., mb -> bytes).
 */
 func (conf Config) CapacityParsed() (size uint64, byteMode bool) {
 	if contains(cache.VALID_CAP_UNITS, strings.ToUpper(conf.CapacityUnit)) {

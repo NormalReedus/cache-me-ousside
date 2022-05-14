@@ -11,7 +11,7 @@ import (
 
 // New returns an LRUCache with the given capacity and optionally a unit to use memory-based cache limit.
 // To use partial memory units, use whole units of lower size instead (e.g. 1.5kb == 1536b).
-// TODO: handle a passed cap unit
+// TODO: handle the passed cap unit
 func New(capacity uint64, capacityUnit string) *LRUCache {
 	if capacity == 0 {
 		logger.Panic(fmt.Errorf("cache capacity must be greater than 0"))
