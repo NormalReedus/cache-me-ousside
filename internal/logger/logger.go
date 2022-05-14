@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/common-nighthawk/go-figure"
 	"github.com/fatih/color"
 )
 
@@ -175,6 +176,9 @@ func Panic(err error) {
 // HiMom will display a startup message with a presentation of used configuration.
 func HiMom(confString string, url string) {
 	urlClr := color.New(color.FgBlue, color.Underline)
+
+	myFigure := figure.NewColorFigure("Hello World", "", "green", true)
+	myFigure.Print()
 
 	fmt.Printf("📦 You LRU cache microservice is running on %s with the following configuration:\n", urlClr.Sprint(url))
 

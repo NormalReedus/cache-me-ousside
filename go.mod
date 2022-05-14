@@ -3,6 +3,7 @@ module github.com/magnus-bb/cache-me-ousside
 go 1.18
 
 require (
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/fatih/color v1.13.0
 	github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
 	github.com/gofiber/fiber/v2 v2.33.0
