@@ -1,8 +1,5 @@
-* Tilføj cli args til Bust på GET og HEAD, hvis man nu vil det...
-  * ✅ Andre steder bruges allerede AllMethods til at validere bust methods, så bør man også kunne tilføje AllMethods fra CLI
-  * ✅ Det skal tilføjes i cli, cliArgs og config (tjek om der er mere)
-  * tilføj tests til bustGET og bustHEAD <----
-* Brug https://github.com/go-playground/validator til a validere config
+* Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
+* Tilføj cool ascii art med `cache-me-ousside` i HiMom.
 * Deploy beta til npm / gopkg / github
   * Kommentarer efter godoc standards
   * README
@@ -14,6 +11,8 @@
   * Skal i første omgang kun deployes som en applikation (ikke et modul), så man bare kan køre programmet.
     * Så på npm skal der være dokumentation, der siger at man skal installere globalt, men er gopkg overhovedet et sted, man deployer apps?
       * Måske skal man bare deploy buildet binary til github som release, så man kan install med `go get` eller `go install` eller hvad end man nu gør for applikationer.
+* Tilføj ENV var tests til CLI
+* Brug https://github.com/go-playground/validator til a validere config
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
   * Kan det lade sig gøre med go uden at skulle lave any type?
 * Testing

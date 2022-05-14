@@ -1,6 +1,42 @@
 # cache-me-ousside
-### Your favorite Least Recently Used cache microservice 
-A simple LRU cache that can be used as a reverse proxy, meaning that any request to this microservice will automatically be passed on to your specified REST API without the REST API having to change anything to accomodate the LRU cache
+## Your favorite Least Recently Used cache microservice 
+A simple LRU cache that can be used as a reverse proxy, meaning that any request to this microservice will automatically be passed on to your specified REST API without the REST API having to change anything to accomodate the LRU cache.
+
+As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly which cache entries to bust and when. That means that one single `POST` request will no longer clear your whole cache when it doesn't need to.
+
+## TILFØJ GIF af start af programmet og et par requests, så man kan se terminal output
+
+## Contents
+- [Specs](#specs)
+- [Details](#details)
+
+
+## Installation
+* go install / go get
+* npm?
+
+## Usage
+* Hvordan man kører det
+  * Start med at beskrive hvordan man kører, derefter config i næste afsnit
+  * Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
+* tilføj code block med output fra `--help`
+
+### Configuration
+* Beskriv de 3 forskellige måder at config
+  * JSON5 (anbefalet), cli, env
+* Vis et eksempel med alle features / eksempel / default features af hver slags måde og beskriv syntaks og overwrites
+  * cli overskriver fil, men tjek hvordan det er med env
+* Referér til All features for at se hver config man kan sætte
+
+## All features
+* Beskrivelse af alle de forskellige måder man kan bruge programmet med hver sin undertitel (###)
+* Hver feature skal have en beskrivelse af i rækkefølge:
+  * Hvad det bruges til (hvilket problem det løser)
+  * Hvordan det konfigureres i fil, cli, env
+  * Eksempel på output eller effekt eller lignende (hvis applicable)
+  * Caveats / bugs / todos / ting man skal være opmærksom på
+* Beskriv features, der endnu ikke er færdige og markér med TODO eller WIP, så man i Contents kan se oversigt over nuværende og kommende features
+
 
 ## Specs
 * Basic REST API som per default bare skal reverse proxy alle requests direkte til et angivet endpoint og give svaret tilbage

@@ -11,6 +11,12 @@
     "HEAD": [ "/posts", "/posts/:id" ],
   },
   "bust": {
+    "GET": {
+      "/todos": [ "/posts" ]
+    },
+    "HEAD": {
+      "/todos": [ "/posts" ]
+    },
     "POST": {
       // POST requests to /posts will remove all cached entries in which the substring /posts exists in the key
       "/posts": [ "/posts" ]

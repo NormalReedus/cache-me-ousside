@@ -30,6 +30,8 @@ func TestFlagParsing(t *testing.T) {
 	assert.Equal("logfile.log", conf.LogFilePath, "Expected the flag --logfile to set conf.LogFilePath to \"logfile.log\", got %q", conf.LogFilePath)
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["GET"], "Expected the flag --cache:GET with comma-separated values to set conf.Cache[\"GET\"] to both of %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["GET"])
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["HEAD"], "Expected the flag --cache:HEAD to set conf.Cache[\"HEAD\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["HEAD"])
+	assert.Equal([]string{"/posts"}, conf.Bust["GET"]["/todos"], "Expected the flag --bust:GET to set conf.Bust[\"GET\"][\"/todos\"] to %v, got %v", []string{"/posts"}, conf.Bust["GET"]["/todos"])
+	assert.Equal([]string{"/posts"}, conf.Bust["HEAD"]["/todos"], "Expected the flag --bust:HEAD to set conf.Bust[\"HEAD\"][\"/todos\"] to %v, got %v", []string{"/posts"}, conf.Bust["HEAD"]["/todos"])
 	assert.Equal([]string{"/posts"}, conf.Bust["POST"]["/posts"], "Expected the flag --bust:POST to set conf.Bust[\"POST\"][\"/posts\"] to %v, got %v", []string{"/posts"}, conf.Bust["POST"]["/posts"])
 	assert.Equal([]string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"], "Expected the flag --bust:PUT with multiple patterns to set conf.Bust[\"PUT\"][\"/posts\"] to both of %v, got %v", []string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"])
 	assert.Equal([]string{"/posts/:id"}, conf.Bust["PUT"]["/posts/:id"], "Expected the flag --bust:PUT to set conf.Bust[\"PUT\"][\"/posts/:id\"] to %v, got %v", []string{"/posts/:id"}, conf.Bust["PUT"]["/posts/:id"])
@@ -58,6 +60,8 @@ func TestConfigFileParsing(t *testing.T) {
 	assert.Equal("logfile.log", conf.LogFilePath, "Expected the prop 'logFilePath' to set conf.LogFilePath to \"logfile.log\", got %q", conf.LogFilePath)
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["GET"], "Expected the prop cache.GET to set conf.Cache[\"GET\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["GET"])
 	assert.Equal([]string{"/posts", "/posts/:id"}, conf.Cache["HEAD"], "Expected the prop cache.HEAD to set conf.Cache[\"HEAD\"] to %v, got %v", []string{"/posts", "/posts/:id"}, conf.Cache["HEAD"])
+	assert.Equal([]string{"/posts"}, conf.Bust["GET"]["/todos"], "Expected the prop bust.GET to set conf.Bust[\"GET\"][\"/todos\"] to %v, got %v", []string{"/posts"}, conf.Bust["GET"]["/todos"])
+	assert.Equal([]string{"/posts"}, conf.Bust["HEAD"]["/todos"], "Expected the prop bust.HEAD to set conf.Bust[\"HEAD\"][\"/todos\"] to %v, got %v", []string{"/posts"}, conf.Bust["HEAD"]["/todos"])
 	assert.Equal([]string{"/posts"}, conf.Bust["POST"]["/posts"], "Expected the prop bust.POST to set conf.Bust[\"POST\"][\"/posts\"] to %v, got %v", []string{"/posts"}, conf.Bust["POST"]["/posts"])
 	assert.Equal([]string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"], "Expected the prop bust.PUT to set conf.Bust[\"PUT\"][\"/posts\"] to %v, got %v", []string{"^GET:/posts", "^HEAD:/posts"}, conf.Bust["PUT"]["/posts"])
 	assert.Equal([]string{"/posts/:id"}, conf.Bust["PUT"]["/posts/:id"], "Expected the prop bust.PUT to set conf.Bust[\"PUT\"][\"/posts/:id\"] to %v, got %v", []string{"/posts/:id"}, conf.Bust["PUT"]["/posts/:id"])
@@ -93,6 +97,8 @@ func generateArgs() []string {
 		"--cache:GET", "/posts",
 		"--cache:GET", "/posts/:id",
 		"--cache:HEAD", "/posts,/posts/:id",
+		"--bust:GET", "/todos=>/posts",
+		"--bust:HEAD", "/todos=>/posts",
 		"--bust:POST", "/posts=>/posts",
 		"--bust:PUT", "/posts=>^GET:/posts||^HEAD:/posts",
 		"--bust:PUT", "/posts/:id=>/posts/:id",
