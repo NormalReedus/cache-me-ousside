@@ -1,6 +1,5 @@
 * Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
 * Deploy beta til npm / gopkg / github
-  * Kommentarer efter godoc standards
   * README
   * Links
     * Den her er SUPER https://www.digitalocean.com/community/tutorials/how-to-distribute-go-modules

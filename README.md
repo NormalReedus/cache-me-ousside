@@ -4,7 +4,7 @@ A simple LRU cache that can be used as a reverse proxy, meaning that any request
 
 As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly which cache entries to bust and when. That means that one single `POST` request will no longer clear your whole cache when it doesn't need to.
 
-## TILFØJ GIF af start af programmet og et par requests, så man kan se terminal output
+![cache-me-ousside demo](img/cache-me-ousside.gif)
 
 ## Contents
 - [Specs](#specs)
