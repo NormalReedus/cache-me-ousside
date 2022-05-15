@@ -177,10 +177,10 @@ func Panic(err error) {
 func HiMom(confString string, url string) {
 	urlClr := color.New(color.FgBlue, color.Underline)
 
-	myFigure := figure.NewColorFigure("Hello World", "", "green", true)
-	myFigure.Print()
+	figure.NewFigure("Cache Me Ousside", "cybermedium", true).Print()
+	fmt.Println()
 
-	fmt.Printf("📦 You LRU cache microservice is running on %s with the following configuration:\n", urlClr.Sprint(url))
+	fmt.Printf("📦 Your LRU cache microservice is running on %s with the following configuration:\n", urlClr.Sprint(url))
 
 	fmt.Println(confString)
 }

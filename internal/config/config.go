@@ -169,6 +169,16 @@ func (conf Config) Address() string {
 	return fmt.Sprintf("%s:%d", conf.Hostname, conf.Port)
 }
 
+// LogModeString returns a human-readable string representation of how logging is configured.
+// It will be either a log file path or "terminal mode"
+func (conf Config) LogModeString() string {
+	if conf.LogFilePath != "" {
+		return conf.LogFilePath
+	}
+
+	return "terminal mode"
+}
+
 // TrimTrailingSlash mutates the ApiUrl to remove any trailing slashes.
 // This is useful so all specified endpoints and patterns can begin with a slash.
 func (conf *Config) TrimTrailingSlash() {
@@ -286,7 +296,7 @@ func (conf Config) String() string {
 		{"Cache address", conf.Address()},
 		{"Proxied API URL", conf.ApiUrl},
 		{"Capacity", conf.CapacityString()},
-		{"Log file", conf.LogFilePath},
+		{"Log", conf.LogModeString()},
 	})
 	generalTable.Render()
 
@@ -306,7 +316,7 @@ func (conf Config) String() string {
 	cacheTable.Render()
 
 	//* Create bust config table
-	output.WriteString("\nBusting Patterns\n")
+	output.WriteString("\nCache Busting Patterns\n")
 	bustRows := [][]string{}
 	for _, method := range AllMethods {
 		for endpoint, endpointMap := range conf.Bust[method] {
