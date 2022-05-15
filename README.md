@@ -1,6 +1,6 @@
 # cache-me-ousside
-## Your favorite Least Recently Used cache microservice 
-A simple LRU cache that can be used as a reverse proxy, meaning that any request to this microservice will automatically be passed on to your specified REST API without the REST API having to change anything to accomodate the LRU cache.
+## Your favorite Least Recently Used cache
+A simple LRU cache that can be used as a proxy or reverse proxy, meaning that any request to this service will automatically be passed on to your specified REST API without the REST API having to change anything to accomodate the LRU cache.
 
 As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly which cache entries to bust and when. That means that one single `POST` request will no longer clear your whole cache when it doesn't need to.
 
@@ -10,18 +10,43 @@ As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly 
 - [Specs](#specs)
 - [Details](#details)
 
+## What is it?
+`cache-me-ousside` is a server that will proxy all requests to any REST API and cache results of the configured routes in memory, so you can serve the results faster on the next request without having to do database queries or other expensive operations multiple times.
+
+`cache-me-ousside` is a Least Recently Used cache, which means that when the cache is at capacity, the least recently accessed cache entries will be removed first (the FIFO principle). You can configure the cache capacity to be either a fixed number of entries or a memory limit (coming soon).
+
+What makes this cache different from other LRU caches is that you can specify exactly which entries to remove when data on your API is updated. Do you have separate data, that in no way influence each other? Normally, an unsafe HTTP request to your API (such as POST or PUT) will remove all entries from your cache, but perhaps you only need POST requests that update your `todos` to remove your cached `todos`, so that you don't have to repopulate your cache with your `posts` again. 
+
+### Package `cache` (public API is a WIP)
+* Man kan også bruge cachen som package til sin egen LRU Cache
+
 
 ## Installation
-* go install / go get
-* npm?
+To install the `cache-me-ousside` binary, you have two options. Both of these allow you to run the `cache-me-ousside` command from anywhere on your computer.
+
+### NPM (coming soon)
+You will need to have [NPM](https://www.npmjs.com/package/npm "NPM package") installed on your computer to use this command.
+
+```sh
+npm i -g cache-me-ousside
+```
+
+### Go
+You will need to have [Go](https://go.dev/dl/ "Go download page") installed on your computer to use this command.
+
+```sh
+go install github.com/magnus-bb/cache-me-ousside
+```
 
 ## Usage
+To run start the 
+
 * Hvordan man kører det
   * Start med at beskrive hvordan man kører, derefter config i næste afsnit
   * Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
 * tilføj code block med output fra `--help`
 
-### Configuration
+## Configuration
 * Beskriv de 3 forskellige måder at config
   * JSON5 (anbefalet), cli, env
 * Vis et eksempel med alle features / eksempel / default features af hver slags måde og beskriv syntaks og overwrites
