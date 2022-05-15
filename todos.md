@@ -1,3 +1,7 @@
+* Inden publish
+  * Fix at man kun enten skal have cache GET eller HEAD, ikke begge
+  * Skal bruge localhost:8080, hvis intet gives med
+  * Skal default til at buste ALT hvis ingen bust er givet med
 * Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
 * Deploy beta til npm / gopkg / github
   * README

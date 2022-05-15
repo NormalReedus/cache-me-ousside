@@ -159,7 +159,7 @@ func CreateConfFromCli() *config.Config {
 				Name:        "config",
 				Aliases:     []string{"conf", "path"},
 				Usage:       "the `PATH` to a json5 config file specifying the cache settings (will be overwritten by command line flags)",
-				EnvVars:     []string{"CONFIG_PATH"},
+				EnvVars:     []string{"CONFIG_PATH", "CONFIG"},
 			},
 			&cli.Uint64Flag{
 				Destination: &args.capacity,
@@ -171,7 +171,7 @@ func CreateConfFromCli() *config.Config {
 			&cli.StringFlag{
 				Destination: &args.capacityUnit,
 				Name:        "capacity-unit",
-				Aliases:     []string{"cu"},
+				Aliases:     []string{"cap-unit", "cu"},
 				Usage:       "set this to use a memory-based instead of entry-based cache capacity. Valid `UNIT`s are 'b', 'kb', 'mb', 'gb', and 'tb'",
 				EnvVars:     []string{"CAPACITY_UNIT"},
 			},
@@ -194,7 +194,7 @@ func CreateConfFromCli() *config.Config {
 				Name:        "api-url",
 				Aliases:     []string{"url", "u"},
 				Usage:       "the `URL` of the API to cache",
-				EnvVars:     []string{"PROXY_URL"},
+				EnvVars:     []string{"API_URL", "PROXY_URL"},
 			},
 			&cli.StringFlag{
 				Destination: &args.logFilePath,
