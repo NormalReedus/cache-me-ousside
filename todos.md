@@ -1,5 +1,4 @@
 * Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
-* Tilføj cool ascii art med `cache-me-ousside` i HiMom.
 * Deploy beta til npm / gopkg / github
   * Kommentarer efter godoc standards
   * README
