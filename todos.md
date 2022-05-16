@@ -1,11 +1,14 @@
 * Inden publish
+  * Lav en bedre overordnet beskrivelse af cache og bust syntaks og tricks
+    * subtitles til configuration options burde kunne gøre det
+    * Det er bare, at mange 'overordnede' ting omkring programmet er beskrevet under config. Hvis disse får sin egen subtitle under konfigurationen og så bliver inkluderet i Contents-oversigten, så er det sikkert fint.
   * Fix at man kun enten skal have cache GET eller HEAD, ikke begge
+    * Lige nu er der en bug, hvor man skal give både get og head før den virker
   * Skal bruge localhost:8080, hvis intet gives med
-  * Skal default til at buste ALT hvis ingen bust er givet med
-    * Det betyder at skulle have en liste af unsafe (tjek) metoder, som matches altid buster med.
-* Lav en bedre overordnet beskrivelse af cache og bust syntaks og tricks
-  * subtitles til configuration options burde kunne gøre det
-* Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
+* Lav nogle predefined configs
+  * Læg en default config med i projektet, der virker ligesom alm. cache hvor alt bustes men man bare skal definere det man vil have cached
+  * Læg en example config, der viser alle forskellige muligheder og beskriver med kommentarer
+  * Dokumentér i readme og ændr alle eksempler til at bruge default config i stedet for dummy
 * Deploy beta til npm / gopkg / github
   * README
   * Links

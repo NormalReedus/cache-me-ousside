@@ -11,27 +11,30 @@ As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly 
 ![cache-me-ousside demo](img/cache-me-ousside.gif)
 
 ## Contents
-- [About](#about)
-- [Getting started](#getting-started)
-  - [Installation](#installation)
-    - [NPM (coming soon)](#npm-coming-soon)
-    - [Go](#go)
-  - [Usage](#usage)
-    - [JSON5 configuration file](#json5-configuration-file)
-    - [Environment variables](#environment-variables)
-    - [CLI flags](#cli-flags)
-  - [Go package (coming soon)](#go-package-coming-soon)
-    - [Installation](#installation-1)
-    - [Usage](#usage-1)
-- [Configuration](#configuration)
-  - [Configuration file path](#configuration-file-path)
-    - [CLI flag](#cli-flag)
-      - [Flags](#flags)
-      - [Example](#example)
-- [Roadmap](#roadmap)
-- [Limitations](#limitations)
-- [Specs](#specs)
-- [Details](#details)
+  - [About](#about)
+  - [Getting started](#getting-started)
+    - [Installation](#installation)
+      - [NPM (coming soon)](#npm-coming-soon)
+      - [Go](#go)
+    - [Usage](#usage)
+      - [JSON5 configuration file](#json5-configuration-file)
+      - [Environment variables](#environment-variables)
+      - [CLI flags](#cli-flags)
+    - [Go package (coming soon)](#go-package-coming-soon)
+      - [Installation](#installation-1)
+      - [Usage](#usage-1)
+  - [Configuration](#configuration)
+    - [Configuration file path](#configuration-file-path)
+    - [Cache capacity](#cache-capacity)
+    - [Cache capacity unit (coming soon)](#cache-capacity-unit-coming-soon)
+    - [Cache server hostname](#cache-server-hostname)
+    - [Cache server port number](#cache-server-port-number)
+    - [REST API proxy URL](#rest-api-proxy-url)
+    - [Log file path](#log-file-path)
+    - [Cached routes](#cached-routes)
+    - [Cache busting routes and patterns](#cache-busting-routes-and-patterns)
+  - [Roadmap](#roadmap)
+  - [Cache limitations](#cache-limitations)
 
 ## About
 `cache-me-ousside` is a server that will proxy all requests to any REST API and cache results of the configured routes in memory, so you can serve the results faster on the next request without having to do database queries or other expensive operations multiple times.
@@ -487,13 +490,19 @@ BUST_PUT=/posts/:id=>/posts/:id
   // ...
   bust: {
     POST: {
-      /posts: [
-        '^GET:/posts', // POST requests to /posts will remove all GET entries that begin with /posts (that includes /posts/123 and so on)
-        HEAD:/posts',
-      ]
+      '/posts': [ // POST requests to /posts...
+        'GET:/posts', // ...will remove all GET entries that begin with /posts (that includes /posts/123 and so on)
+        'HEAD:/posts$', // ...will remove only the HEAD entry called /posts
+      ],
+      '/posts/:id': [ // POST requests to /posts/:id...
+        '/posts/:id', // ...will remove both GET and HEAD entries that match the matched id only and all children route entries (e.g., /posts/123 and /posts/123/comments etc.)
+      ],
     },
     PUT: {
-
+      // ...
+    },
+    DELETE: {
+      // ...
     }
   }
   // ...
@@ -501,24 +510,14 @@ BUST_PUT=/posts/:id=>/posts/:id
 ```
 
 #### Limitations
-If no bust routes and patterns are specified, the cache will never remove any entries, unless they expire (coming soon). If you want the standard behavior, in which any unsafe HTTP request will clear the whole cache, you can specify all routes for the different HTTP methods as `*` (wildcard) and all patterns as `.`. This will match any route with the specified HTTP method and remove all entries in the cache that match the `.` regex (everything). This feature will be improved in the future.
+If no bust routes and patterns are specified, the cache will never remove any entries, unless they expire (coming soon). If you want the standard behavior, in which any unsafe HTTP request will clear the whole cache, you can specify all routes for the different HTTP methods as `*` (wildcard) and a single pattern as `'.'` or just `''` (empty string). This will match any route with the specified HTTP method and remove all entries in the cache that match the `.` regex (everything). This feature will be improved in the future.
 
 It should be noted that some APIs distinguish between trailing slashes in routes (e.g., `/posts` and `/posts/` would have two different handlers), so this cache does as well to support these kinds of APIs. This means that you should strive to be consistent with your API requests in your application so you always either use trailing slashes or omit them in you app, so you avoid missing your cache entries when you intended to bust them.
-
-
-* Hver feature skal have en beskrivelse af i rækkefølge:
-  * Hvad det bruges til (hvilket problem det løser)
-  * Hvordan det konfigureres i fil, cli, env
-  * Eksempel på output eller effekt eller lignende (hvis applicable)
-  * Caveats / bugs / todos / ting man skal være opmærksom på
-    * trailing slashes bliver fjernet fra api url
-    * requests kender forskel på /posts/ og /posts
-* Beskriv features, der endnu ikke er færdige og markér med coming soon
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Roadmap
-* [ ] GraphQL support
+* [ ] GraphQL support (arbitrary routes + request body matching)
 * [ ] Cache expiry
 * [ ] Respect cache-related headers
 * [ ] Package on NPM.org
@@ -527,51 +526,12 @@ It should be noted that some APIs distinguish between trailing slashes in routes
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-## Limitations
-* Skal være REST (ikke graphql), da entries bliver cached på baggrund af deres route, da det repræsenterer den ressource man tilgår
-  * Måske kommer der en graphql version
-* Man kan kun cache GET og HEAD
-* 
+## Cache limitations
+* You can only cache requests with GET and HEAD HTTP methods
+* The proxied and cached API must be a REST API, since the cache server relies on the fact that routes denote the specific resource being requested, and that HTTP methods signify the kind of operation you are doing on the resource
+* Changes to the resources on your API through any other channels than this cache server will not be reflected (bust entries) in the cache
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
-## Specs
-* Basic REST API som per default bare skal reverse proxy alle requests direkte til et angivet endpoint og give svaret tilbage
-* Skal have en JSON config, som man peger på stien til med et flag, når man kører servicen
-* Config skal definere
-  * reverse proxy host som ALLE requests sendes til (required)
-  * max antal gemte cache keys (required) eller eventuelt en størrelse (mbs etc) som cachen ikke må overskride
-  * endpoints der skal caches
-    * skal inddeles i hvilken metode endpointet bruger (nok mest GET, man kan være hvad som helst)
-    * man skal kunne definere helt fast endpoints med faste parametre i både route og query, som så bliver cached
-    * man skal kunne definere endpoints med variable parametre i både route og query, men som stadig skal caches med en key, der er den helt konkrete requests url og parametre
-  * endpoints der skal buste caches
-    * skal inddeles efter metoden brugt (ligesom caching endpoints)
-    * skal også både kunne definere faste og variable endpoints (ligesom caching endpoints)
-    * men hvert endpoint her skal definere hvilke keys (endpoints og parametre) i cachen de buster
-      * Det kunne helt basalt være faste strings eller regex den matcher keys på og fjerner fra cache, men det kunne være fedt at gøre, så der også er en syntaks for at buste en række af endpoints (f.eks. alle fra et bestemt endpoint uanset queryparametre) 
-* LRUCache skal have et map[string][]byte eller map[string]string til cache, dvs map[endpoint]jsondata
-* LRUCache skal have en doubly linked list til at holde styr på LRU, hvor alle node refererer til deres entry i cachen
-* Hvis en entry bliver fetchet og den er i cachen skal den lægges forrest i queuen (MRU)
-* Hvis en entry ikke er i memory skal den sættes i cache og lægges forrest i queuen (MRU)
-  * Størrelse (om det er enheder eller bytes) skal opdateres efter hver operation i cachen
-  * Hvis størrelsen angives i bytes skal hver tilføjelse til cache tjekke størrelsen efter operationen, og fjerne LRU key og tjekke igen iterativt indtil størrelsen er under max
-* Man skal kunne Clear() alting i LRUCache
-* It would be possible to allow for other methods than GET (POST, PUT) to also cache (non-lazily) in the future
-  * this would require a mapping to know how to cache the return value of a POST request (e.g. POST to /posts might create something on /posts/slug)
-  * it would also require that the specific PUT requests are mapped (if their endpoints are not the same), and that the router calls the LRUCache with instructions to both Bust and set a key
-  * POST etc should not be used for caching, since it breaks with the convention of lazy usage defining what stays in cache
-    * it also requires the API to return data from POST requests in the exact same format as what would be returned from a GET
-    * and that the POST request endpoint is the same as the GET endpoint, which it often is not (e.g., with variable route params)
-
-
-## Details
-* You should trust proxies from your REST API, but it is not strictly necessary
-* The cache will only bust cached routes with requests done through the caching microservice. That means, that changing data through any other method will make the cache fall out of sync with the API
-* Your API should always return the exact same data when requesting the same url - the cache uses the url to cache the data.
-* You can only cache responses from GET requests (so far)
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [license-shield]: https://img.shields.io/github/license/magnus-bb/cache-me-ousside.svg?style=for-the-badge
