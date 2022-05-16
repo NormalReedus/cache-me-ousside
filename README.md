@@ -85,6 +85,7 @@ Using a [JSON5](https://json5.org/ "JSON5 documentation") configuration file, is
   },
 }
 ```
+
 **Command line**
 ```sh
 cache-me-ousside --conf /path/to/config.json5
@@ -97,6 +98,7 @@ CAPACITY=500
 API_URL=https://jsonplaceholder.typicode.com/
 CACHE_GET=/posts,/posts/:id
 ```
+
 **Command line**
 ```sh
 cache-me-ousside
@@ -148,7 +150,7 @@ This means that if the same configuration option is specified more than once, th
 Use `cache-me-ousside --help` to see a list of all configuration options in the terminal.
 
 ### Configuration file path
-**Type**: Path (String)
+**Type**: String (Path)
 
 The file path that points to the JSON5 configuration file with options for the cache. This file can be used as an alternative to all other configuration options.
 
@@ -193,7 +195,7 @@ cache-me-ousside --config /path/to/config.json5 --capacity 500
 CAPACITY=500
 ```
 
-#### JSON5 configuration property
+#### JSON5 property
 `capacity`
 
 **Example**
@@ -228,7 +230,7 @@ CAPACITY=500
 CAPACITY_UNIT=mb
 ```
 
-#### JSON5 configuration property
+#### JSON5 property
 `capacityUnit`
 
 **Example**
@@ -237,6 +239,40 @@ CAPACITY_UNIT=mb
   // ...
   capacity: 500,
   capacityUnit: 'mb',
+  // ...
+}
+```
+
+### Cache server hostname
+**Type**: String
+**Default**: `"localhost"` (coming soon)
+
+----
+
+#### CLI flags
+`--hostname` | `--host` | `--hn`
+
+**Example**
+```sh
+cache-me-ousside --config /path/to/config.json5 --hostname localhost
+```
+
+#### Environment variables
+`HOSTNAME`
+
+**Example**
+```sh
+HOSTNAME=localhost
+```
+
+#### JSON5 property
+`hostname`
+
+**Example**
+```json5
+{
+  // ...
+  hostname: 'localhost',
   // ...
 }
 ```
