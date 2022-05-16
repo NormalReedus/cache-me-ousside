@@ -49,7 +49,7 @@ func (set Set[T]) Elements() []T {
 // Gets the allocated memory in bytes so we can compare it to the max allowed memory for the cache
 // if that type of 'capacity' is chosen
 
-// MemUsage outputs the current memory being used in bytes.
+// MemUsage returns the current memory being used in bytes.
 func MemUsage() uint64 {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
@@ -91,12 +91,13 @@ func ToBytes(size uint64, unit string) (uint64, error) {
 }
 
 //* REGEX ROUTES
+
 /*
-	hydrateParams rakes route patterns (strings to turn into regex) and a map of all route params in a route handler
+	HydrateParams rakes route patterns (strings to turn into regex) and a map of all route params in a route handler
 	(ctx.AllParams()) and returns the routePattern with route params replaced with their arguments.
 	Example: will replace /users/:id with /users/123 when given map[id:123]
 */
-func hydrateParams(paramMap map[string]string, routePatternTemplates []string) []string {
+func HydrateParams(paramMap map[string]string, routePatternTemplates []string) []string {
 	// Copy original slice so we can return a new one
 	// newRoutePatterns := routePatternTemplates
 	newRoutePatterns := make([]string, len(routePatternTemplates))

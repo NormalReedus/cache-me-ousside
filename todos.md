@@ -2,6 +2,9 @@
   * Fix at man kun enten skal have cache GET eller HEAD, ikke begge
   * Skal bruge localhost:8080, hvis intet gives med
   * Skal default til at buste ALT hvis ingen bust er givet med
+    * Det betyder at skulle have en liste af unsafe (tjek) metoder, som matches altid buster med.
+* Lav en bedre overordnet beskrivelse af cache og bust syntaks og tricks
+  * subtitles til configuration options burde kunne gøre det
 * Læg en default (ikke example) config med i projektet, der virker ligesom alm. cache hvor alt bustes
 * Deploy beta til npm / gopkg / github
   * README

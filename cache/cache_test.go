@@ -281,7 +281,7 @@ func TestHydrateParams(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		assert.Equal(tt.expected, hydrateParams(tt.paramMap, tt.patterns))
+		assert.Equal(tt.expected, HydrateParams(tt.paramMap, tt.patterns))
 	}
 }
 

@@ -178,7 +178,7 @@ func CreateConfFromCli() *config.Config {
 			&cli.StringFlag{
 				Destination: &args.hostname,
 				Name:        "hostname",
-				Aliases:     []string{"host", "hn"},
+				Aliases:     []string{"hn"},
 				Usage:       "the `HOSTNAME` where the cache is accessible",
 				EnvVars:     []string{"HOSTNAME"},
 			},
@@ -196,12 +196,12 @@ func CreateConfFromCli() *config.Config {
 				Usage:       "the `URL` of the API to cache",
 				EnvVars:     []string{"API_URL", "PROXY_URL"},
 			},
-			&cli.StringFlag{
+			&cli.PathFlag{
 				Destination: &args.logFilePath,
 				Name:        "logfile",
 				Aliases:     []string{"log", "l"},
 				Usage:       "the `FILEPATH` to the log file to use for persistent logs. Omit this to output logs to stdout",
-				EnvVars:     []string{"LOGFILE_PATH"},
+				EnvVars:     []string{"LOGFILE_PATH", "LOGFILE"},
 			},
 			&cli.StringSliceFlag{
 				Destination: &args.cacheGET,

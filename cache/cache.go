@@ -141,7 +141,7 @@ func (cache *LRUCache) Match(patterns []string, paramMap map[string]string) []st
 	keys := make(Set[string]) // use a set so we don't duplicate keys
 
 	// If there are any route params (/:id for example), insert the actual values into the pattern before compiling regex
-	patterns = hydrateParams(paramMap, patterns)
+	patterns = HydrateParams(paramMap, patterns)
 
 	for _, pattern := range patterns {
 		patternExp, err := regexp.Compile(pattern)
