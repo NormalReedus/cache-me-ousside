@@ -33,3 +33,5 @@
   * Husk at fikse så tests giver en tom unit med til New, da vi ikke rigtigt kan teste memory-basered caching.
 * Servér en side /info, der viser konfigurationen og hvordan man bruger cachen (gerne med konkrete eksempler ud fra de routes, man har sat etc)
   * Lav en config til at ændre på routen, hvis man vil bruge andet end /info
+* Lav en cache.Clear() som kan kaldes mere optimeret, hvis patterns er et tomt slice, når man buster
+  * I stedet for at manipulere patterns til at være '.' så det matcher alt, så bare tjek i controlleren om den skal kalde cache.Clear() eller match og bust.
