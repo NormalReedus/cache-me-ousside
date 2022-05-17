@@ -137,11 +137,18 @@ func (cache *LRUCache) Bust(keys ...string) {
 
 // Match returns a slice of keys of the entries in the cache that match the given patterns.
 // The patterns are hydrated with URL parameters from paramMap before being compiled as regex.
+// If an empty slice of patterns is passed, all keys are returned (matching everything).
 func (cache *LRUCache) Match(patterns []string, paramMap map[string]string) []string {
 	keys := make(Set[string]) // use a set so we don't duplicate keys
 
-	// If there are any route params (/:id for example), insert the actual values into the pattern before compiling regex
-	patterns = HydrateParams(paramMap, patterns)
+	if len(patterns) == 0 {
+		// If empty slice of patterns is passed, return all keys (match all)
+		patterns = []string{"."}
+
+	} else {
+		// If there are any route params (/:id for example), insert the actual values into the pattern before compiling regex
+		patterns = HydrateParams(paramMap, patterns)
+	}
 
 	for _, pattern := range patterns {
 		patternExp, err := regexp.Compile(pattern)

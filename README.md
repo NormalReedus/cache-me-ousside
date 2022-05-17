@@ -37,7 +37,7 @@ As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly 
   - [Cache limitations](#cache-limitations)
 
 ## About
-`cache-me-ousside` is a server that will proxy all requests to any REST API and cache results of the configured routes in memory, so you can serve the results faster on the next request without having to do database queries or other expensive operations multiple times.
+`cache-me-ousside` is a server that will proxy all requests to any REST API and cache results of the configured routes in memory, so you can serve the results faster on the next request without having to do database queries or other expensive operations multiple times. In other words, you can cache your REST API resources outside of the API, so you don't have to integrate a cache on the API itself, making setup much easier.
 
 `cache-me-ousside` is a Least Recently Used cache, which means that when the cache is at capacity, the least recently accessed cache entries will be removed first (the FIFO principle). You can configure the cache capacity to be either a fixed number of entries or use a memory based limit (coming soon).
 
@@ -70,13 +70,15 @@ go install github.com/magnus-bb/cache-me-ousside
 ### Usage
 There are three different ways of configuring `cache-me-ousside`: a JSON5 file, environment variables, or command line flags. The minimal setup only requires you to specify a cache capacity, a proxy API URL, and a list of routes to cache for either HEAD or GET requests.
 
+You can use the `config.default.json5` file as a starting point for your configuration, you will just have to enter your own API URL in the file. This configuration will cache 500 entries, log output to the terminal, cache all GET and HEAD requests, and clear the whole cache when any unsafe HTTP method request is used, and run on http://localhost:8080.
+
 See the [configuration section](#configuration) for more details on all of the configuration options, or run the command:
 ```sh
 cache-me-ousside --help
 ```
 
 #### JSON5 configuration file
-Using a [JSON5](https://json5.org/ "JSON5 documentation") configuration file, is the recommended method for configuring the cache.
+Using a [JSON5](https://json5.org/ "JSON5 documentation") configuration file, is the recommended method for configuring the cache. JSON5 is a superset of JSON, that allows you to write in a syntax that is closer to JavaScript. You can also use a regular JSON file.
 
 **Configuration**
 ```json5
@@ -91,7 +93,7 @@ Using a [JSON5](https://json5.org/ "JSON5 documentation") configuration file, is
 
 **Command line**
 ```sh
-cache-me-ousside --conf /path/to/config.json5
+cache-me-ousside --conf ./config.default.json5
 ```
 
 #### Environment variables
@@ -141,7 +143,7 @@ See the [documentation](https://pkg.go.dev/github.com/magnus-bb/cache-me-ousside
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Configuration
-`cache-me-ousside` can be configured with JSON5, environment variables, or CLI flags. The three configuration methods can be used interchangeably (see the [usage section](#usage) for more details on how to use the configuration methods).
+`cache-me-ousside` can be configured with JSON5/JSON, environment variables, or CLI flags. The three configuration methods can be used together (see the [usage section](#usage) for more details on how to use the configuration methods).
 
 If you are mixing configuration methods, the order of precedence is as follows:
 1. Command line flags
@@ -150,21 +152,24 @@ If you are mixing configuration methods, the order of precedence is as follows:
 
 This means that if the same configuration option is specified more than once, the command line flag will be the one used if it is specified, otherwise the environment variable will be used if it is specified, otherwise the JSON5 configuration file will be used.
 
+See the `config.example.json5` file for reference on how to use the JSON5 configuration file.
+
 Use `cache-me-ousside --help` to see a list of all configuration options in the terminal.
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ### Configuration file path
 **Type**: `string` (path)
 
-The file path that points to the JSON5 configuration file with options for the cache. This file can be used as an alternative to all other configuration options.
+The file path that points to the [JSON5](https://json5.org/ "JSON5 documentation") configuration file with options for the cache. This file can be used to specify all other configuration options than the configuration file path itself.
 
 #### CLI flags
 `--config` | `--conf` | `--path`
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5
+cache-me-ousside --config ./config.default.json5
 ```
 
 #### Environment variables
@@ -172,7 +177,7 @@ cache-me-ousside --config /path/to/config.json5
 
 **Example**
 ```sh
-CONFIG_PATH=/path/to/config.json5
+CONFIG_PATH=./config.default.json5
 ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -184,14 +189,14 @@ CONFIG_PATH=/path/to/config.json5
 
 The cache capacity denotes how much data can be stored in the cache. The capacity can be either a fixed number of entries or a memory limit (coming soon). When the cache is full, the least recently accessed cache entry will be removed.
 
-Regardless of whether you are setting a capacity of a specific number of entries or an amount of memory for the cache, the cache capacity should be set to a number (see [Cache capacity unit](#cache-capacity-unit) for more details on the two modes).
+Regardless of whether you are setting a capacity of a specific number of entries or an amount of memory for the cache, the cache capacity should be set to a number (see the [Cache capacity unit](#cache-capacity-unit) section for more details on the two modes).
 
 #### CLI flags
 `--capacity` | `--cap`
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --capacity 500
+cache-me-ousside --config ./config.default.json5 --capacity 500
 ```
 
 #### Environment variables
@@ -227,7 +232,7 @@ The cache capacity unit denotes which type of cache limit you want to impose. Le
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --capacity 500 --capacity-unit mb
+cache-me-ousside --config ./config.default.json5 --capacity 500 --capacity-unit mb
 ```
 
 #### Environment variables
@@ -267,7 +272,7 @@ Be aware that the hostname does not include a scheme.
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --hostname localhost
+cache-me-ousside --config ./config.default.json5 --hostname localhost
 ```
 
 #### Environment variables
@@ -303,7 +308,7 @@ The cache server port number is the port number of the server that will be servi
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --port 8080
+cache-me-ousside --config ./config.default.json5 --port 8080
 ```
 
 #### Environment variables
@@ -332,7 +337,7 @@ PORT=8080
 **Required**
 **Type**: `string`
 
-The REST API proxy URL is where all requests to the cache server will be proxied. That means, that any request sent to the cache server will be forwarded, exactly as-is, to the specified REST API (and requests to configured routes will be cached).
+The REST API proxy URL is where all requests to the cache server will be proxied. That means, that any request sent to the cache server will be forwarded, exactly as-is, to the specified REST API (and responses from configured routes will be cached).
 
 Trailing slashes are trimmed from the API URL so the same caching and busting configuration will work the same when you change the API URL from production to development etc. and perhaps omit the trailing slash in one or the other.
 
@@ -341,7 +346,7 @@ Trailing slashes are trimmed from the API URL so the same caching and busting co
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --api-url https://jsonplaceholder.typicode.com/
+cache-me-ousside --config ./config.default.json5 --api-url https://jsonplaceholder.typicode.com/
 ```
 
 #### Environment variables
@@ -379,7 +384,7 @@ The log file path should point to a file into which all log messages (info, warn
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --logfile /path/to/logfile.log
+cache-me-ousside --config ./config.default.json5 --logfile /path/to/logfile.log
 ```
 
 #### Environment variables
@@ -418,7 +423,7 @@ When setting cached routes with CLI flags, you can either choose to separate the
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --cache:GET /posts,/posts/:id --cache:HEAD /posts --c:h /posts/:id
+cache-me-ousside --config ./config.default.json5 --cache:GET /posts,/posts/:id --cache:HEAD /posts --c:h /posts/:id
 ```
 
 #### Environment variables
@@ -458,9 +463,9 @@ It should be noted that some APIs distinguish between trailing slashes in routes
 
 The cache busting routes and patterns configuration is used to specify which request should remove (bust) specific entries in the cache. You can bust cache entries on any HTTP method, but we recommend only busting on [unsafe](https://datatracker.ietf.org/doc/html/rfc7231#section-4.2.1 "rfc7231 specification") HTTP methods. You can specify any HTTP method in the configuration by substituting `<METHOD>` with the method name in the configuration examples. The cache server runs on [Fiber](https://gofiber.io/ "gofiber website"), and as such follows the same route matching rules as the Fiber framework.
 
-When setting bust routes and entry-matching patterns with CLI flags or environment variables, you must follow a specific syntax (which is why we recommend using the JSON5 configuration file when possible). Every bust configuration option for every method must specify ONE route to match (follows the Fiber syntax) and a list of regex patterns to use for matching entries in the cache to bust. The route and patterns must be separated by `=>`, and the regex patterns must be separated by `||`. As with the cached routes configuration, you can either comma-separate every configuration to supply several route matches or repeat the flag several times to add more routes to bust (only in CLI). The separator characters are rather contrived, but designed to not conflict with the comma separator used by the cli-package, Fiber's route syntax, and regex.
+When setting bust routes and entry-matching patterns with CLI flags or environment variables, you must follow a specific syntax (which is why we recommend using the JSON5 configuration file when possible). Every bust configuration option for every method must specify ONE route to match (follows the Fiber syntax) and a list of regex patterns to use for matching entries in the cache to bust. The route and patterns must be separated by `=>`, and the regex patterns must be separated by `||`. As with the cached routes configuration, you can either comma-separate every configuration to supply several route matches or repeat the flag several times to add more routes to bust (only in CLI). The separator characters are rather contrived, but designed to not conflict with the comma separator used by the cli-package, Fiber's route syntax, and regex. You must also enclose these options in double quotes when specified as a CLI flag to avoid shells such as bash from interpreting `>` as a redirection operator.
 
-All entry-busting patterns use regex syntax, but will first substitute route parameters specified with `:` (just like Fiber's route matching syntax) with the corresponding values from the route. This means that a pattern like `/posts/:id` will only remove an entry for `/posts/1` if the matched route is `/posts/1`. Compare this to the pattern `/posts/` or `/posts/.*` which would remove post entries with any ID. `
+All entry-busting patterns use regex syntax, but will first substitute route parameters specified with `:` (just like Fiber's route matching syntax) with the corresponding values from the route. This means that a pattern like `/posts/:id` will only remove an entry for `/posts/1` if the matched route is `/posts/1`. Compare this to the pattern `/posts/` or `/posts/.*` which would remove post entries with any ID.
 
 All entries are saved in the cache in the format `<METHOD>:<MATCHED_ROUTE>`. This means you can leverage the `^` (beginning of line) and `$` (end of line) characters to specify whether you want to match a specific method or not and whether you want an exact match or anything containing the substring (see JSON5 examples).
 
@@ -469,7 +474,7 @@ All entries are saved in the cache in the format `<METHOD>:<MATCHED_ROUTE>`. Thi
 
 **Example**
 ```sh
-cache-me-ousside --config /path/to/config.json5 --bust:POST /posts=>GET:/posts||HEAD:/posts,/posts/:id=>/posts/:id
+cache-me-ousside --config ./config.default.json5 --bust:POST "/posts=>GET:/posts||HEAD:/posts,/posts/:id=>/posts/:id"
 ```
 
 #### Environment variables
@@ -509,9 +514,10 @@ BUST_PUT=/posts/:id=>/posts/:id
 }
 ```
 
-#### Limitations
-If no bust routes and patterns are specified, the cache will never remove any entries, unless they expire (coming soon). If you want the standard behavior, in which any unsafe HTTP request will clear the whole cache, you can specify all routes for the different HTTP methods as `*` (wildcard) and a single pattern as `'.'` or just `''` (empty string). This will match any route with the specified HTTP method and remove all entries in the cache that match the `.` regex (everything). This feature will be improved in the future.
+#### Default LRU cache behavior
+If no bust routes and patterns are specified, the cache will never remove any entries, unless they expire (coming soon). If you want the standard LRU cache behavior, in which any unsafe HTTP request will clear the whole cache, you can specify all routes for the different HTTP methods as `"*"` (wildcard) and an empty slice of patterns. The `config.default.json5` file uses this behavior.
 
+#### Limitations
 It should be noted that some APIs distinguish between trailing slashes in routes (e.g., `/posts` and `/posts/` would have two different handlers), so this cache does as well to support these kinds of APIs. This means that you should strive to be consistent with your API requests in your application so you always either use trailing slashes or omit them in you app, so you avoid missing your cache entries when you intended to bust them.
 
 <p align="right">(<a href="#top">back to top</a>)</p>

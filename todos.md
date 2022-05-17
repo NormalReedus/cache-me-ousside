@@ -1,16 +1,8 @@
 * Inden publish
-  * Lav en bedre overordnet beskrivelse af cache og bust syntaks og tricks
-    * subtitles til configuration options burde kunne gøre det
-    * Det er bare, at mange 'overordnede' ting omkring programmet er beskrevet under config. Hvis disse får sin egen subtitle under konfigurationen og så bliver inkluderet i Contents-oversigten, så er det sikkert fint.
   * Fix at man kun enten skal have cache GET eller HEAD, ikke begge
     * Lige nu er der en bug, hvor man skal give både get og head før den virker
   * Skal bruge localhost:8080, hvis intet gives med
-* Lav nogle predefined configs
-  * Læg en default config med i projektet, der virker ligesom alm. cache hvor alt bustes men man bare skal definere det man vil have cached
-  * Læg en example config, der viser alle forskellige muligheder og beskriver med kommentarer
-  * Dokumentér i readme og ændr alle eksempler til at bruge default config i stedet for dummy
 * Deploy beta til npm / gopkg / github
-  * README
   * Links
     * Den her er SUPER https://www.digitalocean.com/community/tutorials/how-to-distribute-go-modules
     * https://go.dev/doc/modules/publishing
@@ -23,10 +15,6 @@
 * Brug https://github.com/go-playground/validator til a validere config
 * Hvis cache bare er et slice / array kunne det sættes for både GET og HEAD?
   * Kan det lade sig gøre med go uden at skulle lave any type?
-* Testing
-  * Se på code coverage om der er dele, der ikke bliver testet
-* Default busting (ingen passed bust patterns) er at alle ikke-cacheable requests buster hele cachen
-  * Skriv tests først der tjekker at alt bare forsvinder
 * Overhold Cache-Control headers
   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
@@ -45,16 +33,3 @@
   * Husk at fikse så tests giver en tom unit med til New, da vi ikke rigtigt kan teste memory-basered caching.
 * Servér en side /info, der viser konfigurationen og hvordan man bruger cachen (gerne med konkrete eksempler ud fra de routes, man har sat etc)
   * Lav en config til at ændre på routen, hvis man vil bruge andet end /info
-* README
-  * Beskriv alle flags / config props
-    * Og hvordan man laver multiple vals 
-      * f.eks. flere cache:GET hvor man skal gentage flaget
-      * Eller flere bust:POST hvor man enten gentager flaget eller kommaseparerer værdier
-      * Og beskriv syntaksen for bust cli argumenter med `=>` og `||` samt grunden til tegnene
-    * Og husk at man skal bruge citationstegn for at undgå at `>` outputter til en fil
-    * Vis eksempler på alle kombinationer af at bruge komma, || og at tilføje flere flags med samme navn til at buste
-  * Beskriv hvordan route params kan bustes med : og hvordan det altid bliver parsed før regex
-  * Beskriv hvordan dette er lavet til en almindelig REST api og derfor ikke kan garantere at virke med andre slags API, dvs. at det bygger på safe og unsafe http metoder, hvoraf f.eks. kun GET og HEAD er cacheable og man kan definere entries på baggrund af den route, der er brugt til at requeste entries, da REST er bygget sådan, at routes er lig med ressourcer
-    * F.eks. virker det her ikke med GraphQL
-  * Beskriv at man både kan køre det som binary, der er en server microservice, men man også kan go get pakken og så importere `cache` for selv at bruge den
-  * Beskriv hvordan busting foregår med GET og HEAD i regex

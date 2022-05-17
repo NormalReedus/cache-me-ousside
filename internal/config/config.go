@@ -320,6 +320,11 @@ func (conf Config) String() string {
 	bustRows := [][]string{}
 	for _, method := range AllMethods {
 		for endpoint, endpointMap := range conf.Bust[method] {
+			if len(endpointMap) == 0 {
+				bustRows = append(bustRows, []string{method, endpoint, "ALL"}) // empty bust pattern slice means to bust everything
+				continue
+			}
+
 			for _, pattern := range endpointMap {
 				bustRows = append(bustRows, []string{method, endpoint, pattern})
 			}
