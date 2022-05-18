@@ -1,9 +1,8 @@
 {
-	capacity: 500, 
-	hostname: 'localhost', //delete
-	port: 8080, // delete
-	apiUrl: 'https://jsonplaceholder.typicode.com/', // Replace this with your API URL
-	// apiUrl: '<INSERT API URL HERE>', // Replace this with your API URL
+	// Default capacity: 500 entries
+	// Default hostname: 'localhost'
+	// Default port: 8080
+	apiUrl: '<INSERT API URL HERE>', // Replace this with your API URL
 	cache: {
 		GET: ['*'],
 		HEAD: ['*'],

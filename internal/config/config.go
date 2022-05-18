@@ -15,6 +15,12 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
+const (
+	DefaultCapacity uint64 = 5
+	DefaultHostname        = "localhost"
+	DefaultPort     uint   = 8080
+)
+
 var (
 	// AllMethods is a slice of all valid http methods to use in the cache configuration for busting.
 	// 	{"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "OPTIONS"}
@@ -43,8 +49,11 @@ func New() *Config {
 	}
 
 	conf := &Config{
-		Cache: make(CacheMap),
-		Bust:  bustMap,
+		Capacity: DefaultCapacity,
+		Hostname: DefaultHostname,
+		Port:     DefaultPort,
+		Cache:    make(CacheMap),
+		Bust:     bustMap,
 	}
 
 	return conf
@@ -88,28 +97,28 @@ func LoadJSON(configPath string) *Config {
 
 // Config represents the configuration for the cache-me-ousside application.
 type Config struct {
-	// Capacity is required, it represents the limit to how much data can be stored in the cache.
+	// Default is 500, it represents the limit to how much data can be stored in the cache.
 	Capacity uint64 `json:"capacity"`
+
 	/*
 		CapacityUnit represents the unit of measurement for the capacity.
 		If omitted, the cache Capacity will be measured in entries.
 		Set CapacityUnit to a string to use memory as the unit of measurement, e.g. "mb".
 	*/
 	CapacityUnit string `json:"capacityUnit"`
-	/*
-		Hostname is required, it represents the hostname where the server application can be accessed. E.g.:
-			"localhost".
-	*/
+
+	// Default is "localhost", it represents the hostname where the server application can be accessed.
 	Hostname string `json:"hostname"`
-	/*
-		Port is required, it represents the port where the server application can be accessed. E.g.:
-		 	8080
-	*/
+
+	//Default is 8080, it represents the port where the server application can be accessed. E.g.:
 	Port uint `json:"port"`
+
 	// ApiUrl is required, it represents the url of the API to which all requests are proxied and cached from.
 	ApiUrl string `json:"apiUrl"`
+
 	// LogFilePath is the path to an optional log file to use instead of stdout (terminal mode).
 	LogFilePath string `json:"logFilePath"`
+
 	/*
 		Cache is a map of http methods with slices of endpoints to which requests should be cached. E.g.:
 			{
@@ -117,7 +126,9 @@ type Config struct {
 				"HEAD": ["/api/v1/users/:id", "/api/v1/users/:id/posts"],
 			}
 	*/
+
 	Cache CacheMap `json:"cache"` // required (either GET or HEAD)
+
 	/*
 		Bust is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust. E.g.:
 			{

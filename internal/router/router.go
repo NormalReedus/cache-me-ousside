@@ -31,7 +31,7 @@ func New(conf *config.Config, cache *cache.LRUCache) *fiber.App {
 }
 
 // setBustingEndpoints loops through methods, endpoints, and patterns and sets a middleware that removes cache entries when patterns are matched.
-// E.g. POST to /users could remove all cache entries that match the pattern ^/users or ^/users/:id.
+// E.g. POST to /users could remove all cache entries that match the pattern /users or /users/:id.
 func setBustingEndpoints(app *fiber.App, conf *config.Config) {
 	for method, endpointMap := range conf.Bust {
 		for endpoint, patterns := range endpointMap {
