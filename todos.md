@@ -1,7 +1,3 @@
-* Inden publish
-  * Fix at man kun enten skal have cache GET eller HEAD, ikke begge
-    * Lige nu er der en bug, hvor man skal give både get og head før den virker
-  * Skal bruge localhost:8080, hvis intet gives med
 * Deploy beta til npm / gopkg / github
   * Links
     * Den her er SUPER https://www.digitalocean.com/community/tutorials/how-to-distribute-go-modules

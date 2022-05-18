@@ -1,6 +1,6 @@
 {
-	// How many entries to store in the cache
-	capacity: 5, 
+	// How many entries to store in the cache (500 entries is the default)
+	capacity: 500, 
 
 	// Which (if any) memory unit to use for the capacity (only used for memory based cache limit)
 	capacityUnit: '', // Omit or '' to use entry based cache limit, otherwise use 'b', 'kb', 'mb', 'gb', or 'tb'

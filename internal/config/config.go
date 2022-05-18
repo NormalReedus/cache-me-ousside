@@ -266,10 +266,6 @@ func (conf *Config) ValidateProps() error {
 
 	if !getExists && !headExists {
 		missingProps = append(missingProps, "Cache")
-	} else if !getExists {
-		missingProps = append(missingProps, "Cache[\"GET\"]")
-	} else if !headExists {
-		missingProps = append(missingProps, "Cache[\"HEAD\"]")
 	}
 
 	if len(missingProps) > 0 {
