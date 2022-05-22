@@ -12,7 +12,7 @@ fi
 package_split=(${package//\// })
 package_name=${package_split[-1]}
 
-platforms=("windows/amd64" "windows/386" "darwin/amd64" "linux/386")
+platforms=("windows/amd64" "windows/386" "darwin/amd64" "linux/amd64" "linux/386")
 
 for platform in "${platforms[@]}"
 do
@@ -20,7 +20,7 @@ do
 	GOOS=${platform_split[0]}
 	GOARCH=${platform_split[1]}
 
-  output_dir="build/"
+  output_dir="dist/"
   output_name=$package_name'-'$GOOS'-'$GOARCH
   output_path="$output_dir/$output_name"
 

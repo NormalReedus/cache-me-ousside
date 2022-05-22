@@ -14,4 +14,6 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-build/
+dist/
+bin/
+node_modules/

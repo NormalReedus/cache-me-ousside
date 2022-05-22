@@ -1,0 +1,31 @@
+{
+  "name": "cache-me-ousside",
+  "version": "0.1.0-alpha.1",
+  "description": "A simple LRU cache that can be used as a proxy or reverse proxy, meaning that any request to this service will automatically be passed on to your specified REST API without the REST API having to change anything to accomodate the LRU cache.",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js install",
+    "preuninstall": "node scripts/postinstall.js uninstall"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magnus-bb/cache-me-ousside.git"
+  },
+  "author": "Magnus Bendix Borregaard",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/magnus-bb/cache-me-ousside/issues"
+  },
+  "goBinary": {
+    "name": "cache-me-ousside",
+    "path": "./bin"
+  },
+  "homepage": "https://github.com/magnus-bb/cache-me-ousside#readme",
+  "files": [
+    "dist",
+    "postinstall.js"
+  ],
+  "dependencies": {
+    "mkdirp": "^1.0.4"
+  }
+}
