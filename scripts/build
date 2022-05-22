@@ -25,7 +25,7 @@ do
   output_path="$output_dir/$output_name"
 
 	if [ $GOOS = "windows" ]; then
-		output_name+='.exe'
+		output_path+='.exe'
 	fi
 
   env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_path $package
