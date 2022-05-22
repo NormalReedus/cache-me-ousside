@@ -48,10 +48,10 @@ What makes this cache different from other LRU caches is that you can specify ex
 ## Getting started
 It is super simple to get up and running with `cache-me-ousside`!
 
-### Installation
+### Installing
 To install the `cache-me-ousside` binary, you have two options. Both of these allow you to run the `cache-me-ousside` command from anywhere on your computer.
 
-#### NPM (coming soon)
+#### NPM
 You will need to have [NPM](https://www.npmjs.com/package/npm "NPM package") installed on your computer to use this command.
 
 ```sh
@@ -63,6 +63,29 @@ You will need to have [Go](https://go.dev/dl/ "Go download page") installed on y
 
 ```sh
 go install github.com/magnus-bb/cache-me-ousside
+```
+
+### Uninstalling
+Uninstalling `cache-me-ousside` is as simple, as removing the `cache-me-ousside` binary file, from your computer. How this is done depends on your method of installation.
+
+#### Installed with NPM
+Delete the `cache-me-ousside(.exe)` binary located in your NPM `bin` directory. You can find the `bin` directory by running the following command in your terminal:
+
+```sh
+npm bin -g
+``` 
+
+You can also run the following script, that comes with this repo:
+
+```sh
+node scripts/postinstall.js uninstall
+```
+
+#### Installed with Go
+Delete the file located at `$GOPATH/bin/cache-me-ousside(.exe)`. The file extension will be `exe` on a Windows machine. With bash, you can see the location of `GOPATH` by running:
+
+```sh
+echo $GOPATH
 ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>

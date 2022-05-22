@@ -4,8 +4,9 @@
   "description": "A simple LRU cache that can be used as a proxy or reverse proxy, meaning that any request to this service will automatically be passed on to your specified REST API without the REST API having to change anything to accomodate the LRU cache.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "node scripts/postinstall.js install",
-    "preuninstall": "node scripts/postinstall.js uninstall"
+    "build": "./scripts/build",
+    "prepare": "./scripts/build",
+    "postinstall": "node scripts/postinstall.js install"
   },
   "repository": {
     "type": "git",
