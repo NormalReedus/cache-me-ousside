@@ -65,21 +65,28 @@ async function verifyAndPlaceBinary(binName, binPath, callback) {
 				binName
 		)
 
+
 	// Get installation path for executables under node
 	const installationPath = await getInstallationPath()
+	// fs.rename(
+		// 	path.join(binPath, binName),
+		// 	path.join(installationPath, binName),
+		// 	err => {
+	// 		if (!err) {
+		// 			console.info('Installed cache-me-ousside successfully')
+		// 			callback(null)
+		// 		} else {
+			// 			callback(err)
+			// 		}
+			// 	}
+			// )
+			
 	// Copy the executable to the path
-	fs.rename(
+	fs.copyFileSync(
 		path.join(binPath, binName),
-		path.join(installationPath, binName),
-		err => {
-			if (!err) {
-				console.info('Installed cache-me-ousside successfully')
-				callback(null)
-			} else {
-				callback(err)
-			}
-		}
+		path.join(installationPath, binName)
 	)
+	console.info('Installed cache-me-ousside successfully')
 }
 
 function validateConfiguration(packageJson) {
@@ -168,7 +175,12 @@ async function install(callback) {
 	const src = `./dist/${opts.binName}-${process.platform}-${
 		ARCH_MAPPING[process.arch]
 	}`
-	await execShellCommand(`cp ${src} ${opts.binPath}/${opts.binName}`)
+	// await execShellCommand(`cp ${src} ${opts.binPath}/${opts.binName}`)
+	fs.copyFileSync(
+		src,
+		path.join(opts.binPath, opts.binName)
+	)
+
 	await verifyAndPlaceBinary(opts.binName, opts.binPath, callback)
 }
 
