@@ -24,7 +24,7 @@
   "homepage": "https://github.com/magnus-bb/cache-me-ousside#readme",
   "files": [
     "dist",
-    "postinstall.js"
+    "scripts/postinstall.js"
   ],
   "dependencies": {
     "mkdirp": "^1.0.4"
