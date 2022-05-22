@@ -41,7 +41,7 @@ As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly 
 
 `cache-me-ousside` is a Least Recently Used cache, which means that when the cache is at capacity, the least recently accessed cache entries will be removed first (the FIFO principle). You can configure the cache capacity to be either a fixed number of entries or use a memory based limit (coming soon).
 
-What makes this cache different from other LRU caches is that you can specify exactly which entries to remove when data on your API is updated. Do you have separate data, that in no way influence each other? Normally, an unsafe HTTP request to your API (such as POST or PUT) will remove all entries from your cache, but perhaps you only need POST requests that update your `todos` to remove your cached `todos`, so that you don't have to repopulate your cache with your `posts` again. To configure the cache server to remove all entries on any unsafe HTTP request, see the limitations section of [cache busting routes and patterns](#cache-busting-routes-and-patterns).
+What makes this cache different from other LRU caches is that you can specify exactly which entries to remove when data on your API is updated. Do you have separate data, that in no way influence each other? Normally, an unsafe HTTP request to your API (such as POST or PUT) will remove all entries from your cache, but perhaps you only need POST requests that update your `todos` to remove your cached `todos`, so that you don't have to repopulate your cache with your `posts` again. To configure the cache server to remove all entries on any unsafe HTTP request, see the [Default LRU cache behavior](#default-lru-cache-behavior) section.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -70,7 +70,7 @@ go install github.com/magnus-bb/cache-me-ousside
 ### Usage
 There are three different ways of configuring `cache-me-ousside`: a JSON5 file, environment variables, or command line flags. The minimal setup only requires you to specify a cache capacity, a proxy API URL, and a list of routes to cache for either HEAD or GET requests.
 
-You can use the `config.default.json5` file as a starting point for your configuration, you will just have to enter your own API URL in the file. This configuration will cache 500 entries, log output to the terminal, cache all GET and HEAD requests, and clear the whole cache when any unsafe HTTP method request is used, and run on http://localhost:8080.
+You can use the `config.default.json5` file as a starting point for your configuration, you will just have to enter your own API URL in the file. This configuration will cache 500 entries, log output to the terminal, cache all GET and HEAD requests, and clear the whole cache when any unsafe HTTP method request is used, and run on http://localhost:8080. To not clear the whole cache on all unsafe HTTP method requests see the [cache busting routes and patterns](#cache-busting-routes-and-patterns) section.
 
 See the [configuration section](#configuration) for more details on all of the configuration options, or run the command:
 ```sh
@@ -78,7 +78,7 @@ cache-me-ousside --help
 ```
 
 #### JSON5 configuration file
-Using a [JSON5](https://json5.org/ "JSON5 documentation") configuration file, is the recommended method for configuring the cache. JSON5 is a superset of JSON, that allows you to write in a syntax that is closer to JavaScript. You can also use a regular JSON file.
+Using a [JSON5](https://json5.org/ "JSON5 documentation") configuration file is the recommended method for configuring the cache. JSON5 is a superset of JSON, that allows you to write in a syntax that is closer to JavaScript. You can also use a regular JSON file.
 
 **Configuration**
 ```json5
@@ -154,7 +154,7 @@ This means that if the same configuration option is specified more than once, th
 
 See the `config.example.json5` file for reference on how to use the JSON5 configuration file.
 
-Use `cache-me-ousside --help` to see a list of all configuration options in the terminal.
+Use `cache-me-ousside --help` to see a list of all configuration options (flags and environment) in the terminal.
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -261,7 +261,7 @@ CAPACITY_UNIT=mb
 
 ### Cache server hostname
 **Type**: `string`
-**Default**: `"localhost"` (coming soon)
+**Default**: `"localhost"`
 
 The cache server hostname is the hostname of the server that will be serving the cache. This is the first part of the server address (before port number) where the cache server can be accessed.
 
@@ -299,7 +299,7 @@ HOSTNAME=localhost
 
 ### Cache server port number
 **Type**: `uint`
-**Default**: `8080` (coming soon)
+**Default**: `8080`
 
 The cache server port number is the port number of the server that will be serving the cache. This is the second part of the server address (after hostname) where the cache server can be accessed.
 
@@ -515,7 +515,7 @@ BUST_PUT=/posts/:id=>/posts/:id
 ```
 
 #### Default LRU cache behavior
-If no bust routes and patterns are specified, the cache will never remove any entries, unless they expire (coming soon). If you want the standard LRU cache behavior, in which any unsafe HTTP request will clear the whole cache, you can specify all routes for the different HTTP methods as `"*"` (wildcard) and an empty slice of patterns. The `config.default.json5` file uses this behavior.
+If no bust routes and patterns are specified, the cache will never remove any entries, unless they expire (coming soon). If you want the standard LRU cache behavior, in which any unsafe HTTP request will clear the whole cache, you can specify all routes for the different HTTP methods as `"*"` (wildcard) and an empty slice of patterns. The `config.default.json5` file uses this behavior. Because of a bug with the JSON5 parsing Go package, you must use double quotes, when specifying the wildcard route (`"*"`) - this should not be an issue, if you choose to use a regular JSON file.
 
 #### Limitations
 It should be noted that some APIs distinguish between trailing slashes in routes (e.g., `/posts` and `/posts/` would have two different handlers), so this cache does as well to support these kinds of APIs. This means that you should strive to be consistent with your API requests in your application so you always either use trailing slashes or omit them in you app, so you avoid missing your cache entries when you intended to bust them.
@@ -526,9 +526,8 @@ It should be noted that some APIs distinguish between trailing slashes in routes
 * [ ] GraphQL support (arbitrary routes + request body matching)
 * [ ] Cache expiry
 * [ ] Respect cache-related headers
-* [ ] Package on NPM.org
 * [ ] Public API of package `cache`
-* [ ] Allow for a cache prop called `both`, that will apply to both GET and HEAD requests
+* [ ] Allow for specifying GET and HEAD caching with one list of endpoints instead of two separate
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
