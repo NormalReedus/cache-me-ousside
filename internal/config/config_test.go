@@ -47,14 +47,9 @@ func TestRequiredProps(t *testing.T) {
 		property           string
 	}
 	tests := [...]args{
-		{"capacity-missing", "Capacity"},
-		{"hostname-missing", "Hostname"},
-		{"port-missing", "Port"},
 		{"api-url-missing", "ApiUrl"},
-		{"cache-get-missing", "Cache[\"GET\"]"},
-		{"cache-get-empty", "Cache[\"GET\"]"},
-		{"cache-head-missing", "Cache[\"HEAD\"]"},
-		{"cache-head-empty", "Cache[\"HEAD\"]"},
+		{"cache-missing", "Cache"},
+		{"cache-empty", "Cache"},
 	}
 
 	for _, tt := range tests {

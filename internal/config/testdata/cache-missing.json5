@@ -2,12 +2,8 @@
   "capacity": 5,
   "capacityUnit": "",
   "hostname": "localhost",
+  "port": 8080,
   "apiUrl": "https://jsonplaceholder.typicode.com/",
-  "logFilePath": "logfile.log",
-  "cache":  {
-    "GET": [ "/posts", "/posts/:id" ],
-    "HEAD": [ "/posts", "/posts/:id" ],
-  },
   "bust": {
     "POST": {
       "/posts": [ "/posts" ]
