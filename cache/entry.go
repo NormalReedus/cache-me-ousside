@@ -1,23 +1,10 @@
 package cache
 
-import (
-	"encoding/json"
-	"fmt"
-
-	"github.com/magnus-bb/cache-me-ousside/internal/logger"
-)
-
 // newEntry returns a CacheEntry with the given key and data.
 func newEntry(key string, data *CacheData) *CacheEntry {
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		logger.Error(fmt.Errorf("there was an error creating the entry: %s", key))
-		return nil
-	}
-
 	entry := &CacheEntry{
 		key:  key,
-		data: jsonData,
+		data: data,
 	}
 
 	return entry
@@ -29,8 +16,8 @@ type CacheEntry struct {
 	// key is the name of the entry in the cache.
 	// It is usually named after the route that is being cached.
 	key string
-	// data is a marshaled CacheData, which contains both headers and body of an API response.
-	data []byte
+	// data is an instance of CacheData, which contains both headers and body of an API response.
+	data *CacheData
 	// next contains a newer CacheEntry in the cache.
 	next *CacheEntry
 	// prev contains an older CacheEntry in the cache.
@@ -57,18 +44,13 @@ func (entry *CacheEntry) SetNext(newEntry *CacheEntry) *CacheEntry {
 	return newEntry
 }
 
-// UnmarshalData returns a CacheData from the marshaled json data in the entry.
-func (entry *CacheEntry) UnmarshalData() CacheData {
-	return NewCacheDataFromJSON(entry.data)
-}
-
 // Key returns the key of the entry.
 func (entry CacheEntry) Key() string {
 	return entry.key
 }
 
-// Data returns the data of the entry.
-func (entry CacheEntry) Data() []byte {
+// Data returns the data of the entry encoded in whichever way it was saved in CacheData.
+func (entry CacheEntry) Data() *CacheData {
 	return entry.data
 }
 

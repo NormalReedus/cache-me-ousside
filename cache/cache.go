@@ -62,10 +62,8 @@ func (cache *LRUCache) Get(key string) *CacheData {
 	// Set as head
 	cache.MoveToMRU(entry)
 
-	// Unpack data from []byte to CacheData
-	data := entry.UnmarshalData()
-
-	return &data
+	// return &data
+	return entry.Data()
 }
 
 // Set saves an entry with the given CacheData under the given key in the cache.
