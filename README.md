@@ -16,6 +16,7 @@ As opposed to most LRU caches, `cache-me-ousside` allows you to specify exactly 
     - [Installing](#installing)
       - [NPM](#npm)
       - [Go](#go)
+      - [GitHub](#github)
     - [Uninstalling](#uninstalling)
       - [Installed with NPM](#installed-with-npm)
       - [Installed with Go](#installed-with-go)
@@ -68,6 +69,9 @@ You will need to have [Go](https://go.dev/dl/ "Go download page") installed on y
 ```sh
 go install github.com/magnus-bb/cache-me-ousside@latest
 ```
+
+#### GitHub
+You can also download your platform specific executable from the [GitHub releases page](https://github.com/magnus-bb/cache-me-ousside/releases "GitHub releases page").
 
 ### Uninstalling
 Uninstalling `cache-me-ousside` is as simple, as removing the `cache-me-ousside` binary file, from your computer. How this is done depends on your method of installation.

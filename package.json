@@ -1,6 +1,6 @@
 {
   "name": "cache-me-ousside",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "A simple LRU cache that can be used as a proxy or reverse proxy, meaning that any request to this service will automatically be passed on to your specified REST API without the REST API having to change anything to accomodate the LRU cache.",
   "main": "index.js",
   "scripts": {
