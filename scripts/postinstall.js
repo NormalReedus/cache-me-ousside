@@ -144,10 +144,10 @@ function parsePackageJson() {
 	var version = packageJson.version
 	if (version[0] === 'v') version = version.substr(1) // strip the 'v' if necessary v0.0.1 => 0.0.1
 
-	// Binary name on Windows has .exe suffix
-	if (process.platform === 'win32') {
-		binName += '.exe'
-	}
+	// // Binary name on Windows has .exe suffix
+	// if (process.platform === 'win32') {
+	// 	binName += '.exe'
+	// }
 
 	return {
 		binName: binName,
@@ -167,14 +167,24 @@ function parsePackageJson() {
 var INVALID_INPUT = 'Invalid inputs'
 async function install(callback) {
 	var opts = parsePackageJson()
+
 	if (!opts) return callback(INVALID_INPUT)
+	
 	mkdirp.sync(opts.binPath)
+
 	console.info(
 		`Copying the relevant binary for OS: ${process.platform}, ARCH: ${process.arch}`
 	)
-	const src = `./dist/${opts.binName}-${process.platform}-${
+
+	let src = `./dist/${opts.binName}-${PLATFORM_MAPPING[process.platform]}-${
 		ARCH_MAPPING[process.arch]
 	}`
+
+	// Binary name on Windows has .exe suffix
+	if (process.platform === 'win32') {
+		src += '.exe'
+	}
+
 	// await execShellCommand(`cp ${src} ${opts.binPath}/${opts.binName}`)
 	fs.copyFileSync(
 		src,
