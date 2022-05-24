@@ -66,7 +66,7 @@ npm i -g cache-me-ousside
 You will need to have [Go](https://go.dev/dl/ "Go download page") installed on your computer to use this command.
 
 ```sh
-go install github.com/magnus-bb/cache-me-ousside
+go install github.com/magnus-bb/cache-me-ousside@latest
 ```
 
 ### Uninstalling
@@ -100,6 +100,7 @@ There are three different ways of configuring `cache-me-ousside`: a JSON5 file, 
 You can use the `config.default.json5` file as a starting point for your configuration, you will just have to enter your own API URL in the file. This configuration will cache 500 entries, log output to the terminal, cache all GET and HEAD requests, and clear the whole cache when any unsafe HTTP method request is used, and run on http://localhost:8080. To not clear the whole cache on all unsafe HTTP method requests see the [cache busting routes and patterns](#cache-busting-routes-and-patterns) section.
 
 See the [configuration section](#configuration) for more details on all of the configuration options, or run the command:
+
 ```sh
 cache-me-ousside --help
 ```
