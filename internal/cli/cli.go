@@ -141,7 +141,7 @@ func CreateConfFromCli() *config.Config {
 
 	app := &cli.App{
 		Name:      "cache-me-ousside",
-		Version:   "0.1.0-alpha.2",
+		Version:   "0.1.0-alpha.3",
 		Compiled:  time.Now(),
 		Copyright: "(c) 2022 Magnus Bendix Borregaard",
 		Authors: []*cli.Author{
