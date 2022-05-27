@@ -57,7 +57,7 @@ func Initialize(logFilepath string) *os.File {
 func setLogFileMode(filepath string) *os.File {
 	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		Panic(fmt.Errorf("Could not set log file %q, got the following error: %v", filepath, err))
+		Fatal(fmt.Errorf("could not set log file %q, got the following error: %v", filepath, err))
 	}
 
 	infoLog.SetOutput(file)
@@ -166,11 +166,16 @@ func Error(err error) {
 	errorLog.Println(err)
 }
 
-// Panic will log err with the errorPrefix and correct icon
-// as well as stop execution.
+// Panic will log err with the errorPrefix and correct icon as well as stop execution.
 // This is only used for errors during setup.
 func Panic(err error) {
 	errorLog.Panicln(err)
+}
+
+// Fatal will log err with the errorPrefix and correct icon as well as stop execution.
+// This is only used for errors during setup.
+func Fatal(err error) {
+	errorLog.Fatalln(err)
 }
 
 // HiMom will display a startup message with a presentation of used configuration.

@@ -3,6 +3,7 @@
 package cache
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -12,9 +13,9 @@ import (
 // New returns an LRUCache with the given capacity and optionally a unit to use memory-based cache limit.
 // To use partial memory units, use whole units of lower size instead (e.g. 1.5kb == 1536b).
 // TODO: handle the passed cap unit
-func New(capacity uint64, capacityUnit string) *LRUCache {
+func New(capacity uint64, capacityUnit string) (*LRUCache, error) {
 	if capacity == 0 {
-		logger.Panic(fmt.Errorf("cache capacity must be greater than 0"))
+		return nil, errors.New("cache capacity must be greater than 0")
 	}
 
 	cache := &LRUCache{
@@ -24,7 +25,7 @@ func New(capacity uint64, capacityUnit string) *LRUCache {
 		lru:      nil,
 	}
 
-	return cache
+	return cache, nil
 }
 
 // LRUCache represents all entries in the cache, it's capacity limit, and the first and last entries.

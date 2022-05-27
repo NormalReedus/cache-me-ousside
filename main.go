@@ -12,10 +12,16 @@ func main() {
 	logger.Initialize("") // we want all startup errors etc to be logged to terminal, then we will log to file later if one is provided
 
 	// Get configuration struct from CLI (which might read a config file, if provided)
-	conf := commandline.CreateConfFromCli()
+	conf, err := commandline.CreateConfFromCli()
+	if err != nil {
+		logger.Fatal(err)
+	}
 
 	// Create the actual cache to hold entries
-	dataCache := cache.New(conf.Capacity, conf.CapacityUnit)
+	dataCache, err := cache.New(conf.Capacity, conf.CapacityUnit)
+	if err != nil {
+		logger.Fatal(err)
+	}
 
 	// Setup the router
 	app := router.New(conf, dataCache)

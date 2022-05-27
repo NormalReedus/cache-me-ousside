@@ -1,13 +1,13 @@
 package commandline
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/magnus-bb/cache-me-ousside/internal/config"
-	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 	"github.com/urfave/cli/v2"
 )
 
@@ -44,7 +44,7 @@ type cliArgs struct {
 	This will also validate config props and trim invalid http methods from
 	caching and busting routes as well as remove trailing slash from ApiUrl.
 */
-func (a *cliArgs) addToConfig(c *config.Config) {
+func (a *cliArgs) addToConfig(c *config.Config) error {
 	if c == nil {
 		c = config.New()
 	}
@@ -77,57 +77,86 @@ func (a *cliArgs) addToConfig(c *config.Config) {
 
 	if len(a.bustGET.Value()) > 0 {
 		for _, args := range a.bustGET.Value() {
-			parseAndSetBustArgs(c, "GET", args)
+			err := parseAndSetBustArgs(c, "GET", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustHEAD.Value()) > 0 {
 		for _, args := range a.bustHEAD.Value() {
-			parseAndSetBustArgs(c, "HEAD", args)
+			err := parseAndSetBustArgs(c, "HEAD", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustPOST.Value()) > 0 {
 		for _, args := range a.bustPOST.Value() {
-			parseAndSetBustArgs(c, "POST", args)
+			err := parseAndSetBustArgs(c, "POST", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustPUT.Value()) > 0 {
 		for _, args := range a.bustPUT.Value() {
-			parseAndSetBustArgs(c, "PUT", args)
+			err := parseAndSetBustArgs(c, "PUT", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustDELETE.Value()) > 0 {
 		for _, args := range a.bustDELETE.Value() {
-			parseAndSetBustArgs(c, "DELETE", args)
+			err := parseAndSetBustArgs(c, "DELETE", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustPATCH.Value()) > 0 {
 		for _, args := range a.bustPATCH.Value() {
-			parseAndSetBustArgs(c, "PATCH", args)
+			err := parseAndSetBustArgs(c, "PATCH", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustTRACE.Value()) > 0 {
 		for _, args := range a.bustTRACE.Value() {
-			parseAndSetBustArgs(c, "TRACE", args)
+			err := parseAndSetBustArgs(c, "TRACE", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustCONNECT.Value()) > 0 {
 		for _, args := range a.bustCONNECT.Value() {
-			parseAndSetBustArgs(c, "CONNECT", args)
+			err := parseAndSetBustArgs(c, "CONNECT", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if len(a.bustOPTIONS.Value()) > 0 {
 		for _, args := range a.bustOPTIONS.Value() {
-			parseAndSetBustArgs(c, "OPTIONS", args)
+			err := parseAndSetBustArgs(c, "OPTIONS", args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	// Make sure the config is valid
 	if err := c.ValidateProps(); err != nil {
-		logger.Panic(err)
+		return err
 	}
 
 	c.TrimTrailingSlash()
 	c.RemoveInvalidMethods()
+
+	return nil
 }
 
 /*
@@ -135,7 +164,7 @@ func (a *cliArgs) addToConfig(c *config.Config) {
 	If a configuration json5 file is provided with --config, any cli flags will overwrite the file's configuration.
 	The configuration is also validated and trimmed for invalid http methods and trailing slash in the ApiUrl.
 */
-func CreateConfFromCli() *config.Config {
+func CreateConfFromCli() (*config.Config, error) {
 	args := cliArgs{} // holds the flags that should overwrite potential config file values
 	var conf *config.Config
 
@@ -284,42 +313,47 @@ func CreateConfFromCli() *config.Config {
 
 		Action: func(c *cli.Context) error {
 			if c.NArg() > 0 {
-				logger.Panic(fmt.Errorf("no arguments should be passed. Did you mean pass a configuration file path with --config?"))
+				return errors.New("no arguments should be passed to CLI. Did you mean pass a configuration file path with --config?")
 			}
+
+			var err error
 
 			// If a config path option was passed, initialize config from that file
 			if args.configPath != "" {
-				conf = config.LoadJSON(args.configPath)
+				conf, err = config.LoadJSON(args.configPath)
+				if err != nil {
+					return err
+				}
+
 			} else {
 				conf = config.New()
 			}
 
 			// Add / overwrite cli arguments to config
-			args.addToConfig(conf) // will also trim and validate config
-
-			return nil
+			// will also trim and validate config
+			return args.addToConfig(conf) // return an err or nil
 		},
 	}
 
 	// Use above cli configuration to actually parse cli arguments and create a usable config
 	err := app.Run(os.Args)
 	if err != nil {
-		logger.Panic(err)
+		return nil, err
 	}
 
-	return conf
+	return conf, nil
 }
 
 // parseAndSetBustArgs will parse / deserialize cli bust configuration args for a method and add them to the Config.
-func parseAndSetBustArgs(c *config.Config, method, args string) {
+func parseAndSetBustArgs(c *config.Config, method, args string) error {
 	// All busting args must have an arrow (=>) to separate the route from the busting pattern
 	if !strings.Contains(args, RouteSepChar) {
-		parseBustArgError(method, args)
+		return newParseBustArgError(method, args)
 	}
 	// Several patterns for one route are separated by ||
 	routeAndPatterns := strings.Split(args, RouteSepChar)
 	if len(routeAndPatterns) != 2 {
-		parseBustArgError(method, args)
+		return newParseBustArgError(method, args)
 	}
 
 	// First part of the string (before =>) will be the route to listen on
@@ -327,19 +361,21 @@ func parseAndSetBustArgs(c *config.Config, method, args string) {
 	// Second part of the string (after =>) will be a comma separated list of patterns to bust
 	patternsString := routeAndPatterns[1]
 	if patternsString == "" {
-		parseBustArgError(method, args)
+		return newParseBustArgError(method, args)
 	}
 
 	patterns := strings.Split(routeAndPatterns[1], PatternSepChar)
 
 	if route == "" || patterns == nil || len(patterns) == 0 {
-		parseBustArgError(method, args)
+		return newParseBustArgError(method, args)
 	}
 
 	c.Bust[method][route] = patterns
+
+	return nil
 }
 
-// parseBustArgError will panic with a helpful error message if the bust cli argument is invalid.
-func parseBustArgError(method, args string) {
-	logger.Panic(fmt.Errorf("Invalid %s bust argument: %q.\nArgument must be in the format '[route]%s[regex-pattern]%s[regex-pattern]...'", method, args, RouteSepChar, PatternSepChar))
+// newParseBustArgError returns a helpful error message if the bust cli argument is invalid.
+func newParseBustArgError(method, args string) error {
+	return fmt.Errorf("invalid %s bust argument: %q.\nArgument must be in the format '[route]%s[regex-pattern]%s[regex-pattern]...'", method, args, RouteSepChar, PatternSepChar)
 }

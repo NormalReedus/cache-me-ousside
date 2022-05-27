@@ -64,17 +64,17 @@ LoadJSON returns a Config created from unmarshaling the json5 file at configPath
 It will also validate the props of the configuration and trim invalid http methods
 in the configuration as well as trailing slashes in the ApiUrl.
 */
-func LoadJSON(configPath string) *Config {
+func LoadJSON(configPath string) (*Config, error) {
 	// Read the configuration json file
 	jsonFile, err := os.Open(configPath)
 	if err != nil {
-		logger.Panic(err)
+		return nil, err
 	}
 	defer jsonFile.Close()
 
 	jsonByteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		logger.Panic(err)
+		return nil, err
 	}
 
 	// Populate a new config with the json file values
@@ -84,7 +84,7 @@ func LoadJSON(configPath string) *Config {
 	// Check if required props are present
 	validationErr := config.ValidateProps()
 	if validationErr != nil {
-		logger.Panic(validationErr)
+		return nil, validationErr
 	}
 
 	// Clean the API url
@@ -92,7 +92,7 @@ func LoadJSON(configPath string) *Config {
 	// Remove invalid methods and let the user know
 	config.RemoveInvalidMethods()
 
-	return config
+	return config, nil
 }
 
 // Config represents the configuration for the cache-me-ousside application.
@@ -151,10 +151,7 @@ type Config struct {
 */
 func (conf Config) CapacityParsed() (size uint64, byteMode bool) {
 	if contains(cache.VALID_CAP_UNITS, strings.ToUpper(conf.CapacityUnit)) {
-		bytes, err := cache.ToBytes(conf.Capacity, conf.CapacityUnit)
-		if err != nil {
-			logger.Panic(err)
-		}
+		bytes, _ := cache.ToBytes(conf.Capacity, conf.CapacityUnit) // expect memory unit to be valid if the config is validated on creation
 
 		return bytes, true
 	}

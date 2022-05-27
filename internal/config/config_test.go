@@ -14,7 +14,7 @@ func TestLoadProps(t *testing.T) {
 
 	assert.FileExists(configPath, "Expected test configuration file to exist for test to work")
 
-	config := LoadJSON(configPath)
+	config, _ := LoadJSON(configPath)
 
 	assert.NotZero(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a non-zero value")
 	assert.Positive(config.Capacity, "Expected required prop config.Capacity to be loaded correctly as a positive number")
@@ -38,7 +38,10 @@ func TestBadPathPanic(t *testing.T) {
 
 	assert.NoFileExists(t, configPath, "Expected test configuration file to not exist for test to work")
 
-	assert.Panics(t, func() { LoadJSON(configPath) }, "Expected config.LoadJSON to panic when the config file does not exist")
+	conf, err := LoadJSON(configPath)
+
+	assert.Nil(t, conf, "Expected config.LoadJSON to return a nil Config pointer when the config file does not exist")
+	assert.Error(t, err, "Expected config.LoadJSON to return an error when the config file does not exist")
 }
 
 func TestRequiredProps(t *testing.T) {
@@ -57,7 +60,11 @@ func TestRequiredProps(t *testing.T) {
 
 		assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-		assert.Panics(t, func() { LoadJSON(configPath) }, "Expected config.LoadJSON(\"%s\") to panic when it does not have required prop: %q", configPath, tt.property)
+		conf, err := LoadJSON(configPath)
+
+		assert.Nil(t, conf, "Expected config.LoadJSON(\"%s\") to return a nil Config pointer when it does not have required prop: %q", configPath, tt.property)
+		assert.Error(t, err, "Expected config.LoadJSON(\"%s\") to return an error when it does not have required prop: %q", configPath, tt.property)
+
 	}
 }
 
@@ -71,7 +78,7 @@ func TestTrimTrailingSlash(t *testing.T) {
 	conf1.TrimTrailingSlash()
 	assert.Equal(t, "https://jsonplaceholder.typicode.com", conf1.ApiUrl, "Expected config.TrimTrailingSlash to remove trailing slashes from the api url prop, got: %s", conf1.ApiUrl)
 
-	conf2 := LoadJSON(configPath)
+	conf2, _ := LoadJSON(configPath)
 	assert.Equal(t, "https://jsonplaceholder.typicode.com", conf2.ApiUrl, "Expected config.LoadJSON to remove trailing slashes from the api url prop when initialized, got: %s", conf2.ApiUrl)
 
 }

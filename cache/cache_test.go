@@ -20,13 +20,14 @@ func init() {
 }
 
 func TestRequiredCapacity(t *testing.T) {
-	defer func() { recover() }()
+	cache, err := New(0, "")
 
-	assert.Panics(t, func() { New(0, "") }, "Expected cache.New to panic if the capacity is 0")
+	assert.Nil(t, cache, "Expected cache.New to return a nil LRUCache pointer if the capacity is 0")
+	assert.Error(t, err, "Expected cache.New to return an error if the capacity is 0")
 }
 
 func TestSetEntry(t *testing.T) {
-	cache := New(1, "")
+	cache, _ := New(1, "")
 
 	cache.Set("GET:/test1", &testData)
 
@@ -36,7 +37,7 @@ func TestSetEntry(t *testing.T) {
 }
 
 func TestEntriesOrder(t *testing.T) {
-	cache := New(5, "")
+	cache, _ := New(5, "")
 
 	cache.Set("GET:/test1", &testData)
 	cache.Set("GET:/test2", &testData)
@@ -67,7 +68,7 @@ func TestEntriesOrder(t *testing.T) {
 }
 
 func TestGetEntry(t *testing.T) {
-	cache := New(1, "")
+	cache, _ := New(1, "")
 
 	cache.Set("GET:/test1", &testData)
 
@@ -84,7 +85,7 @@ func TestGetEntry(t *testing.T) {
 }
 
 func TestGetMissingEntry(t *testing.T) {
-	cache := New(1, "")
+	cache, _ := New(1, "")
 
 	cache.Set("GET:/test1", &testData)
 
@@ -101,7 +102,7 @@ func TestGetMissingEntry(t *testing.T) {
 
 func TestEvictLRU(t *testing.T) {
 	// Cannot really test for memory based eviction since memory usage will vary
-	cache := New(2, "")
+	cache, _ := New(2, "")
 
 	cache.Set("GET:/test1", &testData)
 	cache.Set("GET:/test2", &testData)
@@ -126,7 +127,7 @@ func TestEvictLRU(t *testing.T) {
 }
 
 func TestMatch(t *testing.T) {
-	cache := New(6, "")
+	cache, _ := New(6, "")
 
 	cache.Set("GET:/test1", &testData)
 	cache.Set("HEAD:/test2", &testData)
@@ -163,7 +164,7 @@ func TestMatch(t *testing.T) {
 }
 
 func TestBust(t *testing.T) {
-	cache := New(5, "")
+	cache, _ := New(5, "")
 
 	cache.Set("GET:/test1", &testData)
 	cache.Set("GET:/test2", &testData)
