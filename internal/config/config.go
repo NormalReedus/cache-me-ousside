@@ -320,8 +320,8 @@ func (conf Config) String() string {
 	cacheTable.Render()
 
 	//* Create bust config table
-	output.WriteString("\nCache Busting Patterns\n")
 	bustRows := [][]string{}
+
 	for _, method := range AllMethods {
 		for endpoint, endpointMap := range conf.Bust[method] {
 			if len(endpointMap) == 0 {
@@ -334,12 +334,17 @@ func (conf Config) String() string {
 			}
 		}
 	}
-	bustTable := tablewriter.NewWriter(output)
-	bustTable.SetHeader([]string{"Method", "Endpoints", "Patterns"})
-	bustTable.SetAutoMergeCells(true)
-	bustTable.SetRowLine(true)
-	bustTable.AppendBulk(bustRows)
-	bustTable.Render()
+
+	// No need to print anything, if there are no bust methods declared
+	if len(bustRows) != 0 {
+		output.WriteString("\nCache Busting Patterns\n")
+		bustTable := tablewriter.NewWriter(output)
+		bustTable.SetHeader([]string{"Method", "Endpoints", "Patterns"})
+		bustTable.SetAutoMergeCells(true)
+		bustTable.SetRowLine(true)
+		bustTable.AppendBulk(bustRows)
+		bustTable.Render()
+	}
 
 	return output.String()
 }
