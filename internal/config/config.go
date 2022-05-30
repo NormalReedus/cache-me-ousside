@@ -10,13 +10,14 @@ import (
 	"strings"
 
 	"github.com/flynn/json5"
+	"github.com/go-playground/validator/v10"
 	"github.com/magnus-bb/cache-me-ousside/cache"
 	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 	"github.com/olekukonko/tablewriter"
 )
 
 const (
-	DefaultCapacity uint64 = 5
+	DefaultCapacity uint64 = 500
 	DefaultHostname        = "localhost"
 	DefaultPort     uint   = 8080
 )
@@ -98,7 +99,7 @@ func LoadJSON(configPath string) (*Config, error) {
 // Config represents the configuration for the cache-me-ousside application.
 type Config struct {
 	// Default is 500, it represents the limit to how much data can be stored in the cache.
-	Capacity uint64 `json:"capacity"`
+	Capacity uint64 `json:"capacity" validate:"required,min=1"`
 
 	/*
 		CapacityUnit represents the unit of measurement for the capacity.
@@ -234,6 +235,11 @@ func (conf *Config) RemoveInvalidMethods() {
 // ValidateProps makes sure required configuration props are set and follow the correct format.
 // TODO: use https://github.com/go-playground/validator.
 func (conf *Config) ValidateProps() error {
+
+	validate := validator.New()
+	err := validate.Struct(conf)
+	fmt.Println(err)
+
 	var errorStr string
 
 	if _, err := cache.ToBytes(conf.Capacity, conf.CapacityUnit); err != nil && conf.CapacityUnit != "" {
