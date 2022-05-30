@@ -106,19 +106,19 @@ type Config struct {
 		If omitted, the cache Capacity will be measured in entries.
 		Set CapacityUnit to a string to use memory as the unit of measurement, e.g. "mb".
 	*/
-	CapacityUnit string `json:"capacityUnit"`
+	CapacityUnit string `json:"capacityUnit" validate:"omitempty,oneof=b B kb KB mb MB gb GB tb TB"`
 
 	// Default is "localhost", it represents the hostname where the server application can be accessed.
-	Hostname string `json:"hostname"`
+	Hostname string `json:"hostname" validate:"required,hostname_rfc1123"`
 
 	//Default is 8080, it represents the port where the server application can be accessed. E.g.:
-	Port uint `json:"port"`
+	Port uint `json:"port" validate:"required,min=1,max=65535"`
 
 	// ApiUrl is required, it represents the url of the API to which all requests are proxied and cached from.
-	ApiUrl string `json:"apiUrl"`
+	ApiUrl string `json:"apiUrl" validate:"required,url"`
 
 	// LogFilePath is the path to an optional log file to use instead of stdout (terminal mode).
-	LogFilePath string `json:"logFilePath"`
+	LogFilePath string `json:"logFilePath" validate:"omitempty,filepath"`
 
 	/*
 		Cache is a map of http methods with slices of endpoints to which requests should be cached. E.g.:
@@ -237,6 +237,19 @@ func (conf *Config) RemoveInvalidMethods() {
 func (conf *Config) ValidateProps() error {
 
 	validate := validator.New()
+
+	// DEMO custom validator
+	//! MOVE out and use regex to check for valid filepath
+	validate.RegisterValidation("filepath", func(fl validator.FieldLevel) bool {
+		field := fl.Field()
+
+		if field.String() != "logfile.log" {
+			return false
+		}
+
+		return true
+	})
+
 	err := validate.Struct(conf)
 	fmt.Println(err)
 
