@@ -148,13 +148,13 @@ func (a *cliArgs) addToConfig(c *config.Config) error {
 		}
 	}
 
+	c.TrimTrailingSlash()
+	c.RemoveInvalidMethods()
+
 	// Make sure the config is valid
 	if err := c.ValidateProps(); err != nil {
 		return err
 	}
-
-	c.TrimTrailingSlash()
-	c.RemoveInvalidMethods()
 
 	return nil
 }
