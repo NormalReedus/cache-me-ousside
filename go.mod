@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/fatih/color v1.13.0
-	github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/gofiber/fiber/v2 v2.33.0
 	github.com/olekukonko/tablewriter v0.0.5
@@ -20,13 +19,11 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
-	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.35.0 // indirect

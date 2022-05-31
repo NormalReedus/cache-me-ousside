@@ -53,7 +53,7 @@ func setCachingEndpoints(app *fiber.App, conf *config.Config) {
 	}
 
 	// For all cacheable methods, set middlewares on each defined endpoint to cache
-	for _, method := range config.CacheableMethods {
+	for _, method := range config.CacheableHTTPMethods {
 		for _, endpoint := range conf.Cache[method] {
 			app.Add(method, endpoint, middlewares...)
 		}

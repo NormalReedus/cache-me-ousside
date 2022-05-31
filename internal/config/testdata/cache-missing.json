@@ -1,0 +1,31 @@
+{
+  "capacity": 5,
+  "capacityUnit": "",
+  "hostname": "localhost",
+  "port": 8080,
+  "apiUrl": "https://jsonplaceholder.typicode.com/",
+  "bust": {
+    "POST": {
+      "/posts": [ "/posts" ]
+    },
+    "PUT": {
+      "/posts": [ "^GET:/posts", "^HEAD:/posts" ],
+      "/posts/:id": [ "/posts/:id" ]
+    },
+    "DELETE": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "PATCH": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "TRACE": {
+      "/posts/:id": [ "/posts" ]
+    },
+    "CONNECT": {
+      "/posts": [ "/posts" ]
+    },
+    "OPTIONS": {
+      "/posts": [ "/posts" ]
+    }
+  }
+}

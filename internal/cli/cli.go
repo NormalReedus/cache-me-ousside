@@ -149,7 +149,7 @@ func (a *cliArgs) addToConfig(c *config.Config) error {
 	}
 
 	c.TrimTrailingSlash()
-	c.RemoveInvalidMethods()
+	c.RemoveInvalidHTTPMethods()
 
 	// Make sure the config is valid
 	if err := c.ValidateProps(); err != nil {
@@ -161,7 +161,7 @@ func (a *cliArgs) addToConfig(c *config.Config) error {
 
 /*
 	CreateConfFromCli will parse cli arguments and flags and return a Config with the specified configuration.
-	If a configuration json5 file is provided with --config, any cli flags will overwrite the file's configuration.
+	If a configuration json file is provided with --config, any cli flags will overwrite the file's configuration.
 	The configuration is also validated and trimmed for invalid http methods and trailing slash in the ApiUrl.
 */
 func CreateConfFromCli() (*config.Config, error) {
@@ -187,7 +187,7 @@ func CreateConfFromCli() (*config.Config, error) {
 				Destination: &args.configPath,
 				Name:        "config",
 				Aliases:     []string{"conf", "path"},
-				Usage:       "the `PATH` to a json5 config file specifying the cache settings (will be overwritten by command line flags)",
+				Usage:       "the `PATH` to a json config file specifying the cache settings (will be overwritten by command line flags)",
 				EnvVars:     []string{"CONFIG_PATH", "CONFIG"},
 			},
 			&cli.Uint64Flag{

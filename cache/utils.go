@@ -65,7 +65,7 @@ const (
 	TB
 )
 
-var VALID_CAP_UNITS = []string{"B", "KB", "MB", "GB", "TB"}
+var ValidCapacityUnits = []string{"B", "KB", "MB", "GB", "TB"}
 
 // Converts kb, mb, gb, tb to bytes.
 // If the unit is not set, it will return the size passed into the function as if they are already in bytes.

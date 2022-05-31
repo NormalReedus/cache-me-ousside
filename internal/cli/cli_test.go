@@ -48,7 +48,7 @@ func TestConfigFileParsing(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 
-	os.Args = []string{"cmd", "--config", "./testdata/test.config.json5"}
+	os.Args = []string{"cmd", "--config", "./testdata/test.config.json"}
 
 	conf, _ := CreateConfFromCli()
 
@@ -78,7 +78,7 @@ func TestFlagsOverwriteConfigFile(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 
-	os.Args = []string{"cmd", "--config", "./testdata/test.config.json5", "--api-url", "test"}
+	os.Args = []string{"cmd", "--config", "./testdata/test.config.json", "--api-url", "test"}
 
 	conf, _ := CreateConfFromCli()
 

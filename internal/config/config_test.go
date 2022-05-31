@@ -10,7 +10,7 @@ import (
 func TestLoadProps(t *testing.T) {
 	assert := assert.New(t)
 
-	configPath := "testdata/test.config.json5"
+	configPath := "testdata/test.config.json"
 
 	assert.FileExists(configPath, "Expected test configuration file to exist for test to work")
 
@@ -33,8 +33,8 @@ func TestLoadProps(t *testing.T) {
 	assert.NotEmpty(config.Bust["DELETE"]["/posts/:id"], "Expected config.Bust's DELETE /posts/:id endpoint to not be empty when given a valid config file")
 }
 
-func TestBadPathPanic(t *testing.T) {
-	configPath := "testdata/does.not.exist.json5"
+func TestBadPath(t *testing.T) {
+	configPath := "testdata/does.not.exist.json"
 
 	assert.NoFileExists(t, configPath, "Expected test configuration file to not exist for test to work")
 
@@ -56,20 +56,21 @@ func TestRequiredProps(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		configPath := "testdata/" + tt.testFileIdentifier + ".json5"
+		configPath := "testdata/" + tt.testFileIdentifier + ".json"
 
 		assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 
-		conf, err := LoadJSON(configPath)
+		conf, _ := LoadJSON(configPath)
 
-		assert.Nil(t, conf, "Expected config.LoadJSON(\"%s\") to return a nil Config pointer when it does not have required prop: %q", configPath, tt.property)
-		assert.Error(t, err, "Expected config.LoadJSON(\"%s\") to return an error when it does not have required prop: %q", configPath, tt.property)
+		err := conf.ValidateProps()
+
+		assert.Error(t, err, "Expected config.ValidateProps() to return an error when the Config does not have required prop: %q", configPath, tt.property)
 
 	}
 }
 
 func TestTrimTrailingSlash(t *testing.T) {
-	configPath := "testdata/test.config.json5"
+	configPath := "testdata/test.config.json"
 
 	assert.FileExists(t, configPath, "Expected test configuration file to exist for test to work")
 

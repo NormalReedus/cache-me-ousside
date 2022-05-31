@@ -1,0 +1,18 @@
+{
+	"apiUrl": "<INSERT API URL HERE>",
+	"cache": {
+		"GET": ["*"],
+		"HEAD": ["*"]
+	},
+	"bust": {
+		"POST": {
+			"*": [] 
+		},
+		"PUT": {
+			"*": [] 
+		},
+		"DELETE": {
+			"*": [] 
+		}
+	}
+}

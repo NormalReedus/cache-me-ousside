@@ -7,7 +7,7 @@
   "logFilePath": "logfile.log",
   "cache":  {
     "GET": [ "/posts", "/posts/:id" ],
-    "HEAD": [ "/posts", "/posts/:id" ],
+    "HEAD": [ "/posts", "/posts/:id" ]
   },
   "bust": {
     "POST": {
@@ -31,6 +31,6 @@
     },
     "OPTIONS": {
       "/posts": [ "/posts" ]
-    },
+    }
   }
 }
