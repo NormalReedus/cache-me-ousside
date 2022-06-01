@@ -120,16 +120,16 @@ type Config struct {
 	LogFilePath string `json:"logFilePath" validate:"omitempty,filepath"`
 
 	/*
-		Cache is a map of http methods with slices of endpoints to which requests should be cached. E.g.:
+		Cache is a map of HTTP methods with slices of endpoints to which requests should be cached. E.g.:
 			{
 				"GET": ["/api/v1/users/:id", "/api/v1/users/:id/posts"],
 				"HEAD": ["/api/v1/users/:id", "/api/v1/users/:id/posts"],
 			}
 	*/
-	Cache CacheMap `json:"cache" validate:"required,gt=0,dive,keys,oneof=GET HEAD"` // required (either GET or HEAD)
+	Cache CacheMap `json:"cache" validate:"required,gt=0,dive,keys,oneof=GET HEAD,endkeys,dive,route"`
 
 	/*
-		Bust is a map of http methods with maps of endpoints with slices of patterns to match to cache entries to bust. E.g.:
+		Bust is a map of HTTP methods with maps of endpoints with slices of patterns to match to cache entries to bust. E.g.:
 			{
 				"POST": {
 					"/posts": [ "/posts" ]
@@ -140,7 +140,7 @@ type Config struct {
 				}
 			}
 	*/
-	Bust BustMap `json:"bust" validate:"omitempty,dive,keys,oneof=GET HEAD POST PUT DELETE PATCH TRACE CONNECT OPTIONS,endkeys,dive,keys,route"` // required (either GET or HEAD)
+	Bust BustMap `json:"bust" validate:"omitempty,dive,keys,oneof=GET HEAD POST PUT DELETE PATCH TRACE CONNECT OPTIONS,endkeys,dive,keys,route"`
 }
 
 /*
@@ -204,7 +204,7 @@ func (conf *Config) RemoveInvalidHTTPMethods() {
 		if !contains(CacheableHTTPMethods, method) {
 
 			delete(conf.Cache, method)
-			logger.Warn(fmt.Sprintf("%s is not a valid cacheable http method, it will be ignored", method))
+			logger.Warn(fmt.Sprintf("%s is not a valid cacheable HTTP method, it will be ignored", method))
 
 			invalidCacheMethod = true
 		}
@@ -222,11 +222,11 @@ func (conf *Config) RemoveInvalidHTTPMethods() {
 	}
 
 	if invalidCacheMethod {
-		logger.Info("The following methods are valid cacheable methods: %s" + strings.Join(CacheableHTTPMethods, ", "))
+		logger.Info("the following methods are valid cacheable HTTP methods: " + strings.Join(CacheableHTTPMethods, ", "))
 	}
 
 	if invalidBustMethod {
-		logger.Info("The following methods are valid busting methods: %s" + strings.Join(AllHTTPMethods, ", "))
+		logger.Info("the following methods are valid busting HTTP methods: " + strings.Join(AllHTTPMethods, ", "))
 	}
 }
 
