@@ -61,8 +61,11 @@ func formatValidationError(validationErrors validator.ValidationErrors) error {
 		fmt.Println("Error:", err.Error())
 		fmt.Println()
 
-		fieldName := err.Field()
-		errorMessages = append(errorMessages, validationErrorMap[fieldName](err))
+		// err.Field() usually returns something like "ApiUrl", but with maps it can return "Cache[GET][0]" etc
+		// that means, that if we take only the first part of the string until a (potential) "["
+		// we can always get the prop name on the Config struct
+		propName, _, _ := strings.Cut(err.Field(), "[")
+		errorMessages = append(errorMessages, validationErrorMap[propName](err))
 	}
 
 	aggregatedErrors := errors.New(strings.Join(errorMessages, "; "))
@@ -79,7 +82,7 @@ func requiredErrorMsg(prop string) string {
 // depending on the validation details given with the validator.FieldError err.
 var validationErrorMap = map[string]func(err validator.FieldError) string{
 	"Capacity": func(err validator.FieldError) string {
-		return fmt.Sprintf("'Capacity' must be a non-zero uint64, it is %d", err.Value())
+		return fmt.Sprintf("'%s' must be a non-zero uint64, it is %d", err.Field(), err.Value())
 	},
 
 	"CapacityUnit": func(err validator.FieldError) string {
@@ -95,29 +98,59 @@ var validationErrorMap = map[string]func(err validator.FieldError) string{
 		firstUnitsString := strings.Join(firstUnitsQuoted, ", ")
 		lastUnitString := fmt.Sprintf("%q", units[len(units)-1])
 
-		return fmt.Sprintf("'CapacityUnit' must be omitted or set to either %s, or %s, it is %q", firstUnitsString, lastUnitString, err.Value())
+		return fmt.Sprintf("'%s' must be omitted or set to either %s, or %s, it is %q", err.Field(), firstUnitsString, lastUnitString, err.Value())
 	},
 
 	"Hostname": func(err validator.FieldError) string {
-		return fmt.Sprintf("'Hostname' must be omitted or set to a valid rfc1123 hostname, it is %q", err.Value())
+		return fmt.Sprintf("'%s' must be omitted or set to a valid rfc1123 hostname, it is %q", err.Field(), err.Value())
 	},
 
 	"Port": func(err validator.FieldError) string {
-		return fmt.Sprintf("'Port' must be omitted or set to a number between 1 and 65535, it is %d", err.Value())
+		return fmt.Sprintf("'%s' must be omitted or set to a number between 1 and 65535, it is %d", err.Field(), err.Value())
 	},
 
 	"ApiUrl": func(err validator.FieldError) string {
 		tag := err.Tag()
 
 		if tag == "required" {
-			return requiredErrorMsg("ApiUrl")
+			return requiredErrorMsg(err.Field())
 
 		} else if tag == "url" {
-			return fmt.Sprintf("'ApiUrl' value %q is not a valid URL", err.Value())
+			return fmt.Sprintf("'%s' value is not a valid URL, it is %q", err.Field(), err.Value())
 		}
 
 		return "" // should never happen
 	},
 
-	//TODO: cache and bust
+	"Cache": func(err validator.FieldError) string {
+		tag := err.Tag()
+
+		if tag == "gt" || tag == "required" {
+			return requiredErrorMsg(err.Field())
+		}
+
+		if tag == "oneof" {
+			return fmt.Sprintf("'%s' must be a map with at least one of the following keys: %s, it is %q", err.Field(), strings.Join(CacheableHTTPMethods, ", "), err.Value())
+		}
+
+		if tag == "route" {
+			return fmt.Sprintf("the key of '%s' must be a valid route identifier, it is %q", err.Field(), err.Value())
+		}
+
+		return "" // should never happen
+	},
+
+	"Bust": func(err validator.FieldError) string {
+		tag := err.Tag()
+
+		if tag == "oneof" {
+			return fmt.Sprintf("'%s'can only contain the following keys: %s, it is %q", err.Field(), strings.Join(AllHTTPMethods, ", "), err.Value())
+		}
+
+		if tag == "route" {
+			return fmt.Sprintf("the key of '%s' must be a valid route identifier, it is %q", err.Field(), err.Value())
+		}
+
+		return "" // should never happen
+	},
 }
