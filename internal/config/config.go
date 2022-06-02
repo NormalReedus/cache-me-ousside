@@ -3,7 +3,6 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -98,17 +97,17 @@ func LoadJSON(configPath string) (*Config, error) {
 // Config represents the configuration for the cache-me-ousside application.
 type Config struct {
 	// Default is 500, it represents the limit to how much data can be stored in the cache.
-	Capacity uint64 `json:"capacity" validate:"min=1"`
+	Capacity uint64 `json:"capacity" validate:"required,min=1"`
 
 	/*
 		CapacityUnit represents the unit of measurement for the capacity.
 		If omitted, the cache Capacity will be measured in entries.
 		Set CapacityUnit to a string to use memory as the unit of measurement, e.g. "mb".
 	*/
-	CapacityUnit string `json:"capacityUnit" validate:"required,omitempty,ascii,oneof=b B kb KB mb MB gb GB tb TB"`
+	CapacityUnit string `json:"capacityUnit" validate:"omitempty,oneof=b B kb KB mb MB gb GB tb TB"`
 
 	// Default is "localhost", it represents the hostname where the server application can be accessed.
-	Hostname string `json:"hostname" validate:"required,omitempty,hostname_rfc1123"`
+	Hostname string `json:"hostname" validate:"required,hostname_rfc1123"`
 
 	//Default is 8080, it represents the port where the server application can be accessed. E.g.:
 	Port uint `json:"port" validate:"required,min=1,max=65535"`
@@ -230,68 +229,20 @@ func (conf *Config) RemoveInvalidHTTPMethods() {
 	}
 }
 
-// ValidateProps makes sure required configuration props are set and follow the correct format.
-// TODO: use https://github.com/go-playground/validator.
-func (conf *Config) ValidateProps() error {
+// Validate makes sure required configuration props are set and follow the correct format.
+func (conf *Config) Validate() error {
 	validate := newConfigValidator()
+
 	errs := validate.Struct(conf)
 
 	var formattedError error
 
 	if errs != nil {
 		formattedError = formatValidationError(errs.(validator.ValidationErrors))
-		fmt.Println(formattedError)
-	}
-
-	var errorStr string
-
-	if _, err := cache.ToBytes(conf.Capacity, conf.CapacityUnit); err != nil && conf.CapacityUnit != "" {
-		errorStr += fmt.Sprintf("%s\n", err)
-	}
-
-	missingProps := make([]string, 0)
-	if conf.Capacity == 0 {
-		missingProps = append(missingProps, "Capacity")
-	}
-
-	if conf.ApiUrl == "" {
-		missingProps = append(missingProps, "ApiUrl")
-	}
-
-	if conf.Hostname == "" {
-		missingProps = append(missingProps, "Hostname")
-	}
-
-	if conf.Port == 0 {
-		missingProps = append(missingProps, "Port")
-	}
-
-	// If cache is missing, empty, or it doesn't have either
-	getExists := conf.cachePropExists("GET")
-	headExists := conf.cachePropExists("HEAD")
-
-	if !getExists && !headExists {
-		missingProps = append(missingProps, "Cache")
-	}
-
-	if len(missingProps) > 0 {
-		errorStr += fmt.Sprintf("Config is missing the following required properties: %s\n", strings.Join(missingProps, ", "))
-	}
-
-	if errorStr != "" {
-		return errors.New(errorStr)
+		return formattedError
 	}
 
 	return nil
-}
-
-// cachePropExists returns true if the cache map has the given prop.
-func (conf *Config) cachePropExists(prop string) bool {
-	if conf.Cache[prop] == nil || len(conf.Cache[prop]) == 0 {
-		return false
-	}
-
-	return true
 }
 
 // String returns a human-readable table-formatted representation of the configuration.
