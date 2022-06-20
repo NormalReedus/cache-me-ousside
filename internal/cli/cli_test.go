@@ -78,12 +78,12 @@ func TestFlagsOverwriteConfigFile(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 
-	os.Args = []string{"cmd", "--config", "./testdata/test.config.json", "--api-url", "test"}
+	os.Args = []string{"cmd", "--config", "./testdata/test.config.json", "--api-url", "https://test.com"}
 
-	conf, _ := CreateConfFromCli()
+	conf, err := CreateConfFromCli()
 
-	assert.Equal("test", conf.ApiUrl, "Expected the passed flag (--api-url) to overwrite the prop (apiUrl) specified in the config file, but got %q", conf.ApiUrl)
-
+	assert.NoError(err, "Expected new config to be created without any errors")
+	assert.Equal("https://test.com", conf.ApiUrl, "Expected the passed flag (--api-url) to overwrite the prop (apiUrl) specified in the config file, but got %q", conf.ApiUrl)
 }
 
 func generateArgs() []string {
