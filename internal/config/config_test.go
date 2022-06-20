@@ -62,7 +62,7 @@ func TestRequiredProps(t *testing.T) {
 
 		conf, _ := LoadJSON(configPath)
 
-		err := conf.ValidateProps()
+		err := conf.Validate()
 
 		assert.Error(t, err, "Expected config.ValidateProps() to return an error when the Config does not have required prop: %q", configPath, tt.property)
 

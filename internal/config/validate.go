@@ -48,23 +48,11 @@ func formatValidationError(validationErrors validator.ValidationErrors) error {
 	var errorMessages []string
 
 	for _, err := range validationErrors {
-		fmt.Println("Namespace:", err.Namespace())
-		fmt.Println("StructNamespace:", err.StructNamespace())
-		fmt.Println("Field:", err.Field())
-		fmt.Println("StructField:", err.StructField())
-		fmt.Println("Tag:", err.Tag())
-		fmt.Println("ActualTag:", err.ActualTag())
-		fmt.Println("Value:", err.Value())
-		fmt.Println("Param:", err.Param())
-		fmt.Println("Kind:", err.Kind())
-		fmt.Println("Type:", err.Type())
-		fmt.Println("Error:", err.Error())
-		fmt.Println()
-
 		// err.Field() usually returns something like "ApiUrl", but with maps it can return "Cache[GET][0]" etc
 		// that means, that if we take only the first part of the string until a (potential) "["
 		// we can always get the prop name on the Config struct
 		propName, _, _ := strings.Cut(err.Field(), "[")
+
 		errorMessages = append(errorMessages, validationErrorMap[propName](err))
 	}
 

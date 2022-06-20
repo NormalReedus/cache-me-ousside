@@ -152,7 +152,7 @@ func (a *cliArgs) addToConfig(c *config.Config) error {
 	c.RemoveInvalidHTTPMethods()
 
 	// Make sure the config is valid
-	if err := c.ValidateProps(); err != nil {
+	if err := c.Validate(); err != nil {
 		return err
 	}
 
