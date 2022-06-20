@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"sync"
 
 	"github.com/magnus-bb/cache-me-ousside/internal/logger"
 )
@@ -30,6 +31,7 @@ func New(capacity uint64, capacityUnit string) (*LRUCache, error) {
 
 // LRUCache represents all entries in the cache, it's capacity limit, and the first and last entries.
 type LRUCache struct {
+	mutex    sync.RWMutex
 	capacity int
 	entries  map[string]*CacheEntry
 	mru      *CacheEntry
@@ -39,6 +41,9 @@ type LRUCache struct {
 // CachedKeys returns a slice of the keys of all cached entries.
 // NOTE: Does not always return keys in the order they were added.
 func (cache *LRUCache) CachedKeys() []string {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+
 	keys := make([]string, 0, len(cache.entries))
 	for k := range cache.entries {
 		keys = append(keys, k)
@@ -49,26 +54,35 @@ func (cache *LRUCache) CachedKeys() []string {
 
 // Size returns the number of entries currently saved in the cache.
 func (cache *LRUCache) Size() int {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+
 	return len(cache.entries)
 }
 
 // Get returns the CacheData of the entry saved under the given key.
 func (cache *LRUCache) Get(key string) *CacheData {
+	// Write lock is used since Get will also rearrange the order of entries
+	cache.mutex.Lock()
+	defer cache.mutex.Unlock()
+
 	entry, exists := cache.entries[key]
 
 	if !exists {
 		return nil
 	}
 
-	// Set as head
-	cache.MoveToMRU(entry)
+	// Set fetched entry as head
+	cache.moveToMRU(entry)
 
-	// return &data
 	return entry.Data()
 }
 
 // Set saves an entry with the given CacheData under the given key in the cache.
 func (cache *LRUCache) Set(key string, data *CacheData) {
+	cache.mutex.Lock()
+	defer cache.mutex.Unlock()
+
 	// You should never set something with a key that already exists
 	//... since the cached data should have been returned instead in that case
 	if _, exists := cache.entries[key]; exists {
@@ -81,7 +95,7 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 
 	// If there are no entries, set entry as both head and tail
 	if cache.lru == nil && cache.mru == nil {
-		cache.entries[key] = cache.SetFirst(entry)
+		cache.entries[key] = cache.setFirst(entry)
 	} else {
 		// If there are entries, set entry as head
 		cache.entries[key] = cache.mru.SetNext(entry)
@@ -89,13 +103,16 @@ func (cache *LRUCache) Set(key string, data *CacheData) {
 	}
 
 	// If the cache is full, evict the LRU entry
-	if cache.Size() > cache.capacity {
-		cache.EvictLRU()
+	if len(cache.entries) > cache.capacity { // we don't use Size, since that has its own lock
+		cache.evictLRU()
 	}
 }
 
 // Bust will remove all entries saved under the given keys from the cache.
 func (cache *LRUCache) Bust(keys ...string) {
+	cache.mutex.Lock()
+	defer cache.mutex.Unlock()
+
 	for _, entryKey := range keys {
 		entry, exists := cache.entries[entryKey]
 
@@ -138,6 +155,9 @@ func (cache *LRUCache) Bust(keys ...string) {
 // The patterns are hydrated with URL parameters from paramMap before being compiled as regex.
 // If an empty slice of patterns is passed, all keys are returned (matching everything).
 func (cache *LRUCache) Match(patterns []string, paramMap map[string]string) []string {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+
 	keys := make(Set[string]) // use a set so we don't duplicate keys
 
 	if len(patterns) == 0 {
@@ -166,8 +186,11 @@ func (cache *LRUCache) Match(patterns []string, paramMap map[string]string) []st
 	return keys.Elements()
 }
 
-// EvictLRU removes the least recently used entry from the cache to make room for new entries.
-func (cache *LRUCache) EvictLRU() *CacheEntry {
+// evictLRU removes the least recently used entry from the cache to make room for new entries.
+func (cache *LRUCache) evictLRU() *CacheEntry {
+	// No need to lock mutex here, this is not an atomic operation
+	// which means that the calling operations (Set) will lock the mutex
+
 	// Save ref to removed entry
 	evicted := cache.lru
 
@@ -177,7 +200,7 @@ func (cache *LRUCache) EvictLRU() *CacheEntry {
 	}
 
 	// If there is only one element in the cache
-	if cache.Size() == 1 {
+	if len(cache.entries) == 1 { // Don't use Size since calling operation will handle mutex lock
 		cache.lru = nil
 		cache.mru = nil
 
@@ -200,9 +223,12 @@ func (cache *LRUCache) EvictLRU() *CacheEntry {
 	return evicted
 }
 
-// MoveToMRU moves the given entry to the most recently used position in the cache.
+// moveToMRU moves the given entry to the most recently used position in the cache.
 // NOTE: Must be used on existing entry, cannot be used to add new entries.
-func (cache *LRUCache) MoveToMRU(entry *CacheEntry) {
+func (cache *LRUCache) moveToMRU(entry *CacheEntry) {
+	// No need to lock mutex here, this is not an atomic operation
+	// which means that the calling operations (Get) will lock the mutex
+
 	// If this entry is already head (or only entry), don't do anything
 	if entry == nil || entry == cache.mru {
 		return
@@ -218,9 +244,12 @@ func (cache *LRUCache) MoveToMRU(entry *CacheEntry) {
 	cache.mru = entry
 }
 
-// SetFirst sets the given entry as the first entry in the cache.
+// setFirst sets the given entry as the first entry in the cache.
 // This is used because it takes som special setup to add the first node to a linked list.
-func (cache *LRUCache) SetFirst(entry *CacheEntry) *CacheEntry {
+func (cache *LRUCache) setFirst(entry *CacheEntry) *CacheEntry {
+	// No need to lock mutex here, this is not an atomic operation
+	// which means that the calling operations (Set) will lock the mutex
+
 	cache.lru = entry
 	cache.mru = entry
 
@@ -230,14 +259,23 @@ func (cache *LRUCache) SetFirst(entry *CacheEntry) *CacheEntry {
 	return entry
 }
 
-func (cache LRUCache) Entries() map[string]*CacheEntry {
+func (cache *LRUCache) Entries() map[string]*CacheEntry {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+
 	return cache.entries
 }
 
-func (cache LRUCache) MRU() *CacheEntry {
+func (cache *LRUCache) MRU() *CacheEntry {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+
 	return cache.mru
 }
 
-func (cache LRUCache) LRU() *CacheEntry {
+func (cache *LRUCache) LRU() *CacheEntry {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+
 	return cache.lru
 }
